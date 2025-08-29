@@ -1,70 +1,172 @@
-# Getting Started with Create React App
+# 1. Hướng dẫn build dự án
+**Quy trình chuẩn, gọn – an toàn** để làm việc nhánh/PR trên GitHub, đảm bảo master luôn sạch và hạn chế xung đột giữa các nhóm khác.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# 0) Nguyên tắc chung
 
-## Available Scripts
+* **Không commit trực tiếp lên `master`**. Mọi thay đổi đều qua **feature branch → Pull Request (PR)**.
+* **Nhánh nhỏ, sống ngắn** (1–5 ngày), PR nhỏ (≤ 300 dòng) để review nhanh, ít conflict.
+* Luôn **đồng bộ feature branch với `master` bằng `rebase`** trước khi mở/ cập nhật PR.
 
-In the project directory, you can run:
 
-### `npm start`
+### Bước 1: Lấy code mới nhất từ `master`
+**Nếu lần đầu tiên thì dùng lệnh clone**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+git clone https://github.com/luongit/fe-bkap-ai-schooling
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Bước 2: Cài đặt dự án (Chỉ dành cho lần đàu clone dự án)
+**cd và thưc mục gốc của dự án nếu chwua ử thư mục gốc**
+```bash
+cd fe-bkap-ai-schooling
+```
+Sau đó chạy tiếp lệnh cài thư viện
+```bash
+npm install
+Hoặc: npm i
+```
 
-### `npm test`
+Tiếp theo: Chạy dự án
+```bash
+npm run start
+```
+Trình duyệt sẽ tự mở trình duyệt lên: http://127.0.0.1:3000
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+# 2. Hướng dẫn push dự án và merge vào nhánh chính
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+**Nếu đã phát triển xong task của mình, muốn đẩy lên**
+Bước 1: Pull code mới nhất từ `master`
+> Lệnh pull cũng thường dùng trước khi đẩy dự án lên để đảm bảo là không bị xung đột phiên bản
+```bash
+git fetch origin
+git checkout master
+git pull --ff-only origin master
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Bước 2: Tại thư mục gốc dưới local, chạy lệnh sau
+- Tạo nhánh `mỗi một task nên tạo một nhánh riêng`, VD task ngày `AI001-25-08-2025`
+Lệnh tạo nhánh
+```bash
+git branch AI001-25-08-2025
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Hoặc tạo và di chuyển vào nhánh luôn
+```bash
+git checkout -b AI001-25-08-2025
+```
 
-### `npm run eject`
+### Bước 2: Thực hiện code, commit thay đổi
+```bash
+git add .
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+**Tiếp theo là commmit**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+git commit -m "Mô tả về task đang làm"
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Bước 3: Push nhánh mới lên remote lần đầu (tạo nhánh trên GitHub)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+git push -u origin AI001-25-08-2025
+```
+**👉 Sau bước này, remote sẽ có thêm nhánh AI001-25-08-2025, và lần sau bạn chỉ cần:**
 
-## Learn More
+```bash
+git push
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# 3) Đồng bộ với `master` để tránh conflict về sau
 
-### Code Splitting
+> Làm thường xuyên (mỗi ngày/ trước khi push):
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+git fetch origin
+git rebase origin/master
+# nếu có conflict: sửa -> git add <file> -> git rebase --continue
+# nếu muốn hủy rebase: git rebase --abort
+```
 
-### Analyzing the Bundle Size
+# 4) Push nhánh và mở Pull Request
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```bash
+git push -u origin AI001-25-08-2025
+```
 
-### Making a Progressive Web App
+Lên GitHub mở **PR vào `master`**:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+* Title rõ ràng (mapping ticket/module).
+* Mô tả: mục tiêu, thay đổi chính, ảnh/chụp màn hình nếu là UI, checklist test.
+* Gắn reviewers, labels, project/milestone nếu dùng.
 
-### Advanced Configuration
+# 5) Cập nhật PR khi nhóm trưởng (hoặc người khác) merge code mới vào master
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Khi PR còn mở, cứ **rebase lại trên `master`** để giữ lịch sử sạch:
 
-### Deployment
+```bash
+git fetch origin
+git checkout AI001-25-08-2025
+git rebase origin/master
+git push --force-with-lease
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+> Dùng `--force-with-lease` (thay vì `--force`) để an toàn, tránh ghi đè nhầm thay đổi người khác.
 
-### `npm run build` fails to minify
+# 6) Review → CI pass → Merge
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+* Yêu cầu **≥1 review chấp thuận** và **CI xanh**.
+* Cách merge khuyến nghị:
+
+  * **Squash & merge**: gộp commit lặt vặt thành 1 commit sạch trên master (dễ đọc lịch sử).
+  * Hoặc **Rebase & merge**: giữ từng commit nhưng vẫn linear (yêu cầu commit đã gọn gàng).
+* Sau merge:
+
+```bash
+git checkout master
+git pull --ff-only origin master
+git branch -d AI001-25-08-2025
+git push origin --delete AI001-25-08-2025   # dọn remote branch
+```
+
+# 7) Ra phiên bản (tùy dự án)
+
+* Tag & release:
+
+```bash
+git tag -a v1.2.0 -m "Release v1.2.0 - Module AI001"
+git push origin v1.2.0
+```
+
+---
+
+
+# Tóm tắt lệnh cốt lõi (copy dùng hằng ngày)
+
+```bash
+# cập nhật master
+git fetch origin
+git checkout master
+git pull --ff-only origin master
+
+# tạo nhánh làm việc
+git checkout -b AI001-25-08-2025
+
+# làm việc & commit
+git add .
+git commit -m "AI001: <nội dung>"
+
+# rebase với master trước khi push/ update PR
+git fetch origin
+git rebase origin/master
+
+# push & mở PR
+git push -u origin AI001-25-08-2025
+
+# nếu master đổi, update PR
+git fetch origin
+git rebase origin/master
+git push --force-with-lease
+```
