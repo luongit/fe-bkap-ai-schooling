@@ -107,11 +107,12 @@ function Home() {
     // Chuẩn bị stream
     controllerRef.current = new AbortController();
     const signal = controllerRef.current.signal;
-
+   
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch(`${API_URL}/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json','Accept': 'application/x-ndjson' },
+        headers: { 'Content-Type': 'application/json','Accept': 'application/x-ndjson', 'Authorization': `Bearer ${token}` },
         cache: 'no-store',
         body: JSON.stringify({ messages: updatedHistory }),
         signal
