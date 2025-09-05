@@ -10,7 +10,7 @@ function Sidebar() {
             </div>
 
             <ul className="side-list">
-                <li><a className="side-item active" href="#"><span className="icon-dot"></span> AI Tìm kiếm</a></li>
+                <li><a className="side-item active" href="/"><span className="icon-dot"></span> AI Tìm kiếm</a></li>
                 <li><a className="side-item" href="#"><span className="icon-dot"></span> Giải bài tập</a></li>
                 <li><a className="side-item" href="#"><span className="icon-dot"></span> AI Viết văn</a></li>
                 <li><a className="side-item" href="#"><span className="icon-dot"></span> Chat Bot</a></li>
