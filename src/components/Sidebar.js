@@ -1,4 +1,44 @@
-function Sidebar() {
+import { useEffect, useState } from "react";
+import "./css/Sidebar.css";
+
+const API_URL = process.env.REACT_APP_API_URL || "";
+
+function Sidebar({ onSelectSession }) {
+    const [sessions, setSessions] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const fetchSessions = () => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        setLoading(true);
+        fetch(`${API_URL}/conversations/sessions`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setSessions(data);
+                } else {
+                    console.error("Không phải array:", data);
+                    setSessions([]);
+                }
+            })
+            .catch(err => console.error("Load sessions error:", err))
+            .finally(() => setLoading(false));
+    };
+
+    useEffect(() => {
+        fetchSessions();
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener("sessionUpdated", fetchSessions);
+        return () => {
+            window.removeEventListener("sessionUpdated", fetchSessions);
+        };
+    }, []);
+
     return (
         <aside className="sidebar" id="sidebar">
             <div className="side-head">
@@ -10,16 +50,31 @@ function Sidebar() {
             </div>
 
             <ul className="side-list">
-                <li><a className="side-item active" href="/"><span className="icon-dot"></span> AI Tìm kiếm</a></li>
-                <li><a className="side-item" href="#"><span className="icon-dot"></span> Giải bài tập</a></li>
-                <li><a className="side-item" href="#"><span className="icon-dot"></span> AI Viết văn</a></li>
-                <li><a className="side-item" href="#"><span className="icon-dot"></span> Chat Bot</a></li>
-                <li><a className="side-item" href="#"><span className="icon-dot"></span> Thêm công cụ</a></li>
+                <li><a className="side-item active" href="/">AI Tìm kiếm</a></li>
+                <li><a className="side-item" href="#">Giải bài tập</a></li>
+                <li><a className="side-item" href="#">AI Viết văn</a></li>
+                <li><a className="side-item" href="#">Chat Bot</a></li>
+                <li><a className="side-item" href="#">Thêm công cụ</a></li>
             </ul>
 
             <div className="side-note">Lịch sử</div>
-            <ul className="side-list">
-                <li><a className="side-item" href="#"><span className="icon-dot"></span> Đăng nhập để lưu lại lịch sử</a></li>
+            <ul className="side-list history-list">
+                {!localStorage.getItem("token") ? (
+                    <li><span className="side-item">Đăng nhập để lưu lại lịch sử</span></li>
+                ) : loading ? (
+                    <li><span className="side-item">Đang tải...</span></li>
+                ) : sessions.length === 0 ? (
+                    <li><span className="side-item">Chưa có lịch sử</span></li>
+                ) : (
+                    sessions.map((s) => (
+                        <li key={s.sessionId}>
+                            <button className="side-item" onClick={() => onSelectSession(s.sessionId)}>
+                                <span className="icon-dot"></span>
+                                <span className="session-preview">{s.previewMessage || s.sessionId}</span>
+                            </button>
+                        </li>
+                    ))
+                )}
             </ul>
 
             <div className="side-note">Khác</div>
