@@ -4,24 +4,21 @@ import { getProfile, updateProfile } from "../services/profileService";
 function ProfileEditPage() {
   const [profile, setProfile] = useState(null);
   const [hobbies, setHobbies] = useState([]);
-  const [inputValue, setInputValue] = useState(""); // 👈 thêm state riêng
+  const [inputValue, setInputValue] = useState(""); 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user?.userId;
-
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await getProfile(userId);
+        const data = await getProfile();
         setProfile(data);
         setEmail(data.email || "");
         setPhone(data.phone || "");
         if (data.hobbies) {
           setHobbies(data.hobbies);
-          setInputValue(data.hobbies.join(", ")); // hiển thị ban đầu
+          setInputValue(data.hobbies.join(", "));
         }
       } catch (err) {
         console.error("Lỗi khi load profile", err);
@@ -29,8 +26,8 @@ function ProfileEditPage() {
         setLoading(false);
       }
     };
-    if (userId) fetchProfile();
-  }, [userId]);
+    fetchProfile();
+  }, []);
 
   const handleSave = async () => {
     try {
@@ -41,7 +38,7 @@ function ProfileEditPage() {
         payload = { email, phone };
       }
 
-      const updated = await updateProfile(userId, payload);
+      const updated = await updateProfile(payload);
       setProfile(updated);
       alert("Cập nhật thành công!");
     } catch (err) {
@@ -50,13 +47,12 @@ function ProfileEditPage() {
   };
 
   const handleBlur = () => {
-    // Khi rời khỏi input mới parse
     const values = inputValue
       .split(",")
       .map(h => h.trim())
       .filter(h => h);
     setHobbies(values);
-    setInputValue(values.join(", ")); // chuẩn hóa lại chuỗi
+    setInputValue(values.join(", "));
   };
 
   if (loading) return <p>Đang tải...</p>;
@@ -75,9 +71,9 @@ function ProfileEditPage() {
             <input
               type="text"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)} // cho nhập tự do
-              onBlur={handleBlur} // khi mất focus mới parse
-              style={{ width: "100%", padding: "6px", marginTop: "4px" }}
+              onChange={(e) => setInputValue(e.target.value)}
+              onBlur={handleBlur}
+              style={{ width: "250px", padding: "4px", marginLeft: "8px" }}
             />
           </p>
         </>
@@ -92,6 +88,7 @@ function ProfileEditPage() {
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              style={{ width: "250px", padding: "4px", marginLeft: "8px" }}
             />
           </p>
           <p>
@@ -100,17 +97,22 @@ function ProfileEditPage() {
               type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              style={{ width: "250px", padding: "4px", marginLeft: "8px" }}
             />
           </p>
           <p><b>Lớp chủ nhiệm:</b> {profile.homeroom}</p>
         </>
       )}
 
-      <button className="btn primary" style={{ marginTop: "1rem", display: "inline-block" }} onClick={handleSave}>Lưu thay đổi</button>
+      <button
+        className="btn primary"
+        style={{ marginTop: "1rem", display: "inline-block" }}
+        onClick={handleSave}
+      >
+        Lưu thay đổi
+      </button>
     </div>
   );
 }
-
-
 
 export default ProfileEditPage;
