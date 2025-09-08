@@ -2,19 +2,14 @@ import { useEffect, useState } from "react";
 import { getProfile } from "../services/profileService";
 import { Link } from "react-router-dom";
 
-
-
 function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user?.userId;
-
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await getProfile(userId);
+        const data = await getProfile();
         setProfile(data);
       } catch (err) {
         console.error("Lỗi khi load profile", err);
@@ -22,8 +17,8 @@ function ProfilePage() {
         setLoading(false);
       }
     };
-    if (userId) fetchProfile();
-  }, [userId]);
+    fetchProfile();
+  }, []);
 
   if (loading) return <p>Đang tải...</p>;
   if (!profile) return <p>Không tìm thấy profile</p>;
@@ -55,6 +50,7 @@ function ProfilePage() {
       {(profile.objectType === "SCHOOL" || profile.objectType === "SYSTEM") && (
         <p><b>Admin:</b> {profile.fullName}</p>
       )}
+
       {(profile.objectType === "STUDENT" || profile.objectType === "TEACHER") && (
         <Link to="/profile/edit" className="btn primary" style={{ marginTop: "1rem", display: "inline-block" }}>
           Chỉnh sửa thông tin
