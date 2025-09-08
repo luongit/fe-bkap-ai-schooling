@@ -20,7 +20,8 @@ function Header() {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("username");
-    sessionStorage.removeItem("chatHistory");
+    sessionStorage.removeItem("chatHistory");;
+    sessionStorage.removeItem("sessionId")
     setIsLoggedIn(false);
     navigate("/login");
   };

@@ -8,6 +8,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
 
+
 import TopIntro from '../components/TopIntro';
 import { getLangIcon, extractText, speakText } from '../services/handle/Function';
 // Tuỳ chọn: nếu muốn giữ lưới an toàn FE cho LaTeX (dù BE đã chuẩn), bật dòng dưới:
@@ -24,6 +25,8 @@ function Home() {
       return [];
     }
   });
+  
+  const [sessionId, setSessionId] = useState(() => sessionStorage.getItem('sessionId') || null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -107,16 +110,36 @@ function Home() {
     // Chuẩn bị stream
     controllerRef.current = new AbortController();
     const signal = controllerRef.current.signal;
-   
+
     try {
       const token = localStorage.getItem('token');
+
+      // 🔹 Nếu chưa có sessionId thì gọi API để tạo mới
+      let sessionToUse = sessionId;
+      if (!sessionToUse) {
+        const startRes = await fetch(`${API_URL}/conversations/start`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const startData = await startRes.json();
+        sessionToUse = startData.sessionId;
+        setSessionId(sessionToUse);
+        sessionStorage.setItem('sessionId', sessionToUse);
+      }
+
+      // 🔹 Gọi API stream, lần này truyền đúng sessionId
       const res = await fetch(`${API_URL}/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json','Accept': 'application/x-ndjson', 'Authorization': `Bearer ${token}` },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/x-ndjson',
+          'Authorization': `Bearer ${token}`
+        },
         cache: 'no-store',
-        body: JSON.stringify({ messages: updatedHistory }),
+        body: JSON.stringify({ messages: updatedHistory, session_id: sessionToUse }),
         signal
       });
+
 
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
 
@@ -174,7 +197,7 @@ function Home() {
             // Gộp + batch update
             pushAssistantChunk(updatedHistory, assistantMessageRef, safeContent);
           }
-        }
+        }window.dispatchEvent(new Event("sessionUpdated"));
       }
     } catch (err) {
       console.error(err);
@@ -230,6 +253,7 @@ function Home() {
   }, [copied, handleCopy]);
 
   return (
+     
     <main className="main">
       <section className="hero">
         {!started && <TopIntro />}
@@ -283,7 +307,9 @@ function Home() {
           Khi đặt câu hỏi, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách quyền riêng tư</a>.
         </p>
       </section>
+      
     </main>
+    
   );
 }
 
