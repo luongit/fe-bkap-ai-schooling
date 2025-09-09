@@ -97,12 +97,42 @@ function Home() {
     setTimeout(() => setCopied(false), 1200);
   }, []);
 
-  const handleClear = useCallback(() => {
-    if (!window.confirm('Bạn có chắc muốn xóa lịch sử trò chuyện?')) return;
+ const handleClear = useCallback(async () => {
+  if (!window.confirm('Bạn có chắc muốn xóa toàn bộ cuộc trò chuyện này?')) return;
+
+  const sid = sessionStorage.getItem('sessionId');
+  const token = localStorage.getItem("token");
+  if (!sid || !token) {
+    // Không có session thì chỉ xoá local
     sessionStorage.removeItem('chatHistory');
     setChatHistory([]);
+    setSessionId(null);
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/conversations/${sid}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) throw new Error("Xóa session thất bại");
+
+    // Sau khi xoá BE thành công → xoá local luôn
+    sessionStorage.removeItem('chatHistory');
+    sessionStorage.removeItem('sessionId');
+    setChatHistory([]);
+    setSessionId(null);
     setInput('');
-  }, []);
+
+    // Gửi sự kiện để sidebar (nếu có) reload lại danh sách session
+    window.dispatchEvent(new Event("sessionUpdated"));
+  } catch (err) {
+    console.error("Delete session error:", err);
+    alert("Không xoá được cuộc trò chuyện!");
+  }
+}, [API_URL]);
+
 
   // Math-safe check nhẹ để giảm vỡ công thức (BE đã chuẩn, FE chỉ là lưới an toàn)
   const isMathBalanced = (s) => {
