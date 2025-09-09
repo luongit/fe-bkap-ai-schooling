@@ -68,10 +68,15 @@ function Sidebar({ onSelectSession }) {
                 ) : (
                     sessions.map((s) => (
                         <li key={s.sessionId}>
-                            <button className="side-item" onClick={() => onSelectSession(s.sessionId)}>
+                            <button
+                                className="side-item"
+                                onClick={() => window.dispatchEvent(new CustomEvent("selectSession", { detail: s.sessionId }))}
+                            >
                                 <span className="icon-dot"></span>
                                 <span className="session-preview">{s.previewMessage || s.sessionId}</span>
                             </button>
+
+
                         </li>
                     ))
                 )}

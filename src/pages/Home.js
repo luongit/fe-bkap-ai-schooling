@@ -25,7 +25,7 @@ function Home() {
       return [];
     }
   });
-  
+
   const [sessionId, setSessionId] = useState(() => sessionStorage.getItem('sessionId') || null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -47,6 +47,48 @@ function Home() {
       listEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [chatHistory, loading]);
+
+  //Lịch sử chat
+  const loadSession = useCallback(async (sid) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_URL}/conversations/${sid}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Không tải được lịch sử");
+
+      const data = await res.json();
+      const mapped = data
+        .flatMap(log => [
+          log.message && { role: "user", content: log.message },
+          log.response && { role: "assistant", content: log.response }
+        ])
+        .filter(m => m && m.content !== "[Session started]");
+
+
+      // loại null
+      setChatHistory(mapped);
+      setSessionId(sid);
+      sessionStorage.setItem("sessionId", sid);
+      sessionStorage.setItem("chatHistory", JSON.stringify(mapped));
+    } catch (err) {
+      console.error("Load session error:", err);
+    }
+  }, [API_URL]);
+  useEffect(() => {
+    const handler = (e) => {
+      const sid = e.detail;
+      loadSession(sid);
+    };
+
+    window.addEventListener("selectSession", handler);
+    return () => {
+      window.removeEventListener("selectSession", handler);
+    };
+  }, [loadSession]);
+
 
   // Helpers
   const handleCopy = useCallback((text) => {
@@ -127,7 +169,7 @@ function Home() {
         sessionStorage.setItem('sessionId', sessionToUse);
       }
 
-      // 🔹 Gọi API stream, lần này truyền đúng sessionId
+      //  Gọi API stream, lần này truyền đúng sessionId
       const res = await fetch(`${API_URL}/stream`, {
         method: 'POST',
         headers: {
@@ -197,7 +239,7 @@ function Home() {
             // Gộp + batch update
             pushAssistantChunk(updatedHistory, assistantMessageRef, safeContent);
           }
-        }window.dispatchEvent(new Event("sessionUpdated"));
+        } window.dispatchEvent(new Event("sessionUpdated"));
       }
     } catch (err) {
       console.error(err);
@@ -253,7 +295,7 @@ function Home() {
   }, [copied, handleCopy]);
 
   return (
-     
+
     <main className="main">
       <section className="hero">
         {!started && <TopIntro />}
@@ -307,9 +349,9 @@ function Home() {
           Khi đặt câu hỏi, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách quyền riêng tư</a>.
         </p>
       </section>
-      
+
     </main>
-    
+
   );
 }
 
