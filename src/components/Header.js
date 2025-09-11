@@ -23,7 +23,8 @@ function Header() {
     sessionStorage.removeItem("chatHistory");
     sessionStorage.removeItem("sessionId");
     setIsLoggedIn(false);
-    navigate("/");
+    window.location.href = "/";
+
   };
 
   return (
@@ -44,7 +45,7 @@ function Header() {
         {!isLoggedIn ? (
           <>
             <Link
-              to="/login"
+              to="/auth/login"
               className="btn"
               onClick={() => console.log("Clicked login - Debug")}
             >
