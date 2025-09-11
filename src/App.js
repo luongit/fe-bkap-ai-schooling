@@ -22,6 +22,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />
+          <Route path="/chat/:sessionId" element={<Home />} />
           {/* Fallback 404 */}
           <Route
             path="*"
