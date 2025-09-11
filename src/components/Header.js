@@ -7,7 +7,6 @@ function Header() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Lấy thông tin từ localStorage
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("username");
 
@@ -18,18 +17,13 @@ function Header() {
   }, []);
 
   const handleLogout = () => {
-    // Xóa thông tin đăng nhập
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("username");
-
-    // Xóa dữ liệu chat tạm thời
     sessionStorage.removeItem("chatHistory");
     sessionStorage.removeItem("sessionId");
-
     setIsLoggedIn(false);
     navigate("/");
-    window.location.reload(); // reload để cập nhật header ngay
   };
 
   return (
@@ -49,7 +43,11 @@ function Header() {
       <div className="actions">
         {!isLoggedIn ? (
           <>
-            <Link to="/auth/login" className="btn">
+            <Link
+              to="/login"
+              className="btn"
+              onClick={() => console.log("Clicked login - Debug")}
+            >
               Đăng nhập
             </Link>
             <Link to="/register" className="btn primary">
@@ -58,8 +56,14 @@ function Header() {
           </>
         ) : (
           <>
-            <Link to="/profile" className="btn">
-              Tài khoản của bạn 
+            <Link
+              to="/profile"
+              className="btn"
+              onClick={() =>
+                console.log("Clicked profile - URL should change and re-render")
+              } // Debug: Xóa sau test
+            >
+              Tài khoản của bạn
             </Link>
             <button className="btn primary" onClick={handleLogout}>
               Đăng xuất
