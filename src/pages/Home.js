@@ -89,6 +89,21 @@ function Home() {
     };
   }, [loadSession]);
 
+    // Reset khi tạo cuộc trò chuyện mới
+  useEffect(() => {
+    const handleNewChat = () => {
+      sessionStorage.removeItem("chatHistory");
+      sessionStorage.removeItem("sessionId");
+      setChatHistory([]);
+      setSessionId(null);
+      setInput('');
+    };
+
+    window.addEventListener("newChat", handleNewChat);
+    return () => {
+      window.removeEventListener("newChat", handleNewChat);
+    };
+  }, []);
 
   // Helpers
   const handleCopy = useCallback((text) => {

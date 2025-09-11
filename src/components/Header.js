@@ -7,9 +7,10 @@ function Header() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Kiểm tra token trong localStorage
+    // Lấy thông tin từ localStorage
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("username");
+
     if (token) {
       setIsLoggedIn(true);
       if (user) setUsername(user);
@@ -17,13 +18,18 @@ function Header() {
   }, []);
 
   const handleLogout = () => {
+    // Xóa thông tin đăng nhập
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("username");
-    sessionStorage.removeItem("chatHistory");;
-    sessionStorage.removeItem("sessionId")
+
+    // Xóa dữ liệu chat tạm thời
+    sessionStorage.removeItem("chatHistory");
+    sessionStorage.removeItem("sessionId");
+
     setIsLoggedIn(false);
-    navigate("/login");
+    navigate("/");
+    window.location.reload(); // reload để cập nhật header ngay
   };
 
   return (
@@ -38,20 +44,23 @@ function Header() {
           />
         </svg>
       </button>
-      <div className="title">AI Spark - đồng hành cùng bạn</div>
-      <div className="promo">
-        Tặng 6 tháng AI Pro cho thành viên • <b>Tìm hiểu ngay</b>
-      </div>
 
+      <div className="title">AI Spark - đồng hành cùng bạn</div>
       <div className="actions">
         {!isLoggedIn ? (
           <>
-            <Link to="/login" className="btn">Đăng nhập</Link>
-            <Link to="/register" className="btn primary">Tạo tài khoản miễn phí</Link>
+            <Link to="/login" className="btn">
+              Đăng nhập
+            </Link>
+            <Link to="/register" className="btn primary">
+              Tạo tài khoản miễn phí
+            </Link>
           </>
         ) : (
           <>
-            <Link to="/profile" className="btn">Tài khoản của bạn</Link>
+            <Link to="/profile" className="btn">
+              Tài khoản của bạn 
+            </Link>
             <button className="btn primary" onClick={handleLogout}>
               Đăng xuất
             </button>

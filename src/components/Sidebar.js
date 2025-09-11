@@ -50,12 +50,24 @@ function Sidebar({ onSelectSession }) {
             </div>
 
             <ul className="side-list">
-                <li><a className="side-item active" href="/">AI Tìm kiếm</a></li>
+                <li>
+                    <a
+                        className="side-item active"
+                        onClick={() => {
+                            sessionStorage.removeItem("chatHistory");
+                            sessionStorage.removeItem("sessionId");
+                            window.dispatchEvent(new Event("newChat"));
+                        }}
+                    >
+                        AI Tìm kiếm
+                    </a>
+                </li>
                 <li><a className="side-item" href="#">Giải bài tập</a></li>
                 <li><a className="side-item" href="#">AI Viết văn</a></li>
                 <li><a className="side-item" href="#">Chat Bot</a></li>
                 <li><a className="side-item" href="#">Thêm công cụ</a></li>
             </ul>
+
 
             <div className="side-note">Lịch sử</div>
             <ul className="side-list history-list">
