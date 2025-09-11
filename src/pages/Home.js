@@ -7,6 +7,7 @@ import rehypeHighlight from 'rehype-highlight';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
+import { useParams } from "react-router-dom"; 
 
 
 import TopIntro from '../components/TopIntro';
@@ -25,7 +26,7 @@ function Home() {
       return [];
     }
   });
-
+  const { sessionId: urlSessionId } = useParams(); // lấy sessionId từ URL
   const [sessionId, setSessionId] = useState(() => sessionStorage.getItem('sessionId') || null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -47,6 +48,8 @@ function Home() {
       listEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [chatHistory, loading]);
+  
+
 
   //Lịch sử chat
   const loadSession = useCallback(async (sid) => {
@@ -78,16 +81,10 @@ function Home() {
     }
   }, [API_URL]);
   useEffect(() => {
-    const handler = (e) => {
-      const sid = e.detail;
-      loadSession(sid);
-    };
-
-    window.addEventListener("selectSession", handler);
-    return () => {
-      window.removeEventListener("selectSession", handler);
-    };
-  }, [loadSession]);
+  if (urlSessionId) {
+    loadSession(urlSessionId);
+  }
+}, [urlSessionId, loadSession]);
 
     // Reset khi tạo cuộc trò chuyện mới
   useEffect(() => {
