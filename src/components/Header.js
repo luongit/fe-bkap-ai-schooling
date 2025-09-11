@@ -49,7 +49,7 @@ function Header() {
       <div className="actions">
         {!isLoggedIn ? (
           <>
-            <Link to="/login" className="btn">
+            <Link to="/auth/login" className="btn">
               Đăng nhập
             </Link>
             <Link to="/register" className="btn primary">

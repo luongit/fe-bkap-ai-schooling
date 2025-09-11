@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./css/Sidebar.css";
+import { Link } from "react-router-dom";
 
 const API_URL = process.env.REACT_APP_API_URL || "";
 
@@ -42,7 +43,8 @@ function Sidebar({ onSelectSession }) {
     return (
         <aside className="sidebar" id="sidebar">
             <div className="side-head">
-                <div className="logo">AS</div>
+                <Link className="logo" to="/">AS</Link>
+
                 <div>
                     <div className="brand-name">AI Spark</div>
                     <div className="small-name">Mạng xã hội</div>
