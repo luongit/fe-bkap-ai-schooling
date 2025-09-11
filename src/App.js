@@ -6,6 +6,9 @@ import Home from './pages/Home';
 import LoginPage from "./pages/LoginPage";
 import ProfilePage from './pages/ProfilePage';
 import ProfileEditPage from './pages/ProfileEditPage';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 function App() {
   return (
