@@ -44,12 +44,12 @@ function Header() {
       <div className="actions">
         {!isLoggedIn ? (
           <>
-            {/* <a href="/login" class="btn" onclick="console.log('Clicked login - Debug')">
+            <a href="/login" class="btn" onclick="console.log('Clicked login - Debug')">
               Đăng nhập
-            </a> */}
-            <Link to="/login" class="btn" onclick="console.log('Clicked login - Debug')">
+            </a>
+            {/* <Link to="/login" class="btn" onclick="console.log('Clicked login - Debug')">
               Đăng nhập
-            </Link>
+            </Link> */}
 
             <Link to="/register" className="btn primary">
               Tạo tài khoản miễn phí
