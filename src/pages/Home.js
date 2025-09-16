@@ -7,7 +7,7 @@ import rehypeHighlight from 'rehype-highlight';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
-import { useParams } from "react-router-dom"; 
+import { useParams } from "react-router-dom";
 
 
 import TopIntro from '../components/TopIntro';
@@ -48,8 +48,16 @@ function Home() {
       listEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [chatHistory, loading]);
-  
 
+  //Bắt login
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token) {
+      setShowLoginModal(true); // chưa login thì bật modal
+    }
+  }, [token]);
 
   //Lịch sử chat
   const loadSession = useCallback(async (sid) => {
@@ -81,12 +89,12 @@ function Home() {
     }
   }, [API_URL]);
   useEffect(() => {
-  if (urlSessionId) {
-    loadSession(urlSessionId);
-  }
-}, [urlSessionId, loadSession]);
+    if (urlSessionId) {
+      loadSession(urlSessionId);
+    }
+  }, [urlSessionId, loadSession]);
 
-    // Reset khi tạo cuộc trò chuyện mới
+  // Reset khi tạo cuộc trò chuyện mới
   useEffect(() => {
     const handleNewChat = () => {
       sessionStorage.removeItem("chatHistory");
@@ -109,41 +117,41 @@ function Home() {
     setTimeout(() => setCopied(false), 1200);
   }, []);
 
- const handleClear = useCallback(async () => {
-  if (!window.confirm('Bạn có chắc muốn xóa toàn bộ cuộc trò chuyện này?')) return;
+  const handleClear = useCallback(async () => {
+    if (!window.confirm('Bạn có chắc muốn xóa toàn bộ cuộc trò chuyện này?')) return;
 
-  const sid = sessionStorage.getItem('sessionId');
-  const token = localStorage.getItem("token");
-  if (!sid || !token) {
-    // Không có session thì chỉ xoá local
-    sessionStorage.removeItem('chatHistory');
-    setChatHistory([]);
-    setSessionId(null);
-    return;
-  }
+    const sid = sessionStorage.getItem('sessionId');
+    const token = localStorage.getItem("token");
+    if (!sid || !token) {
+      // Không có session thì chỉ xoá local
+      sessionStorage.removeItem('chatHistory');
+      setChatHistory([]);
+      setSessionId(null);
+      return;
+    }
 
-  try {
-    const res = await fetch(`${API_URL}/conversations/${sid}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+      const res = await fetch(`${API_URL}/conversations/${sid}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-    if (!res.ok) throw new Error("Xóa session thất bại");
+      if (!res.ok) throw new Error("Xóa session thất bại");
 
-    // Sau khi xoá BE thành công → xoá local luôn
-    sessionStorage.removeItem('chatHistory');
-    sessionStorage.removeItem('sessionId');
-    setChatHistory([]);
-    setSessionId(null);
-    setInput('');
+      // Sau khi xoá BE thành công → xoá local luôn
+      sessionStorage.removeItem('chatHistory');
+      sessionStorage.removeItem('sessionId');
+      setChatHistory([]);
+      setSessionId(null);
+      setInput('');
 
-    // Gửi sự kiện để sidebar (nếu có) reload lại danh sách session
-    window.dispatchEvent(new Event("sessionUpdated"));
-  } catch (err) {
-    console.error("Delete session error:", err);
-    alert("Không xoá được cuộc trò chuyện!");
-  }
-}, [API_URL]);
+      // Gửi sự kiện để sidebar (nếu có) reload lại danh sách session
+      window.dispatchEvent(new Event("sessionUpdated"));
+    } catch (err) {
+      console.error("Delete session error:", err);
+      alert("Không xoá được cuộc trò chuyện!");
+    }
+  }, [API_URL]);
 
 
   // Math-safe check nhẹ để giảm vỡ công thức (BE đã chuẩn, FE chỉ là lưới an toàn)
@@ -337,64 +345,133 @@ function Home() {
   }, [copied, handleCopy]);
 
   return (
-
     <main className="main">
       <section className="hero">
-        {!started && <TopIntro />}
+        {!localStorage.getItem("token") ? (
+          <div className="not-logged">
+            <div className="not-logged-box">
+              <p className="not-logged-text">
+                 Bạn cần đăng nhập để bắt đầu trò chuyện
+              </p>
+              <a href="/login" className="login-btn">
+                Đăng nhập
+              </a>
+            </div>
+          </div>
+        ) : (
+          <>
+            {!started && <TopIntro />}
 
-        {chatHistory.map((msg, i) => (
-          <div key={i} className={`chat-message ${msg.role}`}>
-            <div className="message-box">
-              {msg.role === 'user' ? (
-                <div className="user-message">
-                  <pre>{msg.content}</pre>
+            {chatHistory.map((msg, i) => (
+              <div key={i} className={`chat-message ${msg.role}`}>
+                <div className="message-box">
+                  {msg.role === "user" ? (
+                    <div className="user-message">
+                      <Markdown>{msg.content}</Markdown>
+                    </div>
+                  ) : (
+                    <>
+                      <Markdown>{msg.content}</Markdown>
+                      <div className="feedback-bar">
+                        <button
+                          className="btn-icon"
+                          onClick={() => handleCopy(msg.content)}
+                          title="Sao chép"
+                        >
+                          📋
+                        </button>
+                        <button
+                          className="btn-icon"
+                          onClick={() => alert("Bạn thích phản hồi này!")}
+                          title="Thích"
+                        >
+                          👍
+                        </button>
+                        <button
+                          className="btn-icon"
+                          onClick={() =>
+                            alert("Bạn không thích phản hồi này!")
+                          }
+                          title="Không thích"
+                        >
+                          👎
+                        </button>
+                        <button
+                          className="btn-icon"
+                          onClick={() => speakText(msg.content)}
+                          title="Đọc to"
+                        >
+                          🔊
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-              ) : (
-                <>
-                  <Markdown>{msg.content}</Markdown>
-                  <div className="feedback-bar">
-                    <button className="btn-icon" onClick={() => handleCopy(msg.content)} title="Sao chép">📋</button>
-                    <button className="btn-icon" onClick={() => alert('Bạn thích phản hồi này!')} title="Thích">👍</button>
-                    <button className="btn-icon" onClick={() => alert('Bạn không thích phản hồi này!')} title="Không thích">👎</button>
-                    <button className="btn-icon" onClick={() => speakText(msg.content)} title="Đọc to">🔊</button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        ))}
+              </div>
+            ))}
 
-        {loading && <div className="chat-message"><span className="blinker">█</span></div>}
-        <div ref={listEndRef} />
-
-        <div className="composer-wrap">
-          <div className="composer" role="group" aria-label="Hộp nhập câu hỏi">
-            <textarea
-              placeholder="Nhập câu hỏi bất kì..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-            />
-            <div className="right">
-              <button className="circle-btn send" title="Gửi" onClick={handleSubmit}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 12l14-7-7 14-2-5-5-2z" stroke="#16a34a" strokeWidth="2" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-            {!!chatHistory.length && (
-              <button className="circle-btn danger" onClick={handleClear} title="Xoá lịch sử">🗑️</button>
+            {loading && (
+              <div className="chat-message">
+                <span className="blinker">█</span>
+              </div>
             )}
-          </div>
-        </div>
+            <div ref={listEndRef} />
 
-        <p className="disclaimer">
-          Khi đặt câu hỏi, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách quyền riêng tư</a>.
-        </p>
+            <div className="composer-wrap">
+              <div
+                className="composer"
+                role="group"
+                aria-label="Hộp nhập câu hỏi"
+              >
+                <textarea
+                  placeholder="Nhập câu hỏi bất kì..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                />
+                <div className="right">
+                  <button
+                    className="circle-btn send"
+                    title="Gửi"
+                    onClick={handleSubmit}
+                  >
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <path
+                        d="M5 12l14-7-7 14-2-5-5-2z"
+                        stroke="#16a34a"
+                        strokeWidth="2"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                {!!chatHistory.length && (
+                  <button
+                    className="circle-btn danger"
+                    onClick={handleClear}
+                    title="Xoá lịch sử"
+                  >
+                    🗑️
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <p className="disclaimer">
+              Khi đặt câu hỏi, bạn đồng ý với{" "}
+              <a href="#">Điều khoản</a> và{" "}
+              <a href="#">Chính sách quyền riêng tư</a>.
+            </p>
+          </>
+        )}
       </section>
-
     </main>
-
   );
+
 }
 
 export default Home;

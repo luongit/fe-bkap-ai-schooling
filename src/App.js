@@ -16,10 +16,11 @@ function App() {
       <Header />
       <main className="flex-grow min-h-screen z-1 relative">
         {" "}
-        {/* Thêm main để Routes/form hiển thị, tránh Sidebar che */}
+    
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
+         
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />
           <Route path="/chat/:sessionId" element={<Home />} />

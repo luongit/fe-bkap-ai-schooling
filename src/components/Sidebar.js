@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom"; // thêm useNavigate
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./css/Sidebar.css";
-import { Link } from "react-router-dom";
-
 
 const API_URL = process.env.REACT_APP_API_URL || "";
 
-function Sidebar({ onSelectSession }) {
+function Sidebar() {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate(); // khởi tạo navigate
 
     const fetchSessions = () => {
         const token = localStorage.getItem("token");
@@ -41,51 +43,53 @@ function Sidebar({ onSelectSession }) {
         };
     }, []);
 
+    const showComingSoon = () => {
+        toast.info(" Tính năng đang được phát triển, mời bạn quay lại sau!", {
+            position: "top-right",
+            autoClose: 500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "colored"
+        });
+    };
+
+    const startNewChat = () => {
+        sessionStorage.removeItem("chatHistory");
+        sessionStorage.removeItem("sessionId");
+        window.dispatchEvent(new Event("newChat"));
+        navigate("/"); 
+    };
+
     return (
         <aside className="sidebar" id="sidebar">
             <div className="side-head">
-                <Link className="logo" to="/">AS</Link>
-
+                <Link className="logo" to="/">AI</Link>
                 <div>
-                    <div className="brand-name">AI Spark</div>
+                    <div className="brand-name">AI Schooling Platform</div>
                     <div className="small-name">Mạng xã hội</div>
                 </div>
             </div>
 
             <ul className="side-list">
-                <li>
-                    <a
-                        className="side-item active"
-                        onClick={() => {
-                            sessionStorage.removeItem("chatHistory");
-                            sessionStorage.removeItem("sessionId");
-                            window.dispatchEvent(new Event("newChat"));
-                        }}
-                    >
-                        AI Tìm kiếm
-                    </a>
-                </li>
-                <li><a className="side-item" href="#">Giải bài tập</a></li>
-                <li><a className="side-item" href="#">AI Viết văn</a></li>
-                <li><a className="side-item" href="#">Chat Bot</a></li>
-                <li><a className="side-item" href="#">Thêm công cụ</a></li>
+                <li><a className="side-item" onClick={startNewChat}>Đoạn chat mới</a></li>
+                <li><a className="side-item" onClick={showComingSoon}>AI Tìm kiếm</a></li>
+                <li><a className="side-item" onClick={showComingSoon}>Giải bài tập</a></li>
+                <li><a className="side-item" onClick={showComingSoon}>AI Viết văn</a></li>
+                <li><a className="side-item" onClick={showComingSoon}>Chat Bot</a></li>
+                <li><a className="side-item" onClick={showComingSoon}>Thêm công cụ</a></li>
+                <li><a className="side-item" onClick={showComingSoon}><span className="icon-dot"></span> Tải ứng dụng</a></li>
             </ul>
-
 
             <div className="side-note">Lịch sử</div>
             <ul className="side-list history-list">
                 {!localStorage.getItem("token") ? (
-                    <li>
-                        <span className="side-item">Đăng nhập để lưu lại lịch sử</span>
-                    </li>
+                    <li><span className="side-item">Đăng nhập để lưu lại lịch sử</span></li>
                 ) : loading ? (
-                    <li>
-                        <span className="side-item">Đang tải...</span>
-                    </li>
+                    <li><span className="side-item">Đang tải...</span></li>
                 ) : sessions.length === 0 ? (
-                    <li>
-                        <span className="side-item">Chưa có lịch sử</span>
-                    </li>
+                    <li><span className="side-item">Chưa có lịch sử</span></li>
                 ) : (
                     sessions.map((s) => (
                         <li key={s.sessionId}>
@@ -99,14 +103,28 @@ function Sidebar({ onSelectSession }) {
                     ))
                 )}
             </ul>
+
             <div className="side-note">Khác</div>
             <ul className="side-list">
-                <li><a className="side-item" href="#"><span className="icon-dot"></span> Tải ứng dụng</a></li>
+                <li><a className="side-item" onClick={showComingSoon}><span className="icon-dot"></span> Tải ứng dụng</a></li>
             </ul>
 
-            <div className="side-foot">
-                <div className="icon-dot"></div> Trợ giúp
+            <div className="side-foot" onClick={showComingSoon}>
+                <div className="icon-dot" ></div> Trợ giúp
             </div>
+
+            <ToastContainer
+                position="top-right"
+                autoClose={500}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+            />
         </aside>
     );
 }
