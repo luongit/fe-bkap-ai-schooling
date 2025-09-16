@@ -40,17 +40,17 @@ function Header() {
         </svg>
       </button>
 
-      <div className="title">AI Spark - đồng hành cùng bạn</div>
+      <div className="title">AI Schooling Platform - đồng hành cùng bạn</div>
       <div className="actions">
         {!isLoggedIn ? (
           <>
-            <Link
-              to="/auth/login"
-              className="btn"
-              onClick={() => console.log("Clicked login - Debug")}
-            >
+            {/* <a href="/login" class="btn" onclick="console.log('Clicked login - Debug')">
+              Đăng nhập
+            </a> */}
+            <Link to="/login" class="btn" onclick="console.log('Clicked login - Debug')">
               Đăng nhập
             </Link>
+
             <Link to="/register" className="btn primary">
               Tạo tài khoản miễn phí
             </Link>
