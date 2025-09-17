@@ -44,22 +44,27 @@ function Sidebar() {
     }, []);
 
     const showComingSoon = () => {
-        toast.info(" Tính năng đang được phát triển, mời bạn quay lại sau!", {
-            position: "top-right",
-            autoClose: 500,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "colored"
-        });
+        const toastId = "comingSoon";
+        if (!toast.isActive(toastId)) {
+            toast.info("Tính năng đang được phát triển, mời bạn quay lại sau!", {
+                toastId,
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "colored"
+            });
+        }
     };
+
 
     const startNewChat = () => {
         sessionStorage.removeItem("chatHistory");
         sessionStorage.removeItem("sessionId");
         window.dispatchEvent(new Event("newChat"));
-        navigate("/"); 
+        navigate("/");
     };
 
     return (
@@ -115,7 +120,7 @@ function Sidebar() {
 
             <ToastContainer
                 position="top-right"
-                autoClose={500}
+                autoClose={2000}
                 hideProgressBar={false}
                 newestOnTop={false}
                 closeOnClick
@@ -124,6 +129,7 @@ function Sidebar() {
                 draggable
                 pauseOnHover
                 theme="colored"
+                limit={1}
             />
         </aside>
     );
