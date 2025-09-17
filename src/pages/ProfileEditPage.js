@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 function ProfileEditPage() {
   const [profile, setProfile] = useState(null);
   const [hobbies, setHobbies] = useState([]);
+  const [birthdate, setBirthdate] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -25,6 +26,10 @@ function ProfileEditPage() {
           setHobbies(data.hobbies);
           setInputValue(data.hobbies.join(", "));
         }
+        if (data.birthdate) {
+          setBirthdate(data.birthdate); // dạng dd/MM/yyyy hoặc yyyy-MM-dd tùy BE trả về
+        }
+
         toast.success("Tải thông tin thành công!");
       } catch (err) {
         console.error("Lỗi khi load profile", err);
@@ -41,7 +46,8 @@ function ProfileEditPage() {
     try {
       let payload = {};
       if (profile.objectType === "STUDENT") {
-        payload = { hobbies };
+        payload = { hobbies, birthdate: birthdate || null };
+        
       } else if (profile.objectType === "TEACHER") {
         payload = { email, phone };
       }
@@ -100,7 +106,7 @@ function ProfileEditPage() {
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
-  
+
   if (!profile) return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
@@ -111,7 +117,7 @@ function ProfileEditPage() {
         </div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Không tìm thấy profile</h2>
         <p className="text-gray-600 mb-6">Vui lòng thử lại sau hoặc liên hệ quản trị viên</p>
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="bg-indigo-600 text-white py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors"
         >
@@ -125,7 +131,7 @@ function ProfileEditPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <ToastContainer position="top-right" autoClose={3000} />
-      
+
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
@@ -152,7 +158,7 @@ function ProfileEditPage() {
                   <p className="opacity-90 capitalize">{profile.objectType.toLowerCase()}</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => navigate('/profile')}
                 className="text-white bg-white bg-opacity-20 hover:bg-opacity-30 p-2 rounded-full transition-colors"
               >
@@ -176,14 +182,14 @@ function ProfileEditPage() {
                     <p className="text-lg font-semibold text-gray-900">{profile.className}</p>
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Sở thích</label>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {hobbies.map((hobby, index) => (
                       <span key={index} className="bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full flex items-center">
                         {hobby}
-                        <button 
+                        <button
                           onClick={() => removeHobby(index)}
                           className="ml-1 text-indigo-600 hover:text-indigo-800"
                         >
@@ -205,6 +211,17 @@ function ProfileEditPage() {
                   />
                   <p className="mt-1 text-sm text-gray-500">Nhập sở thích và nhấn Enter để thêm từng mục, hoặc phân cách bằng dấu phẩy</p>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ngày sinh</label>
+                  <input
+                    type="date"
+                    value={birthdate ? new Date(birthdate.split("/").reverse().join("-")).toISOString().split("T")[0] : ""}
+                    onChange={(e) => setBirthdate(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  />
+                  <p className="mt-1 text-sm text-gray-500">Chọn ngày sinh (dd/MM/yyyy)</p>
+                </div>
+
               </>
             )}
 
@@ -214,7 +231,7 @@ function ProfileEditPage() {
                   <p className="text-sm font-medium text-gray-500 mb-1">Họ tên</p>
                   <p className="text-lg font-semibold text-gray-900">{profile.fullName}</p>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                   <input
@@ -225,7 +242,7 @@ function ProfileEditPage() {
                     placeholder="Nhập email"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
                   <input
@@ -236,7 +253,7 @@ function ProfileEditPage() {
                     placeholder="Nhập số điện thoại"
                   />
                 </div>
-                
+
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm font-medium text-gray-500 mb-1">Lớp chủ nhiệm</p>
                   <p className="text-lg font-semibold text-gray-900">{profile.homeroom}</p>
@@ -254,7 +271,7 @@ function ProfileEditPage() {
                 </svg>
                 Quay lại
               </button>
-              
+
               <button
                 className="flex items-center bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSave}
