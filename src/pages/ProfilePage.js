@@ -136,6 +136,28 @@ function ProfilePage() {
                       {profile.className}
                     </p>
                   </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Mã học sinh
+                    </p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {profile.code}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Ngày sinh
+                    </p>
+                    <p className="text-lg font-semibold text-gray-900">
+  {profile.birthdate
+    ? new Date(profile.birthdate).toLocaleDateString("vi-VN")
+    : "Chưa có"}
+</p>
+
+
+
+
+                  </div>
                 </div>
 
                 {profile.hobbies?.length > 0 && (
@@ -197,39 +219,39 @@ function ProfilePage() {
 
             {(profile.objectType === "SCHOOL" ||
               profile.objectType === "SYSTEM") && (
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm font-medium text-gray-500 mb-1">Admin</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {profile.fullName}
-                </p>
-              </div>
-            )}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm font-medium text-gray-500 mb-1">Admin</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {profile.fullName}
+                  </p>
+                </div>
+              )}
 
             {(profile.objectType === "STUDENT" ||
               profile.objectType === "TEACHER") && (
-              <div className="mt-8 flex justify-center">
-                <Link
-                  to="/profile/edit"
-                  className="inline-flex items-center bg-indigo-600 text-white py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                <div className="mt-8 flex justify-center">
+                  <Link
+                    to="/profile/edit"
+                    className="inline-flex items-center bg-indigo-600 text-white py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                  Chỉnh sửa thông tin
-                </Link>
-              </div>
-            )}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                    Chỉnh sửa thông tin
+                  </Link>
+                </div>
+              )}
           </div>
 
           <div className="px-8 py-5 bg-gray-50 border-t border-gray-200">
