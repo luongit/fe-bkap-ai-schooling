@@ -149,10 +149,10 @@ function ProfilePage() {
                       Ngày sinh
                     </p>
                     <p className="text-lg font-semibold text-gray-900">
-  {profile.birthdate
-    ? new Date(profile.birthdate).toLocaleDateString("vi-VN")
-    : "Chưa có"}
-</p>
+                      {profile.birthdate
+                        ? new Date(profile.birthdate).toLocaleDateString("vi-VN")
+                        : "Chưa có"}
+                    </p>
 
 
 
