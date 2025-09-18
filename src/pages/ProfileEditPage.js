@@ -66,18 +66,29 @@ function ProfileEditPage() {
 
   // thêm hobby
   const handleAddHobby = (e) => {
-    if (e.key === "Enter" && newHobby.trim() !== "") {
-      const hobby = newHobby.trim();
-      if (!hobbies.includes(hobby)) {
-        setHobbies([...hobbies, hobby]);
-        toast.success("Đã thêm sở thích mới");
-      } else {
-        toast.info("Sở thích này đã tồn tại");
-      }
-      setNewHobby("");
-      e.preventDefault();
+  if (e.key === "Enter" && newHobby.trim() !== "") {
+    const parts = newHobby
+      .split(",")
+      .map((h) => h.trim())
+      .filter((h) => h !== "");
+
+    // Tạo mảng mới (loại trùng)
+    const updated = [...new Set([...hobbies, ...parts])];
+
+    if (updated.length === hobbies.length) {
+      // Không có gì mới được thêm
+      toast.info("Sở thích này đã tồn tại");
+    } else {
+      setHobbies(updated);
+      toast.success("Đã thêm sở thích mới");
     }
-  };
+
+    setNewHobby("");
+    e.preventDefault();
+  }
+};
+
+
 
   // xóa hobby
   const handleRemoveHobby = (index) => {
