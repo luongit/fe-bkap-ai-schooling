@@ -153,10 +153,6 @@ function ProfilePage() {
                         ? new Date(profile.birthdate).toLocaleDateString("vi-VN")
                         : "Chưa có"}
                     </p>
-
-
-
-
                   </div>
                 </div>
 
@@ -227,12 +223,33 @@ function ProfilePage() {
                 </div>
               )}
 
-            {(profile.objectType === "STUDENT" ||
-              profile.objectType === "TEACHER") && (
-                <div className="mt-8 flex justify-center">
+            {(profile.objectType === "STUDENT" || profile.objectType === "TEACHER") && (
+              <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+                <Link
+                  to="/profile/edit"
+                  className="inline-flex items-center bg-indigo-600 text-white py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                  Chỉnh sửa thông tin
+                </Link>
+
+                {profile.objectType === "STUDENT" && (
                   <Link
-                    to="/profile/edit"
-                    className="inline-flex items-center bg-indigo-600 text-white py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    to={`/students/${profile.userId}/goals`}
+                    className="inline-flex items-center bg-green-600 text-white py-3 px-8 rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -245,13 +262,16 @@ function ProfilePage() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        d="M12 6v6l4 2"
                       />
                     </svg>
-                    Chỉnh sửa thông tin
+                    Mục tiêu đề ra
                   </Link>
-                </div>
-              )}
+                )}
+              </div>
+            )}
+
+
           </div>
 
           <div className="px-8 py-5 bg-gray-50 border-t border-gray-200">
@@ -275,7 +295,7 @@ function ProfilePage() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 
