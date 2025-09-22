@@ -379,7 +379,7 @@ function Home() {
                 <p>Số credit còn lại: {remainingCredit}</p>
                 {remainingCredit === 0 && (
                   <p>
-                    <a href="/purchase-credits">Mua thêm credit</a>
+                    <a href="/purchase-credits">Mua thêm credit để tiếp tục sử dụng chức năng</a>
                   </p>
                 )}
               </div>
