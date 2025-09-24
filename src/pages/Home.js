@@ -150,13 +150,13 @@ function Home() {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("Xóa session thất bại");
-       // Sau khi xoá BE thành công → xoá local luôn
+      // Sau khi xoá BE thành công → xoá local luôn
       sessionStorage.removeItem('chatHistory');
       sessionStorage.removeItem('sessionId');
       setChatHistory([]);
       setSessionId(null);
       setInput('');
-        // Gửi sự kiện để sidebar (nếu có) reload lại danh sách session
+      // Gửi sự kiện để sidebar (nếu có) reload lại danh sách session
       window.dispatchEvent(new Event("sessionUpdated"));
     } catch (err) {
       console.error("Delete session error:", err);
@@ -170,7 +170,7 @@ function Home() {
     return dollars % 2 === 0;
   };
 
-// Throttle render khi stream (batch mỗi ~80ms)
+  // Throttle render khi stream (batch mỗi ~80ms)
   const scheduleRef = useRef({ timer: null, pending: '' });
   const pushAssistantChunk = useCallback((baseHistory, assistantMsgRef, chunk) => {
     scheduleRef.current.pending += chunk;
@@ -190,7 +190,7 @@ function Home() {
         ];
         setChatHistory(newHistory);
       } else {
-         // nếu chưa “an toàn”, dồn thêm và chờ batch tiếp theo
+        // nếu chưa “an toàn”, dồn thêm và chờ batch tiếp theo
         scheduleRef.current.pending = take + scheduleRef.current.pending;
       }
     }, 80);
@@ -205,14 +205,14 @@ function Home() {
     setInput('');
     setLoading(true);
     setErrorMessage('');
-     
-     // Chuẩn bị stream
+
+    // Chuẩn bị stream
     controllerRef.current = new AbortController();
     const signal = controllerRef.current.signal;
 
     try {
       const token = localStorage.getItem('token');
-          // 🔹 Nếu chưa có sessionId thì gọi API để tạo mới
+      // 🔹 Nếu chưa có sessionId thì gọi API để tạo mới
       let sessionToUse = sessionId;
       if (!sessionToUse) {
         const startRes = await fetch(`${API_URL}/conversations/start`, {
@@ -225,7 +225,7 @@ function Home() {
         setSessionId(sessionToUse);
         sessionStorage.setItem('sessionId', sessionToUse);
       }
-        //  Gọi API stream, lần này truyền đúng sessionId
+      //  Gọi API stream, lần này truyền đúng sessionId
       const res = await fetch(`${API_URL}/stream`, {
         method: 'POST',
         headers: {
@@ -245,7 +245,7 @@ function Home() {
       assistantMessageRef.current = { role: 'assistant', content: '' };
       let bufferTail = ''; // phòng khi có phần dư chưa “an toàn”
 
-         // Đọc NDJSON
+      // Đọc NDJSON
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -263,7 +263,7 @@ function Home() {
             json = JSON.parse(line);
           } catch (e) {
             console.error('Lỗi parse NDJSON:', line, e);
-              // có thể là dòng rác do network; gom lại để lần sau parse
+            // có thể là dòng rác do network; gom lại để lần sau parse
             bufferTail += line + '\n';
             continue;
           }
@@ -274,7 +274,7 @@ function Home() {
             break;
           }
           if (json.type === 'done') {
-               // flush phần còn lại
+            // flush phần còn lại
             if (scheduleRef.current.timer) {
               clearTimeout(scheduleRef.current.timer);
               scheduleRef.current.timer = null;
@@ -294,10 +294,10 @@ function Home() {
             break;
           }
           if (json.type === 'chunk') {
-                // Tuỳ chọn: nếu bạn bật transform FE thì xử lý ở đây
+            // Tuỳ chọn: nếu bạn bật transform FE thì xử lý ở đây
             // const safeContent = transformLatexDelimiters?.(json.content ?? '') ?? (json.content ?? '');
             const safeContent = json.content ?? '';
-               // Gộp + batch update
+            // Gộp + batch update
             pushAssistantChunk(updatedHistory, assistantMessageRef, safeContent);
           }
         }
@@ -320,7 +320,7 @@ function Home() {
   // Markdown renderer (đặt remarkMath TRƯỚC remarkGfm)
   const Markdown = useMemo(() => {
     return function MD({ children }) {
-         // Nếu muốn luôn chạy lưới an toàn FE cho LaTeX, bật transform dưới:
+      // Nếu muốn luôn chạy lưới an toàn FE cho LaTeX, bật transform dưới:
       // const text = transformLatexDelimiters(String(children ?? ''));
       const text = String(children ?? '');
       return (
@@ -374,16 +374,7 @@ function Home() {
         ) : (
           <>
             {!started && <TopIntro />}
-            {remainingCredit !== null && (
-              <div className="credit-info">
-                <p>Số credit còn lại: {remainingCredit}</p>
-                {remainingCredit === 0 && (
-                  <p>
-                    <a href="/purchase-credits">Mua thêm credit để tiếp tục sử dụng chức năng</a>
-                  </p>
-                )}
-              </div>
-            )}
+
             {errorMessage && (
               <div className="error-message">
                 <p>{errorMessage}</p>
@@ -480,6 +471,12 @@ function Home() {
                 )}
               </div>
             </div>
+            {remainingCredit === 0 && (
+              <div className="credit-warning">
+                <p>Bạn đã hết credit, vui lòng <a href="/purchase-credits">mua thêm credit</a> để tiếp tục sử dụng.</p>
+              </div>
+            )}
+
             <p className="disclaimer">
               Khi đặt câu hỏi, bạn đồng ý với{" "}
               <a href="#">Điều khoản</a> và{" "}

@@ -1,78 +1,112 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import "./css/Header.css";
+import { getProfile } from "../services/profileService";
+import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify"; 
+
+const API_URL = process.env.REACT_APP_API_URL || "";
 
 function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
-  const navigate = useNavigate();
+  const [remainingCredit, setRemainingCredit] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [profile, setProfile] = useState(null);
 
+  const token = localStorage.getItem("token");
+
+  // Hàm check xem đã hiện toast chưa
+  const hasShownToast = localStorage.getItem("hasShownCreditToast") === "true";
+
+  // Fetch profile
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = localStorage.getItem("username");
+    const fetchProfile = async () => {
+      if (!token) return;
+      try {
+        const data = await getProfile();
+        setProfile(data);
+      } catch (err) {
+        console.error("Không lấy được profile:", err);
+      }
+    };
+    fetchProfile();
+  }, [token]);
 
-    if (token) {
-      setIsLoggedIn(true);
-      if (user) setUsername(user);
-    }
+  // Fetch credit
+  useEffect(() => {
+    const fetchCredit = async () => {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_URL}/user/credits`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok && data.credit !== undefined) {
+          setRemainingCredit(data.credit);
+          if (data.credit === 0 && !hasShownToast) {
+            toast.error("Đã hết credit, vui lòng mua thêm");
+            localStorage.setItem("hasShownCreditToast", "true"); // 🔒 đánh dấu đã hiện
+          }
+        } else {
+          setErrorMessage(data.message || "Không lấy được credit");
+        }
+      } catch (err) {
+        console.error("Credit fetch error:", err);
+        setErrorMessage("Không tải được credit");
+      }
+    };
+    fetchCredit();
+  }, [token, hasShownToast]);
+
+  // Listen for credit updates
+  useEffect(() => {
+    const handleCreditUpdate = (event) => {
+      const newCredit = event.detail?.remainingCredit;
+      if (newCredit !== undefined) {
+        setRemainingCredit(newCredit);
+        setErrorMessage("");
+        if (newCredit === 0 && !hasShownToast) {
+          toast.error("Đã hết credit, vui lòng mua thêm");
+          localStorage.setItem("hasShownCreditToast", "true"); // 🔒 chỉ 1 lần duy nhất
+        }
+      }
+    };
+    window.addEventListener("creditUpdated", handleCreditUpdate);
+    return () =>
+      window.removeEventListener("creditUpdated", handleCreditUpdate);
+  }, [hasShownToast]);
+
+  // Logout vẫn không reset toast
+  useEffect(() => {
+    const handleLogout = () => {
+      setRemainingCredit(null);
+      setErrorMessage("");
+      setProfile(null);
+      // ❌ KHÔNG reset hasShownToast để toast chỉ hiện 1 lần duy nhất trên trình duyệt
+    };
+
+    window.addEventListener("userLoggedOut", handleLogout);
+    return () => window.removeEventListener("userLoggedOut", handleLogout);
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("username");
-    sessionStorage.removeItem("chatHistory");
-    sessionStorage.removeItem("sessionId");
-    setIsLoggedIn(false);
-    window.location.href = "/";
-
-  };
 
   return (
     <header className="header">
-      <button className="burger" id="burger" aria-label="Mở menu">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path
-            d="M4 7h16M4 12h12M4 17h16"
-            stroke="#4b5563"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
-      </button>
-
-      <div className="title">AI Schooling Platform - đồng hành cùng bạn</div>
-      <div className="actions">
-        {!isLoggedIn ? (
-          <>
-            <a href="/auth/login" class="btn" onclick="console.log('Clicked login - Debug')">
-              Đăng nhập
-            </a>
-            {/* <Link to="/login" class="btn" onclick="console.log('Clicked login - Debug')">
-              Đăng nhập
-            </Link> */}
-
-            <Link to="/register" className="btn primary">
-              Tạo tài khoản miễn phí
-            </Link>
-          </>
-        ) : (
-          <>
-            <Link
-              to="/profile"
-              className="btn"
-              onClick={() =>
-                console.log("Clicked profile - URL should change and re-render")
-              } // Debug: Xóa sau test
-            >
-              Tài khoản của bạn
-            </Link>
-            <button className="btn primary" onClick={handleLogout}>
-              Đăng xuất
-            </button>
-          </>
-        )}
+      <div className="header-left">
+        <h2 className="brand">BACHKHOA APTECH</h2>
       </div>
+
+      <div className="header-right">
+        <span className="user-info">
+          Xin chào,{" "}
+          <strong>{profile ? profile.fullName : "Người dùng"}</strong>
+        </span>
+
+        {remainingCredit !== null && (
+          <span className="credit-display">💳 {remainingCredit}</span>
+        )}
+        {errorMessage && <span className="credit-error">{errorMessage}</span>}
+      </div>
+      
     </header>
+    
   );
 }
 

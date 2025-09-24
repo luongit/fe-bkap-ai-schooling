@@ -246,9 +246,9 @@ function ProfilePage() {
                   Chỉnh sửa thông tin
                 </Link>
 
-                {profile.objectType === "STUDENT" && (
+                {profile.objectType === "STUDENT" && profile.objectId && (
                   <Link
-                    to={`/students/${profile.userId}/goals`}
+                    to={`/students/${profile.objectId}/goals`} // Sử dụng objectId thay vì userId
                     className="inline-flex items-center bg-green-600 text-white py-3 px-8 rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                   >
                     <svg
@@ -270,8 +270,6 @@ function ProfilePage() {
                 )}
               </div>
             )}
-
-
           </div>
 
           <div className="px-8 py-5 bg-gray-50 border-t border-gray-200">
@@ -295,7 +293,7 @@ function ProfilePage() {
           </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 }
 
