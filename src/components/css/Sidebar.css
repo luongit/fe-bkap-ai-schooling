@@ -38,3 +38,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Đảm bảo tiêu đề Lịch sử không bị thụt */
+.side-note {
+  margin-left: 0;
+  padding-left: 12px; /* Khoảng cách nhỏ để căn chỉnh với các mục khác */
+}
+
+/* Dịch danh sách lịch sử sang phải */
+.side-list.history-list {
+  padding-left: 24px; /* Thụt vào 24px so với tiêu đề */
+}
+
+/* Đảm bảo các mục trong danh sách lịch sử căn chỉnh đẹp */
+.side-list.history-list .side-item {
+  padding: 8px 12px; /* Giảm padding một chút để không quá xa */
+}
