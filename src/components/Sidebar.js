@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useParams } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { HiOutlineChatAlt2, HiOutlineChatAlt2 as ChatIcon } from "react-icons/hi";
+
 
 
 import {
@@ -32,6 +36,7 @@ function Sidebar({ className }) {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
+  const { sessionId } = useParams();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -79,7 +84,7 @@ function Sidebar({ className }) {
     return () => window.removeEventListener("sessionUpdated", fetchSessions);
   }, []);
 
-  
+
 
   const startNewChat = () => {
     sessionStorage.removeItem("chatHistory");
@@ -110,35 +115,35 @@ function Sidebar({ className }) {
       toast.error("Lỗi khi xóa, vui lòng thử lại!");
     }
   };
-const showComingSoon = () => {
-        const toastId = "comingSoon";
-        if (!toast.isActive(toastId)) {
-            toast.info("Tính năng đang được phát triển, mời bạn quay lại sau!", {
-                toastId,
-                position: "top-right",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                theme: "colored"
-            });
-        }
-    };
+  const showComingSoon = () => {
+    const toastId = "comingSoon";
+    if (!toast.isActive(toastId)) {
+      toast.info("Tính năng đang được phát triển, mời bạn quay lại sau!", {
+        toastId,
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored"
+      });
+    }
+  };
 
-const handleLogout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("userId");
-  localStorage.removeItem("username");
-  sessionStorage.removeItem("chatHistory");
-  sessionStorage.removeItem("sessionId");
-  setIsLoggedIn(false);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("username");
+    sessionStorage.removeItem("chatHistory");
+    sessionStorage.removeItem("sessionId");
+    setIsLoggedIn(false);
 
-  // 🔥 bắn event để các component khác biết logout
-  window.dispatchEvent(new Event("userLoggedOut"));
+    // 🔥 bắn event để các component khác biết logout
+    window.dispatchEvent(new Event("userLoggedOut"));
 
-  navigate("/"); // chuyển hướng về trang chủ
-};
+    navigate("/"); // chuyển hướng về trang chủ
+  };
 
   return (
     <aside className={`sidebar ${className}`}>
@@ -155,11 +160,15 @@ const handleLogout = () => {
       <nav className="side-list">
         <button
           onClick={startNewChat}
-          className="side-item w-full text-left"
+          className="side-item w-full text-left flex items-center gap-2"
         >
-          <FiMessageCircle className="sidebar-icon" />
+          <span className="relative">
+            <HiOutlineChatAlt2 className="sidebar-icon" />
+         
+          </span>
           <span>Chat mới</span>
         </button>
+
         <button
           onClick={showComingSoon}
           className="side-item w-full text-left"
@@ -210,43 +219,47 @@ const handleLogout = () => {
         onClick={() => setShowHistory(!showHistory)}
         className="side-item w-full text-left flex justify-between"
       >
-        <div className="flex items-center">
+        <div className="flex items-center gap-2 ">
           <FiClock className="sidebar-icon" />
           <span>Xem lịch sử</span>
         </div>
         <FiChevronDown className="sidebar-icon" />
       </button>
       {showHistory && (
-        <ul className="side-list">
-          {!localStorage.getItem("token") ? (
-            <li className="side-item">Đăng nhập để xem lịch sử</li>
-          ) : loading ? (
-            <li className="side-item">Đang tải...</li>
-          ) : sessions.length === 0 ? (
-            <li className="side-item">Chưa có lịch sử</li>
-          ) : (
+        <ul className="side-list mt-2 pl-6">
+          {loading ? (
+            <li className="side-item text-gray-400 italic">Đang tải...</li>
+          ) : sessions.length > 0 ? (
             sessions.map((s) => (
               <li key={s.sessionId} className="side-item relative">
-                <Link
+                <NavLink
                   to={`/chat/${s.sessionId}`}
-                  className="flex-1"
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 flex-1 overflow-hidden px-2 py-1 rounded-md transition ${isActive
+                      ? "bg-gray-200 text-gray-800 font-semibold"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
+                    }`
+                  }
                 >
-              
-                  <span className="truncate">
+                  <span className="truncate max-w-[150px]">
                     {s.previewMessage || s.sessionId}
                   </span>
-                  <span className="text-xs text-gray-400 ml-2">
+                  <span className="text-xs text-gray-400 ml-auto whitespace-nowrap">
                     {s.updatedAt
                       ? new Date(s.updatedAt).toLocaleDateString("vi-VN")
                       : ""}
                   </span>
-                </Link>
-             
+                </NavLink>
               </li>
             ))
+          ) : (
+            <li className="side-item text-gray-400 italic">Chưa có lịch sử chat</li>
           )}
         </ul>
       )}
+
+
+
 
       <div className="side-note">Khác</div>
       <button
@@ -269,14 +282,14 @@ const handleLogout = () => {
               <FiLogIn className="sidebar-icon" />
               <span>Đăng nhập</span>
             </Link> */}
-           <a
+            <a
               href="/auth/login"
               className="side-item w-full text-left flex items-center space-x-2"
             >
               <FiLogIn className="sidebar-icon" />
               <span>Đăng nhập</span>
             </a>
-            
+
             <Link
               to="/register"
               className="side-item w-full text-left flex items-center space-x-2"
@@ -292,7 +305,7 @@ const handleLogout = () => {
               className="side-item w-full text-left flex items-center space-x-2"
             >
               <FiUser className="sidebar-icon" />
-              <span>Tài khoản </span>
+              <span>Hồ sơ </span>
             </Link>
             <button
               onClick={handleLogout}
