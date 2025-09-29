@@ -21,6 +21,8 @@ export default function WritingPage() {
       return [];
     }
   });
+  const [outlines, setOutlines] = useState([]); // State mới để lưu dàn ý
+  const [selectedOutline, setSelectedOutline] = useState(''); // State để lưu dàn ý được chọn
   const { sessionId: urlSessionId } = useParams();
   const [sessionId, setSessionId] = useState(() => sessionStorage.getItem('writingSessionId') || null);
   const [loading, setLoading] = useState(false);
@@ -125,6 +127,8 @@ export default function WritingPage() {
       sessionStorage.removeItem('writingHistory');
       sessionStorage.removeItem('writingSessionId');
       setChatHistory([]);
+      setOutlines([]); // Xóa dàn ý khi bắt đầu session mới
+      setSelectedOutline('');
       setSessionId(null);
       setInput('');
     };
@@ -134,7 +138,36 @@ export default function WritingPage() {
 
   // Handle category click
   const handleCategoryClick = (cat) => {
-    setInput(`Viết một bài văn kiểu "${cat.title}" - ${cat.desc}`);
+    let prompt = "";
+    switch (cat.title) {
+      case "Phân tích":
+        prompt = "Phân tích tác phẩm ";
+        break;
+      case "Nghị luận xã hội":
+        prompt = "Viết bài nghị luận xã hội về chủ đề ";
+        break;
+      case "Nghị luận văn học":
+        prompt = "Viết bài nghị luận văn học về chủ đề ";
+        break;
+      case "Miêu tả":
+        prompt = "Viết bài văn tả ";
+        break;
+      case "Văn biểu cảm":
+        prompt = "Cảm nghĩ của em về ";
+        break;
+      case "Văn tự sự":
+        prompt = "Viết bài văn kể câu chuyện ";
+        break;
+      case "Viết thư":
+        prompt = "Viết thư gửi ";
+        break;
+      case "Thuyết minh":
+        prompt = "Viết bài văn thuyết minh về ";
+        break;
+      default:
+        prompt = `Viết văn ${cat.title.toLowerCase()} về `;
+    }
+    setInput(prompt);
   };
 
   // Handle copy
@@ -151,6 +184,8 @@ export default function WritingPage() {
     if (!sid || !token) {
       sessionStorage.removeItem('writingHistory');
       setChatHistory([]);
+      setOutlines([]); // Xóa dàn ý khi xóa session
+      setSelectedOutline('');
       setSessionId(null);
       return;
     }
@@ -163,6 +198,8 @@ export default function WritingPage() {
       sessionStorage.removeItem('writingHistory');
       sessionStorage.removeItem('writingSessionId');
       setChatHistory([]);
+      setOutlines([]);
+      setSelectedOutline('');
       setSessionId(null);
       setInput('');
       window.dispatchEvent(new Event('writingSessionUpdated'));
@@ -223,6 +260,7 @@ export default function WritingPage() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder('utf-8');
       assistantMessageRef.current = { role: 'assistant', content: '' };
+      let currentOutline = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -246,6 +284,10 @@ export default function WritingPage() {
             break;
           }
           if (json.type === 'done') {
+            if (currentOutline) {
+              setOutlines((prev) => [...prev, currentOutline]); // Lưu dàn ý
+              setSelectedOutline(currentOutline); // Chọn dàn ý mới nhất
+            }
             const finalHistory = [
               ...updatedHistory.slice(0, -1),
               updatedHistory[updatedHistory.length - 1],
@@ -258,7 +300,11 @@ export default function WritingPage() {
             break;
           }
           if (json.type === 'chunk') {
-            assistantMessageRef.current.content += json.content ?? '';
+            if (json.content.startsWith('## Dàn ý')) {
+              currentOutline += json.content; // Thu thập dàn ý
+            } else {
+              assistantMessageRef.current.content += json.content ?? '';
+            }
             setChatHistory([
               ...updatedHistory.slice(0, -1),
               updatedHistory[updatedHistory.length - 1],
@@ -312,7 +358,23 @@ export default function WritingPage() {
   }, [copied, handleCopy]);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-screen bg-gray-50 px-4">
+  <main className="main">
+    <section className="hero">
+      {!token ? (
+        <div className="not-logged">
+          <div className="not-logged-box">
+            <p className="not-logged-text">
+             Bạn cần đăng nhập để bắt đầu trò chuyện
+            </p>
+            <a href="/auth/login" className="login-btn">
+              Đăng nhập
+            </a>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Toàn bộ giao diện WritingPage hiện tại */}
+          <div className="flex flex-col items-center justify-center w-full min-h-screen bg-gray-50 px-4">
       {/* Header */}
       <div className="flex flex-col items-center text-center mb-6">
         <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
@@ -380,7 +442,7 @@ export default function WritingPage() {
       {/* Input + Dropdowns */}
       <div className="w-full max-w-3xl border rounded-2xl shadow-sm bg-white p-4 flex flex-col gap-3">
         {!hasAssistantResponse && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <select
               className="bg-transparent outline-none text-sm text-gray-700 border rounded-lg px-2 py-1"
               value={tone}
@@ -407,37 +469,53 @@ export default function WritingPage() {
               <option>Vừa</option>
               <option>Dài</option>
             </select>
+            {outlines.length > 0 && (
+              <select
+                className="bg-transparent outline-none text-sm text-gray-700 border rounded-lg px-2 py-1"
+                value={selectedOutline}
+                onChange={(e) => setSelectedOutline(e.target.value)}
+              >
+                <option value="">Chọn dàn ý</option>
+                {outlines.map((outline, index) => (
+                  <option key={index} value={outline}>
+                    Dàn ý {index + 1}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
         )}
-    
-          <div className="composer-wrap">
-              <div className="composer" role="group" aria-label="Hộp nhập câu hỏi">
-                <textarea
-                  placeholder="Nhập câu hỏi bất kì..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                />
-                <div className="right">
-                  <button
-                    className="circle-btn send"
-                    title="Gửi"
-                    onClick={handleSubmit}
-                    disabled={loading || remainingCredit === 0}
-                  >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M5 12l14-7-7 14-2-5-5-2z"
-                        stroke="#16a34a"
-                        strokeWidth="2"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
-                
-              </div>
+        {selectedOutline && (
+          <div className="outline-preview bg-gray-50 p-3 rounded-lg">
+            <Markdown>{selectedOutline}</Markdown>
+          </div>
+        )}
+        <div className="composer-wrap">
+          <div className="composer" role="group" aria-label="Hộp nhập câu hỏi">
+            <textarea
+              placeholder="Nhập câu hỏi bất kì..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <div className="right">
+              <button
+                className="circle-btn send"
+                title="Gửi"
+                onClick={handleSubmit}
+                disabled={loading || remainingCredit === 0}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M5 12l14-7-7 14-2-5-5-2z"
+                    stroke="#16a34a"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
             </div>
-       
+          </div>
+        </div>
       </div>
 
       {remainingCredit === 0 && (
@@ -453,5 +531,10 @@ export default function WritingPage() {
         </button>
       )}
     </div>
-  );
+        </>
+      )}
+    </section>
+  </main>
+);
+
 }

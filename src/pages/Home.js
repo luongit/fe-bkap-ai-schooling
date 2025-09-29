@@ -366,7 +366,7 @@ function Home() {
               <p className="not-logged-text">
                 Bạn cần đăng nhập để bắt đầu trò chuyện
               </p>
-              <a href="/login" className="login-btn">
+              <a href="/auth/login" className="login-btn">
                 Đăng nhập
               </a>
             </div>
