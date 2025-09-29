@@ -8,6 +8,7 @@ import ProfilePage from "./pages/ProfilePage";
 import GoalsPage from "./pages/GoalsPage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import { ToastContainer } from "react-toastify";
+import WritingPage from "./pages/WritingPage";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/profile/edit" element={<ProfileEditPage />} />
           <Route path="/chat/:sessionId" element={<Home />} />
           <Route path="/students/:studentId/goals" element={<GoalsPage />} />
+          <Route path="/writing" element={<WritingPage />} />
 
           {/* Fallback 404 */}
           <Route

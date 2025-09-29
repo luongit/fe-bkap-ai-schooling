@@ -1,14 +1,10 @@
 
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, NavLink } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useParams } from "react-router-dom";
-import { NavLink } from "react-router-dom";
-import { HiOutlineChatAlt2, HiOutlineChatAlt2 as ChatIcon } from "react-icons/hi";
-
-
-
+import { HiOutlineChatAlt2 } from "react-icons/hi";
 import {
   FiMessageCircle,
   FiSearch,
@@ -17,15 +13,14 @@ import {
   FiPlus,
   FiDownload,
   FiClock,
-  FiTrash2,
-  FiChevronDown,
   FiHelpCircle,
   FiLogIn,
   FiUserPlus,
   FiLogOut,
   FiUser,
+  FiChevronDown,
 } from "react-icons/fi";
-import "./css/Sidebar.css"; // Đảm bảo đường dẫn đúng
+import "./css/Sidebar.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "";
 
@@ -81,10 +76,12 @@ function Sidebar({ className }) {
 
   useEffect(() => {
     window.addEventListener("sessionUpdated", fetchSessions);
-    return () => window.removeEventListener("sessionUpdated", fetchSessions);
+    window.addEventListener("writingSessionUpdated", fetchSessions);
+    return () => {
+      window.removeEventListener("sessionUpdated", fetchSessions);
+      window.removeEventListener("writingSessionUpdated", fetchSessions);
+    };
   }, []);
-
-
 
   const startNewChat = () => {
     sessionStorage.removeItem("chatHistory");
@@ -107,6 +104,7 @@ function Sidebar({ className }) {
         toast.success("Đã xóa cuộc trò chuyện!");
         fetchSessions();
         window.dispatchEvent(new Event("sessionUpdated"));
+        window.dispatchEvent(new Event("writingSessionUpdated"));
       } else {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -115,6 +113,7 @@ function Sidebar({ className }) {
       toast.error("Lỗi khi xóa, vui lòng thử lại!");
     }
   };
+
   const showComingSoon = () => {
     const toastId = "comingSoon";
     if (!toast.isActive(toastId)) {
@@ -126,7 +125,7 @@ function Sidebar({ className }) {
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        theme: "colored"
+        theme: "colored",
       });
     }
   };
@@ -137,12 +136,11 @@ function Sidebar({ className }) {
     localStorage.removeItem("username");
     sessionStorage.removeItem("chatHistory");
     sessionStorage.removeItem("sessionId");
+    sessionStorage.removeItem("writingHistory");
+    sessionStorage.removeItem("writingSessionId");
     setIsLoggedIn(false);
-
-    // 🔥 bắn event để các component khác biết logout
     window.dispatchEvent(new Event("userLoggedOut"));
-
-    navigate("/"); // chuyển hướng về trang chủ
+    navigate("/");
   };
 
   return (
@@ -164,11 +162,9 @@ function Sidebar({ className }) {
         >
           <span className="relative">
             <HiOutlineChatAlt2 className="sidebar-icon" />
-         
           </span>
           <span>Chat mới</span>
         </button>
-
         <button
           onClick={showComingSoon}
           className="side-item w-full text-left"
@@ -183,20 +179,30 @@ function Sidebar({ className }) {
           <FiBookOpen className="sidebar-icon" />
           <span>Giải bài tập</span>
         </button>
-        <button
-          onClick={showComingSoon}
-          className="side-item w-full text-left"
+
+      
+        <NavLink
+          to="/writing"
+          onClick={() => {
+            sessionStorage.removeItem("writingHistory");
+            sessionStorage.removeItem("writingSessionId");
+            window.dispatchEvent(new Event("newWriting"));
+          }}
+          className={({ isActive }) =>
+            `side-item w-full text-left flex items-center gap-2 ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
+            }`
+          }
         >
           <FiEdit3 className="sidebar-icon" />
           <span>Viết văn AI</span>
-        </button>
+        </NavLink>
+
         <button
           onClick={showComingSoon}
           className="side-item w-full text-left"
         >
           <FiMessageCircle className="sidebar-icon" />
-          <span>Trợ Lý Ảo
-          </span>
+          <span>Trợ Lý Ảo</span>
         </button>
         <button
           onClick={showComingSoon}
@@ -219,7 +225,7 @@ function Sidebar({ className }) {
         onClick={() => setShowHistory(!showHistory)}
         className="side-item w-full text-left flex justify-between"
       >
-        <div className="flex items-center gap-2 ">
+        <div className="flex items-center gap-2">
           <FiClock className="sidebar-icon" />
           <span>Xem lịch sử</span>
         </div>
@@ -235,9 +241,7 @@ function Sidebar({ className }) {
                 <NavLink
                   to={`/chat/${s.sessionId}`}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 flex-1 overflow-hidden px-2 py-1 rounded-md transition ${isActive
-                      ? "bg-gray-200 text-gray-800 font-semibold"
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
+                    `flex items-center gap-2 flex-1 overflow-hidden px-2 py-1 rounded-md transition ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
                     }`
                   }
                 >
@@ -258,9 +262,6 @@ function Sidebar({ className }) {
         </ul>
       )}
 
-
-
-
       <div className="side-note">Khác</div>
       <button
         onClick={showComingSoon}
@@ -270,18 +271,10 @@ function Sidebar({ className }) {
         <span>Trợ giúp</span>
       </button>
 
-      {/* Phần đăng nhập/đăng xuất giống Grok */}
       <div className="mt-auto pt-4">
         <div className="side-note">Tài khoản</div>
         {!isLoggedIn ? (
           <>
-            {/* <Link
-              to="/login"
-              className="side-item w-full text-left flex items-center space-x-2"
-            >
-              <FiLogIn className="sidebar-icon" />
-              <span>Đăng nhập</span>
-            </Link> */}
             <a
               href="/auth/login"
               className="side-item w-full text-left flex items-center space-x-2"
@@ -289,9 +282,15 @@ function Sidebar({ className }) {
               <FiLogIn className="sidebar-icon" />
               <span>Đăng nhập</span>
             </a>
-
             <Link
               to="/register"
+              className="side-item w-full text-left flex items-center space-x-2"
+            >
+              <FiUserPlus className="sidebar-icon" />
+              <span>Tạo tài khoản</span>
+            </Link>
+            <Link
+              to="/login"
               className="side-item w-full text-left flex items-center space-x-2"
             >
               <FiUserPlus className="sidebar-icon" />
@@ -305,7 +304,7 @@ function Sidebar({ className }) {
               className="side-item w-full text-left flex items-center space-x-2"
             >
               <FiUser className="sidebar-icon" />
-              <span>Hồ sơ </span>
+              <span>Hồ sơ</span>
             </Link>
             <button
               onClick={handleLogout}
