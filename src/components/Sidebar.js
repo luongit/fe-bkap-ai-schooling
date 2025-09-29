@@ -179,8 +179,6 @@ function Sidebar({ className }) {
           <FiBookOpen className="sidebar-icon" />
           <span>Giải bài tập</span>
         </button>
-
-      
         <NavLink
           to="/writing"
           onClick={() => {
@@ -289,13 +287,13 @@ function Sidebar({ className }) {
               <FiUserPlus className="sidebar-icon" />
               <span>Tạo tài khoản</span>
             </Link>
-            <Link
+            {/* <Link
               to="/login"
               className="side-item w-full text-left flex items-center space-x-2"
             >
               <FiUserPlus className="sidebar-icon" />
               <span>Tạo tài khoản</span>
-            </Link>
+            </Link> */}
           </>
         ) : (
           <>
