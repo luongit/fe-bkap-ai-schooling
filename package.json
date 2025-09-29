@@ -23,6 +23,8 @@
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
+    "sweetalert2": "^11.23.0",
+    "sweetalert2-react-content": "^5.1.0",
     "tailwindcss": "^4.1.13",
     "web-vitals": "^2.1.4"
   },
