@@ -1,72 +1,135 @@
+
+/* src/css/Header.css */
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* Căn giữa logo */
   align-items: center;
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
-  padding: 10px 20px;
+  padding: 10px 16px;
   position: sticky;
   top: 0;
   z-index: 50;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
-/* Bên trái: brand */
+/* Burger Menu */
+.burger {
+  display: none; /* Ẩn trên desktop */
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease; /* Chỉ chuyển đổi nền */
+  position: absolute;
+  left: 12px;
+}
+
+.burger:hover {
+  background: #f3f4f6; /* Nền hover, không có viền */
+}
+
+.burger .sidebar-icon {
+  width: 24px;
+  height: 24px;
+  color: #16a34a; /* Màu xanh lá giống --primary */
+}
+
+/* Brand */
 .brand {
   font-size: 18px;
   font-weight: bold;
   color: #2563eb;
+  text-align: center;
+  flex-grow: 1;
 }
 
-/* Bên phải */
+/* Header right */
 .header-right {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
+  position: absolute;
+  right: 12px;
 }
 
 .user-info {
-  font-size: 15px;
-  color: #374151;
+  display: none; /* Ẩn "Xin chào, Nguyễn Văn A" */
 }
 
 .credit-display {
-  padding: 6px 12px;
+  padding: 4px 8px;
   border-radius: 8px;
   background: #f0fdf4;
   color: #16a34a;
   font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .credit-display.credit-empty {
-  background: #fee2e2; /* Màu nền đỏ nhạt */
-  color: #dc2626; /* Màu chữ đỏ đậm */
-}
-
-.credit-warning {
-  font-size: 14px;
-  color: #dc2626; /* Màu đỏ đậm, đồng bộ với credit-empty */
-  font-weight: 600;
+  background: #fee2e2;
+  color: #dc2626;
 }
 
 .credit-error {
   color: red;
-  font-size: 14px;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
-.logout-btn {
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: #ef4444;
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
+/* Responsive */
+@media (max-width: 920px) {
+  .header {
+    padding: 8px 12px;
+  }
+  .brand {
+    font-size: 16px;
+  }
+  .header-right {
+    right: 12px;
+  }
+  .credit-display {
+    padding: 3px 6px;
+    font-size: 13px;
+  }
+  .credit-error {
+    font-size: 12px;
+  }
+  .burger {
+    display: flex; /* Hiện trên mobile */
+  }
 }
 
-.logout-btn:hover {
-  background: #dc2626;
+@media (max-width: 480px) {
+  .header {
+    padding: 8px 10px;
+  }
+  .brand {
+    font-size: 14px;
+  }
+  .header-right {
+    right: 10px;
+  }
+  .credit-display {
+    padding: 3px 5px;
+    font-size: 12px;
+  }
+  .credit-error {
+    font-size: 11px;
+  }
+  .burger {
+    left: 10px;
+    width: 36px;
+    height: 36px;
+  }
+  .burger .sidebar-icon {
+    width: 20px;
+    height: 20px;
+  }
 }

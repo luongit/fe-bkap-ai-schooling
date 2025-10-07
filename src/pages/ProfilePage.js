@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { getProfile } from "../services/profileService";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);

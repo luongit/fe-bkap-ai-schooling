@@ -1,0 +1,104 @@
+/* src/css/mobile.css */
+
+/* Sidebar trên mobile */
+@media (max-width: 920px) {
+  .sidebar {
+    position: fixed;
+    z-index: 60;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar.collapsed {
+    width: 72px;
+  }
+  .sidebar-burger {
+    display: flex; /* Hiện ba gạch trên mobile */
+  }
+  .main-content {
+    margin-left: 0 !important;
+  }
+  .main-content.sidebar-open {
+    margin-left: 72px !important;
+  }
+}
+
+/* App layout trên mobile */
+@media (max-width: 932px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+  .header, .main, .footer {
+    grid-column: 1;
+  }
+  .header {
+    padding: 8px 12px;
+  }
+  .brand {
+    font-size: 16px;
+    text-align: center;
+    margin: 0;
+  }
+  .header-right {
+    right: 12px;
+  }
+  .hello {
+    display: none; /* Ẩn "Hello AI" trên mobile */
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    width: 100%;
+    padding-inline: 8px;
+  }
+  .carousel {
+    gap: 8px;
+  }
+  .pill {
+    min-width: auto;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  .header {
+    padding: 10px 12px;
+  }
+  .brand {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 20px;
+  }
+  .btn {
+    padding: 6px 10px;
+  }
+  .nav-btn {
+    width: 30px;
+    height: 30px;
+  }
+  .header {
+    padding: 8px 10px;
+  }
+  .brand {
+    font-size: 12px;
+  }
+  .header-right {
+    right: 10px;
+  }
+  .credit-display {
+    padding: 3px 5px;
+    font-size: 12px;
+  }
+  .credit-error {
+    font-size: 11px;
+  }
+}

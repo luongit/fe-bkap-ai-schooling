@@ -1,22 +1,22 @@
+
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { FiMenu } from "react-icons/fi";
 import "./css/Header.css";
 import { getProfile } from "../services/profileService";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { toast } from "react-toastify"; 
 
 const API_URL = process.env.REACT_APP_API_URL || "";
 
-function Header() {
+function Header({ toggleSidebar }) {
   const [remainingCredit, setRemainingCredit] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [profile, setProfile] = useState(null);
 
   const token = localStorage.getItem("token");
-
-  // Hàm check xem đã hiện toast chưa
   const hasShownToast = localStorage.getItem("hasShownCreditToast") === "true";
 
-  // Fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
       if (!token) return;
@@ -30,7 +30,6 @@ function Header() {
     fetchProfile();
   }, [token]);
 
-  // Fetch credit
   useEffect(() => {
     const fetchCredit = async () => {
       if (!token) return;
@@ -43,7 +42,7 @@ function Header() {
           setRemainingCredit(data.credit);
           if (data.credit === 0 && !hasShownToast) {
             toast.error("Đã hết credit, vui lòng mua thêm");
-            localStorage.setItem("hasShownCreditToast", "true"); // 🔒 đánh dấu đã hiện
+            localStorage.setItem("hasShownCreditToast", "true");
           }
         } else {
           setErrorMessage(data.message || "Không lấy được credit");
@@ -56,7 +55,6 @@ function Header() {
     fetchCredit();
   }, [token, hasShownToast]);
 
-  // Listen for credit updates
   useEffect(() => {
     const handleCreditUpdate = (event) => {
       const newCredit = event.detail?.remainingCredit;
@@ -65,48 +63,40 @@ function Header() {
         setErrorMessage("");
         if (newCredit === 0 && !hasShownToast) {
           toast.error("Đã hết credit, vui lòng mua thêm");
-          localStorage.setItem("hasShownCreditToast", "true"); // 🔒 chỉ 1 lần duy nhất
+          localStorage.setItem("hasShownCreditToast", "true");
         }
       }
     };
     window.addEventListener("creditUpdated", handleCreditUpdate);
-    return () =>
-      window.removeEventListener("creditUpdated", handleCreditUpdate);
+    return () => window.removeEventListener("creditUpdated", handleCreditUpdate);
   }, [hasShownToast]);
-
-  // Logout vẫn không reset toast
-  useEffect(() => {
-    const handleLogout = () => {
-      setRemainingCredit(null);
-      setErrorMessage("");
-      setProfile(null);
-      // ❌ KHÔNG reset hasShownToast để toast chỉ hiện 1 lần duy nhất trên trình duyệt
-    };
-
-    window.addEventListener("userLoggedOut", handleLogout);
-    return () => window.removeEventListener("userLoggedOut", handleLogout);
-  }, []);
 
   return (
     <header className="header">
-      <div className="header-left">
-        <h2 className="brand">BACHKHOA APTECH</h2>
-      </div>
-
+      <button className="burger" onClick={toggleSidebar}>
+        <FiMenu className="sidebar-icon" />
+      </button>
+      <Link to="/" className="brand">
+        BACHKHOA APTECH
+      </Link>
       <div className="header-right">
-        <span className="user-info">
-          Xin chào,{" "}
-          <strong>{profile ? profile.fullName : "Người dùng"}</strong>
-        </span>
-
-        {remainingCredit !== null && (
-          <span className="credit-display">💳 {remainingCredit}</span>
+        {token && (
+          <>
+            <span className="user-info"></span>
+            {remainingCredit !== null && (
+              <span
+                className={`credit-display ${
+                  remainingCredit === 0 ? "credit-empty" : ""
+                }`}
+              >
+                💳 {remainingCredit}
+              </span>
+            )}
+            {errorMessage && <span className="credit-error">{errorMessage}</span>}
+          </>
         )}
-        {errorMessage && <span className="credit-error">{errorMessage}</span>}
       </div>
-      
     </header>
-    
   );
 }
 

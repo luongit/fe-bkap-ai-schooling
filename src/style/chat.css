@@ -1,0 +1,461 @@
+/* CSS Variables */
+:root {
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --text: #1f2937;
+  --primary: #10a37f; /* Màu xanh lá Grok (dùng cho typing indicator) */
+  --brand: #03090c;
+  --muted: #6b7280;
+  --bg: #fff;
+}
+
+/* Inline Code */
+p code, li code, span code, .inline-code {
+  background: #f3f4f6;
+  color: #0f172a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  white-space: pre-wrap;
+}
+
+/* Chat Container */
+.chat-container {
+  width: min(980px, 100%);
+  margin: 20px auto 0;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start !important;
+  gap: 12px;
+  background: transparent;
+}
+
+/* Chat Message */
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 0; /* Bỏ bo tròn góc, giống Grok */
+  font-size: 16px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  color: var(--text);
+  position: relative;
+  animation: fadeIn 0.3s ease;
+  box-shadow: none; /* Bỏ box-shadow để không tạo viền giả */
+  border: none; /* Bỏ viền hoàn toàn */
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-message.user {
+  align-self: flex-end !important;
+  background: #ffffff;
+  color: #1e3a8a;
+  border: 1px solid rgba(0, 0, 0, 0.08);  /* viền mảnh, nhẹ */
+  border-radius: 12px;                    /* bo góc mềm */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04); /* bóng nhẹ */
+  padding: 12px 16px;
+  max-width: 80%;
+}
+
+
+/* AI Message */
+.chat-message.ai {
+  align-self: flex-start !important;
+  padding: 12px 16px;
+  background: transparent !important;
+  box-shadow: none !important; /* Bỏ box-shadow cho AI */
+  border: none !important; /* Bỏ viền cho AI message */
+  border-radius: 0 !important;
+}
+
+/* Message Box */
+.message-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left !important; /* Đảm bảo nội dung căn bên trái */
+}
+
+/* Markdown Support */
+.chat-message p {
+  margin: 4px 0;
+  text-align: left; /* Căn trái cho p bên trong */
+}
+.chat-message strong {
+  font-weight: 700;
+}
+.chat-message em {
+  font-style: italic;
+}
+.chat-message a {
+  color: var(--brand);
+  text-decoration: underline;
+}
+.chat-message blockquote {
+  border-left: 4px solid var(--primary);
+  background: #ecfdf5;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-style: italic;
+}
+
+/* Code Blocks */
+.chat-message pre {
+  background: #1e293b;
+  color: #f8fafc;
+  font-family: 'Fira Code', monospace;
+  border-radius: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 8px 0;
+  position: relative;
+}
+.chat-message code {
+  background: #e2e8f0;
+  color: #0f172a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+}
+
+/* Code Block Wrapper */
+.code-block-wrapper {
+  position: relative;
+}
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: #2d3748;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  font-size: 13px;
+  color: #e5e7eb;
+}
+.code-lang {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.code-block {
+  margin: 0;
+}
+
+/* Copy Button */
+.copy-button {
+  background: #4b5563;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.copy-button:hover {
+  background: #6b7280;
+}
+.copy-button.copied {
+  background: var(--primary);
+}
+
+/* Tables */
+.chat-message table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+}
+.chat-message th,
+.chat-message td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+}
+.chat-message th {
+  background: #e5e7eb;
+  font-weight: 600;
+}
+.chat-message td {
+  background: var(--bg);
+}
+
+/* Images in Chat */
+.chat-message img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+/* Feedback Bar */
+.feedback-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+.btn-icon {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.btn-icon:hover {
+  color: var(--primary);
+}
+
+/* Composer */
+.composer-wrap {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  background: var(--bg);
+  padding: 0;
+  margin-top: 0;
+  z-index: 10;
+}
+.composer.grok-style {
+  width: min(980px, 100%);
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  height: 56px; /* Cố định chiều cao */
+}
+.composer.grok-style textarea {
+  flex: 1;
+  height: 40px; /* Cố định chiều cao textarea */
+  resize: none; /* Bỏ phóng to/phóng nhỏ */
+  border: none;
+  outline: none;
+  font: 500 16px/1.5 Inter, system-ui;
+  color: var(--text);
+  background: transparent;
+  padding: 8px 12px;
+  box-shadow: none;
+}
+.composer.grok-style textarea:focus {
+  box-shadow: none;
+}
+.composer.grok-style .send-btn {
+  background: #000; /* Màu đen giống Grok */
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  margin-left: 8px;
+}
+.composer.grok-style .send-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+.composer.grok-style .send-btn:hover:not(:disabled) {
+  background: #333; /* Màu đậm hơn khi hover */
+}
+.composer.grok-style .send-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+.composer.grok-style .send-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: #fff;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #e5f2ea;
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--text);
+  margin: 8px 0;
+}
+.typing-indicator span {
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+  animation: typingDot 1.4s infinite ease-in-out both;
+}
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes typingDot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(1); }
+  40% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Disclaimer */
+.disclaimer {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 8px 0 0;
+  text-align: center;
+  width: min(980px, 100%);
+}
+.disclaimer a {
+  color: var(--brand);
+}
+
+/* Credit Warning */
+.credit-warning {
+  text-align: center;
+  color: #b91c1c;
+  background: #fef2f2;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 8px 0 0;
+  font-size: 14px;
+  width: min(980px, 100%);
+}
+.credit-warning a {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+/* Error Message */
+.error-message {
+  margin: 10px 0;
+  padding: 10px;
+  background: #ffebee;
+  border-radius: 8px;
+  color: #b91c1c;
+  text-align: center;
+  font-size: 14px;
+}
+.error-message a {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+/* Scrollbar */
+.chat-message::-webkit-scrollbar,
+.chat-message pre::-webkit-scrollbar,
+.chat-message table::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.chat-message::-webkit-scrollbar-thumb,
+.chat-message pre::-webkit-scrollbar-thumb,
+.chat-message table::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+}
+
+/* KaTeX Safety */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.katex-display > .katex {
+  white-space: normal;
+}
+.katex {
+  font-size: 1.02em;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .chat-container {
+    width: min(96vw, 980px);
+  }
+}
+
+@media (max-width: 920px) {
+  .chat-message {
+    max-width: 100%;
+  }
+  .chat-message.user,
+  .chat-message.ai {
+    max-width: 95%;
+  }
+  .composer-wrap {
+    width: 100%;
+    padding: 0 8px;
+  }
+  .composer.grok-style {
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-container {
+    padding: 0 8px;
+    margin-bottom: 0;
+  }
+  .composer.grok-style {
+    padding: 6px 10px;
+    border-radius: 14px;
+  }
+  .composer.grok-style textarea {
+    height: 36px;
+    font-size: 15px;
+    padding: 6px 10px;
+  }
+  .composer.grok-style .send-btn {
+    width: 32px;
+    height: 32px;
+  }
+  .chat-message {
+    padding: 10px 12px;
+    font-size: 15px;
+  }
+  .chat-message pre {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-message {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+  .composer.grok-style textarea {
+    height: 32px;
+    font-size: 14px;
+  }
+  .composer.grok-style .send-btn {
+    width: 28px;
+    height: 28px;
+  }
+  .feedback-bar {
+    gap: 6px;
+    justify-content: flex-start;
+  }
+  .btn-icon {
+    font-size: 14px;
+  }
+  .copy-button {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
