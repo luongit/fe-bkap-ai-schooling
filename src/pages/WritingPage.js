@@ -4,11 +4,14 @@ import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeKatex from 'rehype-katex';
+import { toast } from 'react-toastify';
+import { useParams, useNavigate } from 'react-router-dom';
+import { FiCopy, FiVolume2 } from 'react-icons/fi';
+import { BsHandThumbsUp, BsHandThumbsDown } from 'react-icons/bs';
+  import { getLangIcon, extractText, speakText } from '../services/handle/Function';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
-import { FiSend } from 'react-icons/fi';
-import { useParams } from 'react-router-dom';
-import { getLangIcon, extractText, speakText } from '../services/handle/Function';
+import 'react-toastify/dist/ReactToastify.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '';
 
@@ -21,12 +24,13 @@ export default function WritingPage() {
       return [];
     }
   });
-  const [outlines, setOutlines] = useState([]); // State mới để lưu dàn ý
-  const [selectedOutline, setSelectedOutline] = useState(''); // State để lưu dàn ý được chọn
+  const [outlines, setOutlines] = useState([]);
+  const [selectedOutline, setSelectedOutline] = useState('');
   const { sessionId: urlSessionId } = useParams();
   const [sessionId, setSessionId] = useState(() => sessionStorage.getItem('writingSessionId') || null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [activeButton, setActiveButton] = useState(null);
   const [remainingCredit, setRemainingCredit] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [tone, setTone] = useState('Trang trọng');
@@ -47,23 +51,19 @@ export default function WritingPage() {
   const assistantMessageRef = useRef({ role: 'assistant', content: '' });
   const controllerRef = useRef(null);
   const listEndRef = useRef(null);
-
-  // Kiểm tra xem có phản hồi từ AI chưa
+  const navigate = useNavigate();
   const hasAssistantResponse = chatHistory.some(msg => msg.role === 'assistant');
 
-  // Persist history
   useEffect(() => {
     sessionStorage.setItem('writingHistory', JSON.stringify(chatHistory));
   }, [chatHistory]);
 
-  // Auto scroll
   useEffect(() => {
     if (listEndRef.current) {
       listEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [chatHistory, loading]);
 
-  // Check login
   const token = localStorage.getItem('token');
   useEffect(() => {
     if (!token) {
@@ -71,7 +71,6 @@ export default function WritingPage() {
     }
   }, [token]);
 
-  // Fetch initial credit
   useEffect(() => {
     const fetchInitialCredit = async () => {
       if (!token) return;
@@ -92,7 +91,6 @@ export default function WritingPage() {
     fetchInitialCredit();
   }, [token]);
 
-  // Load session
   const loadSession = useCallback(async (sid) => {
     if (!token) return;
     try {
@@ -121,13 +119,12 @@ export default function WritingPage() {
     }
   }, [urlSessionId, loadSession]);
 
-  // Handle new writing session
   useEffect(() => {
     const handleNewWriting = () => {
       sessionStorage.removeItem('writingHistory');
       sessionStorage.removeItem('writingSessionId');
       setChatHistory([]);
-      setOutlines([]); // Xóa dàn ý khi bắt đầu session mới
+      setOutlines([]);
       setSelectedOutline('');
       setSessionId(null);
       setInput('');
@@ -136,7 +133,6 @@ export default function WritingPage() {
     return () => window.removeEventListener('newWriting', handleNewWriting);
   }, []);
 
-  // Handle category click
   const handleCategoryClick = (cat) => {
     let prompt = "";
     switch (cat.title) {
@@ -170,21 +166,91 @@ export default function WritingPage() {
     setInput(prompt);
   };
 
-  // Handle copy
   const handleCopy = useCallback((text) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
+    try {
+      navigator.clipboard.writeText(text);
+      toast.success('Đã sao chép vào clipboard!', {
+        toastId: 'copyMessage',
+        position: 'top-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: 'colored',
+      });
+      setCopied(true);
+      setActiveButton('copy');
+      setTimeout(() => {
+        setCopied(false);
+        setActiveButton(null);
+      }, 2000);
+    } catch (err) {
+      console.error('Copy error:', err);
+      toast.error('Không sao chép được. Vui lòng thử lại!', {
+        toastId: 'copyError',
+        position: 'top-right',
+        autoClose: 2000,
+      });
+    }
   }, []);
 
-  // Handle clear
+  const handleFeedback = useCallback((messageId, feedbackType) => {
+    if (!token) {
+      setErrorMessage('Vui lòng đăng nhập để gửi phản hồi.');
+      toast.error('Vui lòng đăng nhập để gửi phản hồi.', {
+        toastId: 'feedbackLoginError',
+        position: 'top-right',
+        autoClose: 2000,
+      });
+      return;
+    }
+    setActiveButton(feedbackType);
+    toast.success('Cảm ơn phản hồi của bạn!', {
+      toastId: `feedback_${feedbackType}_${messageId}`,
+      position: 'top-right',
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: 'colored',
+    });
+    setTimeout(() => setActiveButton(null), 200);
+  }, [token]);
+
+  const handleSpeak = useCallback((text) => {
+    try {
+      speakText(text);
+      toast.info('Đang đọc nội dung...', {
+        toastId: 'speakMessage',
+        position: 'top-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: 'colored',
+      });
+      setActiveButton('speak');
+      setTimeout(() => setActiveButton(null), 200);
+    } catch (err) {
+      console.error('Speak error:', err);
+      toast.error('Không đọc được nội dung. Vui lòng thử lại!', {
+        toastId: 'speakError',
+        position: 'top-right',
+        autoClose: 2000,
+      });
+    }
+  }, []);
+
   const handleClear = useCallback(async () => {
     if (!window.confirm('Bạn có chắc muốn xóa toàn bộ cuộc trò chuyện này?')) return;
     const sid = sessionStorage.getItem('writingSessionId');
     if (!sid || !token) {
       sessionStorage.removeItem('writingHistory');
       setChatHistory([]);
-      setOutlines([]); // Xóa dàn ý khi xóa session
+      setOutlines([]);
       setSelectedOutline('');
       setSessionId(null);
       return;
@@ -208,7 +274,6 @@ export default function WritingPage() {
     }
   }, [token]);
 
-  // Handle submit
   const handleSubmit = useCallback(async () => {
     const question = input.trim();
     if (!question || loading || remainingCredit === 0) return;
@@ -285,8 +350,8 @@ export default function WritingPage() {
           }
           if (json.type === 'done') {
             if (currentOutline) {
-              setOutlines((prev) => [...prev, currentOutline]); // Lưu dàn ý
-              setSelectedOutline(currentOutline); // Chọn dàn ý mới nhất
+              setOutlines((prev) => [...prev, currentOutline]);
+              setSelectedOutline(currentOutline);
             }
             const finalHistory = [
               ...updatedHistory.slice(0, -1),
@@ -301,7 +366,7 @@ export default function WritingPage() {
           }
           if (json.type === 'chunk') {
             if (json.content.startsWith('## Dàn ý')) {
-              currentOutline += json.content; // Thu thập dàn ý
+              currentOutline += json.content;
             } else {
               assistantMessageRef.current.content += json.content ?? '';
             }
@@ -322,7 +387,6 @@ export default function WritingPage() {
     }
   }, [chatHistory, input, loading, sessionId, token, tone, language, length, remainingCredit]);
 
-  // Markdown renderer
   const Markdown = useMemo(() => {
     return function MD({ children }) {
       const text = String(children ?? '');
@@ -339,8 +403,8 @@ export default function WritingPage() {
                 <div className="code-block-wrapper">
                   <div className="code-header">
                     <span className="code-lang">{getLangIcon(lang)}</span>
-                    <button className="copy-button" onClick={() => handleCopy(extractText(codeChildren))}>
-                      {copied ? 'Đã sao chép' : 'Sao chép'}
+                    <button className={`copy-button ${copied ? 'copied' : ''}`} onClick={() => handleCopy(extractText(codeChildren))}>
+                      {copied ? 'Đã sao chép!' : 'Sao chép'}
                     </button>
                   </div>
                   <pre className="code-block">
@@ -358,183 +422,193 @@ export default function WritingPage() {
   }, [copied, handleCopy]);
 
   return (
-  <main className="main">
-    <section className="hero">
-      {!token ? (
-        <div className="not-logged">
-          <div className="not-logged-box">
-            <p className="not-logged-text">
-             Bạn cần đăng nhập để bắt đầu trò chuyện
-            </p>
-            <a href="/auth/login" className="login-btn">
-              Đăng nhập
-            </a>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Toàn bộ giao diện WritingPage hiện tại */}
-          <div className="flex flex-col items-center justify-center w-full min-h-screen bg-gray-50 px-4">
-      {/* Header */}
-      <div className="flex flex-col items-center text-center mb-6">
-        <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
-          <span className="text-3xl">✏️</span>
-        </div>
-        <h1 className="text-2xl font-semibold">AI Viết văn</h1>
-        <p className="text-gray-500 text-sm">
-          AI viết văn theo yêu cầu, hỗ trợ viết content và sáng tạo nội dung miễn phí
-        </p>
-      </div>
-
-      {/* Categories - Chỉ hiển thị khi chưa có phản hồi từ AI */}
-      {!hasAssistantResponse && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-3xl mb-6">
-          {categories.map((c, idx) => (
-            <div
-              key={idx}
-              onClick={() => handleCategoryClick(c)}
-              className={`p-3 rounded-xl cursor-pointer border hover:shadow-md transition ${c.color}`}
-            >
-              <h3 className="font-medium text-sm">{c.title}</h3>
-              <p className="text-xs text-gray-500">{c.desc}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Chat History */}
-      {chatHistory.map((msg, i) => (
-        <div key={i} className={`chat-message ${msg.role}`}>
-          <div className="message-box">
-            {msg.role === 'user' ? (
-              <div className="user-message">
-                <Markdown>{msg.content}</Markdown>
-              </div>
-            ) : (
-              <>
-                <Markdown>{msg.content}</Markdown>
-                <div className="feedback-bar">
-                  <button className="btn-icon" onClick={() => handleCopy(msg.content)} title="Sao chép">
-                    📋
-                  </button>
-                  <button className="btn-icon" onClick={() => alert('Bạn thích phản hồi này!')} title="Thích">
-                    👍
-                  </button>
-                  <button className="btn-icon" onClick={() => alert('Bạn không thích phản hồi này!')} title="Không thích">
-                    👎
-                  </button>
-                  <button className="btn-icon" onClick={() => speakText(msg.content)} title="Đọc to">
-                    🔊
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      ))}
-      {loading && (
-        <div className="chat-message">
-          <span className="blinker">█</span>
-        </div>
-      )}
-      <div ref={listEndRef} />
-
-      {/* Input + Dropdowns */}
-      <div className="w-full max-w-3xl border rounded-2xl shadow-sm bg-white p-4 flex flex-col gap-3">
-        {!hasAssistantResponse && (
-          <div className="flex items-center gap-3 flex-wrap">
-            <select
-              className="bg-transparent outline-none text-sm text-gray-700 border rounded-lg px-2 py-1"
-              value={tone}
-              onChange={(e) => setTone(e.target.value)}
-            >
-              <option>Trang trọng</option>
-              <option>Thân mật</option>
-            </select>
-            <select
-              className="bg-transparent outline-none text-sm text-gray-700 border rounded-lg px-2 py-1"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-            >
-              <option>Tiếng Việt</option>
-              <option>Tiếng Anh</option>
-            </select>
-            <select
-              className="bg-transparent outline-none text-sm text-gray-700 border rounded-lg px-2 py-1"
-              value={length}
-              onChange={(e) => setLength(e.target.value)}
-            >
-              <option>Mặc định</option>
-              <option>Ngắn</option>
-              <option>Vừa</option>
-              <option>Dài</option>
-            </select>
-            {outlines.length > 0 && (
-              <select
-                className="bg-transparent outline-none text-sm text-gray-700 border rounded-lg px-2 py-1"
-                value={selectedOutline}
-                onChange={(e) => setSelectedOutline(e.target.value)}
-              >
-                <option value="">Chọn dàn ý</option>
-                {outlines.map((outline, index) => (
-                  <option key={index} value={outline}>
-                    Dàn ý {index + 1}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-        )}
-        {selectedOutline && (
-          <div className="outline-preview bg-gray-50 p-3 rounded-lg">
-            <Markdown>{selectedOutline}</Markdown>
-          </div>
-        )}
-        <div className="composer-wrap">
-          <div className="composer" role="group" aria-label="Hộp nhập câu hỏi">
-            <textarea
-              placeholder="Nhập câu hỏi bất kì..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-            />
-            <div className="right">
-              <button
-                className="circle-btn send"
-                title="Gửi"
-                onClick={handleSubmit}
-                disabled={loading || remainingCredit === 0}
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M5 12l14-7-7 14-2-5-5-2z"
-                    stroke="#16a34a"
-                    strokeWidth="2"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+    <main className="main">
+      <section className="hero">
+        {!token ? (
+          <div className="not-logged">
+            <div className="not-logged-box">
+              <p className="not-logged-text">
+                Bạn cần đăng nhập để bắt đầu trò chuyện
+              </p>
+              <a href="/auth/login" className="login-btn">
+                Đăng nhập
+              </a>
             </div>
           </div>
-        </div>
+        ) : (
+          <>
+              <div className="flex flex-col items-center text-center mb-6">
+      <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
+        <span className="text-3xl">✏️</span>
       </div>
-
-      {remainingCredit === 0 && (
-        <div className="credit-warning">
-          <p>
-            Bạn đã hết credit, vui lòng <a href="/purchase-credits">mua thêm credit</a> để tiếp tục sử dụng.
-          </p>
-        </div>
-      )}
-      {!!chatHistory.length && (
-        <button className="circle-btn danger" onClick={handleClear} title="Xóa lịch sử">
-          🗑️
-        </button>
-      )}
+      <h1 className="text-2xl font-semibold text-gray-900">AI Viết Văn</h1>
+      <p className="text-gray-500 text-sm mt-2 max-w-md">
+        AI hỗ trợ viết văn theo yêu cầu, giúp bạn sáng tạo nội dung chất lượng và dễ dàng.
+      </p>
     </div>
-        </>
-      )}
-    </section>
-  </main>
-);
 
+            {errorMessage && (
+              <div className="error-message">
+                <p>{errorMessage}</p>
+                {errorMessage.includes('hết credit') && (
+                  <p>
+                    <a href="/purchase-credits">Mua thêm credit</a>
+                  </p>
+                )}
+              </div>
+            )}
+            <div className="chat-container">
+              {!hasAssistantResponse && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-3xl mb-6">
+                  {categories.map((c, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleCategoryClick(c)}
+                      className={`p-3 rounded-xl cursor-pointer border hover:shadow-md transition ${c.color}`}
+                    >
+                      <h3 className="font-medium text-sm">{c.title}</h3>
+                      <p className="text-xs text-gray-500">{c.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {chatHistory.map((msg, i) => (
+                <div key={i} className={`chat-message ${msg.role === 'user' ? 'user' : 'ai'}`}>
+                  <div className="message-box">
+                    <Markdown>{msg.content}</Markdown>
+                    {msg.role === 'assistant' && (
+                      <div className="feedback-bar">
+                        <button
+                          className={`btn-icon ${activeButton === 'copy' ? 'active' : ''}`}
+                          onClick={() => handleCopy(msg.content)}
+                          title="Sao chép"
+                        >
+                          <FiCopy className="h-5 w-5" />
+                        </button>
+                        <button
+                          className={`btn-icon ${activeButton === 'like' ? 'active' : ''}`}
+                          onClick={() => handleFeedback(i, 'like')}
+                          title="Thích"
+                        >
+                          <BsHandThumbsUp className={activeButton === 'like' ? 'h-6 w-6' : 'h-5 w-5'} />
+                        </button>
+                        <button
+                          className={`btn-icon ${activeButton === 'dislike' ? 'active' : ''}`}
+                          onClick={() => handleFeedback(i, 'dislike')}
+                          title="Không thích"
+                        >
+                          <BsHandThumbsDown className={activeButton === 'dislike' ? 'h-6 w-6' : 'h-5 w-5'} />
+                        </button>
+                        <button
+                          className={`btn-icon ${activeButton === 'speak' ? 'active' : ''}`}
+                          onClick={() => handleSpeak(msg.content)}
+                          title="Đọc to"
+                        >
+                          <FiVolume2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {loading && (
+                <div className="typing-indicator">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              )}
+              <div ref={listEndRef} />
+              {!hasAssistantResponse && (
+                <div className="w-full max-w-3xl mb-6">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <select
+                      className="bg-transparent outline-none text-sm text-gray-700 border rounded-lg px-2 py-1"
+                      value={tone}
+                      onChange={(e) => setTone(e.target.value)}
+                    >
+                      <option>Trang trọng</option>
+                      <option>Thân mật</option>
+                    </select>
+                    <select
+                      className="bg-transparent outline-none text-sm text-gray-700 border rounded-lg px-2 py-1"
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                    >
+                      <option>Tiếng Việt</option>
+                      <option>Tiếng Anh</option>
+                    </select>
+                    <select
+                      className="bg-transparent outline-none text-sm text-gray-700 border rounded-lg px-2 py-1"
+                      value={length}
+                      onChange={(e) => setLength(e.target.value)}
+                    >
+                      <option>Mặc định</option>
+                      <option>Ngắn</option>
+                      <option>Vừa</option>
+                      <option>Dài</option>
+                    </select>
+                    {outlines.length > 0 && (
+                      <select
+                        className="bg-transparent outline-none text-sm text-gray-700 border rounded-lg px-2 py-1"
+                        value={selectedOutline}
+                        onChange={(e) => setSelectedOutline(e.target.value)}
+                      >
+                        <option value="">Chọn dàn ý</option>
+                        {outlines.map((outline, index) => (
+                          <option key={index} value={outline}>
+                            Dàn ý {index + 1}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                  {selectedOutline && (
+                    <div className="outline-preview bg-gray-50 p-3 rounded-lg mt-3">
+                      <Markdown>{selectedOutline}</Markdown>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="composer-wrap">
+              <div className="composer grok-style" role="group" aria-label="Hộp nhập câu hỏi">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
+                />
+                <button
+                  className="send-btn"
+                  title="Gửi"
+                  onClick={handleSubmit}
+                  disabled={loading || remainingCredit === 0}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 19V5m7 7l-7-7-7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </div>
+              <p className="disclaimer">
+                Khi đặt câu hỏi, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách quyền riêng tư</a>.
+              </p>
+              {remainingCredit === 0 && (
+                <div className="credit-warning">
+                  <p>
+                    Bạn đã hết credit, vui lòng <a href="/purchase-credits">mua thêm credit</a> để tiếp tục sử dụng.
+                  </p>
+                </div>
+              )}
+              
+            </div>
+          </>
+        )}
+      </section>
+    </main>
+  );
 }
