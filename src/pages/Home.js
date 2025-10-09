@@ -14,10 +14,11 @@ import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
 import 'react-toastify/dist/ReactToastify.css';
 import '../style/chat.css';
-
+import '../style/mobile.css'
 const API_URL = process.env.REACT_APP_API_URL || '';
 
 function Home() {
+
   const [input, setInput] = useState('');
   const [chatHistory, setChatHistory] = useState(() => {
     try {
@@ -34,7 +35,6 @@ function Home() {
   const [remainingCredit, setRemainingCredit] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(false);
-
   const navigate = useNavigate();
   const started = chatHistory.length > 0;
   const assistantMessageRef = useRef({ role: 'assistant', content: '' });
@@ -324,7 +324,7 @@ function Home() {
       const decoder = new TextDecoder('utf-8');
       assistantMessageRef.current = { role: 'assistant', content: '' };
       let bufferTail = '';
-
+      let firstChunkReceived = false;
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -351,6 +351,7 @@ function Home() {
             setLoading(false);
             break;
           }
+          
           if (json.type === 'done') {
             if (scheduleRef.current.timer) {
               clearTimeout(scheduleRef.current.timer);
@@ -367,12 +368,20 @@ function Home() {
             if (json.remainingCredit !== undefined) {
               setRemainingCredit(json.remainingCredit);
             }
+          
             break;
           }
           if (json.type === 'chunk') {
-            const safeContent = json.content ?? '';
-            pushAssistantChunk(updatedHistory, assistantMessageRef, safeContent);
-          }
+  const safeContent = json.content ?? '';
+
+  // ✅ Tắt chấm ngay khi có chunk đầu tiên
+  if (!firstChunkReceived) {
+    firstChunkReceived = true;
+    setLoading(false);
+  }
+
+  pushAssistantChunk(updatedHistory, assistantMessageRef, safeContent);
+}
         }
         window.dispatchEvent(new Event('sessionUpdated'));
       }
@@ -426,124 +435,132 @@ function Home() {
 
   return (
     <main className="main">
-      <section className="hero">
-        {!token ? (
-          <div className="not-logged">
-            <div className="not-logged-box">
-              <p className="not-logged-text">Bạn cần đăng nhập để bắt đầu trò chuyện</p>
-              <a href="/auth/login" className="login-btn">
-                Đăng nhập
-              </a>
+  {/* vùng hero hiển thị intro / lỗi */}
+  <section className="hero">
+    {!token ? (
+      <div className="not-logged">
+        <div className="not-logged-box">
+          <p className="not-logged-text">Bạn cần đăng nhập để bắt đầu trò chuyện</p>
+          <a href="/auth/login" className="login-btn">
+            Đăng nhập
+          </a>
+        </div>
+      </div>
+    ) : (
+      <>
+        {!started && <TopIntro />}
+        {errorMessage && (
+          <div className="error-message">
+            <p>{errorMessage}</p>
+            {errorMessage.includes('hết credit') && (
+              <p>
+                <a href="/purchase-credits">Mua thêm credit</a>
+              </p>
+            )}
+          </div>
+        )}
+      </>
+    )}
+  </section>
+
+  {/* ✅ vùng cuộn chat */}
+<div className={`chat-scroll-wrapper ${chatHistory.length > 0 ? 'has-messages' : ''}`}>
+    <div className="chat-container">
+      <div className="chat-inner">
+        {chatHistory.map((msg, i) => (
+          <div key={i} className={`chat-message ${msg.role}`}>
+            <div className="message-box">
+              <Markdown>{msg.content}</Markdown>
+              {msg.role === 'assistant' && (
+                <div className="feedback-bar">
+                  <button className="btn-icon" onClick={() => handleCopy(msg.content)} title="Sao chép">
+                    <FiCopy className="h-5 w-5" />
+                  </button>
+                  <button className="btn-icon" onClick={() => handleFeedback(i, 'like')} title="Thích">
+                    <BsHandThumbsUp className="h-5 w-5" />
+                  </button>
+                  <button className="btn-icon" onClick={() => handleFeedback(i, 'dislike')} title="Không thích">
+                    <BsHandThumbsDown className="h-5 w-5" />
+                  </button>
+                  <button className="btn-icon" onClick={() => handleSpeak(msg.content)} title="Đọc to">
+                    <FiVolume2 className="h-5 w-5" />
+                  </button>
+                  <button className="btn-icon" onClick={handleGoal} title="Tạo mục tiêu">
+                    <FiCheck className="h-5 w-5" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        ) : (
-          <>
-            {!started && <TopIntro />}
-            {errorMessage && (
-              <div className="error-message">
-                <p>{errorMessage}</p>
-                {errorMessage.includes('hết credit') && (
-                  <p>
-                    <a href="/purchase-credits">Mua thêm credit</a>
-                  </p>
-                )}
-              </div>
-            )}
-            <div className="chat-container">
-              {chatHistory.map((msg, i) => (
-                <div key={i} className={`chat-message ${msg.role}`}>
-                  <div className="message-box">
-                    <Markdown>{msg.content}</Markdown>
-                    {msg.role === 'assistant' && (
-                      <div className="feedback-bar">
-                        <button
-                          className={`btn-icon ${activeButton === 'copy' ? 'active' : ''}`}
-                          onClick={() => handleCopy(msg.content)}
-                          title="Sao chép"
-                        >
-                          <FiCopy className="h-5 w-5" />
-                        </button>
-                        <button
-                          className={`btn-icon ${activeButton === 'like' ? 'active' : ''}`}
-                          onClick={() => handleFeedback(i, 'like')}
-                          title="Thích"
-                        >
-                          <BsHandThumbsUp className={activeButton === 'like' ? 'h-6 w-6' : 'h-5 w-5'} />
-                        </button>
-                        <button
-                          className={`btn-icon ${activeButton === 'dislike' ? 'active' : ''}`}
-                          onClick={() => handleFeedback(i, 'dislike')}
-                          title="Không thích"
-                        >
-                          <BsHandThumbsDown className={activeButton === 'dislike' ? 'h-6 w-6' : 'h-5 w-5'} />
-                        </button>
-                        <button
-                          className={`btn-icon ${activeButton === 'speak' ? 'active' : ''}`}
-                          onClick={() => handleSpeak(msg.content)}
-                          title="Đọc to"
-                        >
-                          <FiVolume2 className="h-5 w-5" />
-                        </button>
-                        <button
-                          className={`btn-icon ${activeButton === 'goal' ? 'active' : ''}`}
-                          onClick={handleGoal}
-                          title="Tạo mục tiêu"
-                        >
-                          <FiCheck className="h-5 w-5" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {loading && (
-                <div className="typing-indicator">
-                  <span />
-                  <span />
-                  <span />
-                </div>
-              )}
-              <div ref={listEndRef} />
-            </div>
-            <div className="composer-wrap">
-              <div className="composer grok-style" role="group" aria-label="Hộp nhập câu hỏi">
-                <textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSubmit();
-                    }
-                  }}
-                />
-                <button
-                  className="send-btn"
-                  title="Gửi"
-                  onClick={handleSubmit}
-                  disabled={loading || remainingCredit === 0}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 19V5m7 7l-7-7-7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              </div>
-              <p className="disclaimer">
-                Khi đặt câu hỏi, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách quyền riêng tư</a>.
-              </p>
-              {remainingCredit === 0 && (
-                <div className="credit-warning">
-                  <p>
-                    Bạn đã hết credit, vui lòng <a href="/purchase-credits">mua thêm credit</a> để tiếp tục sử dụng.
-                  </p>
-                </div>
-              )}
-            </div>
-          </>
+        ))}
+
+        {loading && (
+  <div className="typing-indicator">               
+   <span></span>
+          </div>
         )}
-      </section>
-    </main>
-  );
+        <div ref={listEndRef} />
+      </div>
+    </div>
+  </div>
+
+  {/* ✅ thanh nhập tin nhắn cố định */}
+ <div
+  className="input-area"
+  style={{
+    transform: chatHistory.length === 0 ? "translateY(-25vh)" : "translateY(0)",
+    transition: "transform 0.3s ease",
+    position: "relative",
+  }}
+>
+  <div className="composer grok-style" role="group" aria-label="Hộp nhập câu hỏi">
+    <textarea
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      placeholder="Tôi có thể giúp gì cho bạn?"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          handleSubmit();
+        }
+      }}
+    />
+    <button
+      className="send-btn"
+      title="Gửi"
+      onClick={handleSubmit}
+      disabled={loading || remainingCredit === 0}
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M12 19V5m7 7l-7-7-7 7"
+          stroke="#fff"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <p className="disclaimer">
+    Khi đặt câu hỏi, bạn đồng ý với{" "}
+    <a href="#">Điều khoản</a> và{" "}
+    <a href="#">Chính sách quyền riêng tư</a>.
+  </p>
+
+  {remainingCredit === 0 && (
+    <div className="credit-warning">
+      <p>
+        Bạn đã hết credit, vui lòng{" "}
+        <a href="/purchase-credits">mua thêm credit</a> để tiếp tục sử dụng.
+      </p>
+    </div>
+  )}
+</div>
+</main>
+);
 }
+
 
 export default Home;
