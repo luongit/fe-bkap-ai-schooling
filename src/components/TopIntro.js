@@ -1,34 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './css/TopIntro.css';
 
 export default function TopIntro() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const prompts = [
-    { text: 'Hỏi về toán học: Giải phương trình bậc hai', icon: '🧮' },
-    { text: 'Viết bài luận về biến đổi khí hậu', icon: '📝' },
-    { text: 'Khám phá vũ trụ: Hố đen là gì?', icon: '🌌' },
-    { text: 'Lập kế hoạch học tập hiệu quả', icon: '📅' },
-  ];
-
-  // Auto-rotate carousel every 4 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % prompts.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [prompts.length]);
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + prompts.length) % prompts.length);
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % prompts.length);
-  };
-
   return (
     <div className="topintro">
       <div className="robot-animation">
+        {/* Biểu tượng robot */}
         <svg
           width="80"
           height="80"
@@ -57,26 +34,17 @@ export default function TopIntro() {
           <span className="particle particle-3"></span>
         </div>
       </div>
+
       <div className="header-content">
         <h1 className="hello">
-          <span className="grad">Khám phá AI Spark</span>
+          <span className="grad">Khám phá BKAP AI</span>
         </h1>
         <p className="subtitle">
           Người trợ lý thông minh giúp bạn học tập, sáng tạo và khám phá thế giới dễ dàng.
         </p>
       </div>
-      <div className="carousel">
-        <button className="nav-btn" aria-label="Trước" onClick={handlePrev}>
-          ←
-        </button>
-        <div className="pill" key={currentIndex}>
-          <span className="thumb">{prompts[currentIndex].icon}</span>
-          <span>{prompts[currentIndex].text}</span>
-        </div>
-        <button className="nav-btn" aria-label="Sau" onClick={handleNext}>
-          →
-        </button>
-      </div>
+
+      {/* Giữ lại phần explore */}
       <div className="explore">
         <a className="tag" href="#ask-question">
           <span className="tag-icon ask-icon">❓</span>

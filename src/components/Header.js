@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FiMenu } from "react-icons/fi";
 import "./css/Header.css";
 import { getProfile } from "../services/profileService";
 import { toast } from "react-toastify";
@@ -73,9 +71,6 @@ function Header({ toggleSidebar }) {
 
   return (
     <header className="header">
-      <button className="burger" onClick={toggleSidebar}>
-        <FiMenu className="sidebar-icon" />
-      </button>
       <Link to="/" className="brand">
         BACHKHOA APTECH
       </Link>
