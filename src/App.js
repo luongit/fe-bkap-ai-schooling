@@ -1,25 +1,62 @@
-import { Route, Routes, Link } from "react-router-dom"; // Xóa BrowserRouter khỏi import
+import { useState,useEffect } from "react";
+import { Route, Routes, Link } from "react-router-dom";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
+import RegisterPage from "./pages/RegisterPage"
 import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage"
 import ProfilePage from "./pages/ProfilePage";
 import GoalsPage from "./pages/GoalsPage";
 import ProfileEditPage from "./pages/ProfileEditPage";
-import { ToastContainer } from "react-toastify";
 import WritingPage from "./pages/WritingPage";
+import ImageGeneration from "./pages/ImageGeneration";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./style/mobile.css"
+import "./style/mobile.css";
+import "./components/css/Sidebar.css";
+
 function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+useEffect(() => {
+    // khi sidebar mở thì khóa cuộn body
+    if (isSidebarOpen) {
+      document.body.classList.add("sidebar-open");
+    } else {
+      document.body.classList.remove("sidebar-open");
+    }
+  }, [isSidebarOpen]);
   return (
     <>
-      <Sidebar />
-      <Header />
-      <main className="flex-grow min-h-screen z-1 relative">
-        {" "}
+      {/* Nút 2 gạch giống ChatGPT — ẩn khi sidebar mở */}
+      {!isSidebarOpen && (
+        <button className="burger" onClick={toggleSidebar}>
+          <span className="burger-icon">
+            <span className="line top"></span>
+            <span className="line bottom"></span>
+          </span>
+        </button>
+      )}
 
+   {isSidebarOpen && (
+  <div className="sidebar-overlay" onClick={toggleSidebar}></div>
+)}
+
+<Sidebar
+  className={isSidebarOpen ? "open" : ""}
+  isOpen={isSidebarOpen}
+  onToggleSidebar={toggleSidebar}
+/>
+  <Header />
+      <main
+        className={`main-content flex-grow min-h-screen z-1 relative ${
+          isSidebarOpen ? "sidebar-open" : ""
+        }`}
+      >
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
@@ -29,8 +66,7 @@ function App() {
           <Route path="/chat/:sessionId" element={<Home />} />
           <Route path="/students/:studentId/goals" element={<GoalsPage />} />
           <Route path="/writing" element={<WritingPage />} />
-
-          {/* Fallback 404 */}
+          <Route path="/generate-image" element={<ImageGeneration />} />
           <Route
             path="*"
             element={
@@ -51,6 +87,7 @@ function App() {
           />
         </Routes>
       </main>
+
       <Footer />
       <ToastContainer position="top-right" autoClose={3000} />
     </>

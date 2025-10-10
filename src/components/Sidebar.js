@@ -21,13 +21,15 @@ import {
   FiChevronLeft,
   FiMoreVertical,
   FiTrash2,
+  FiImage,
 } from "react-icons/fi";
 import "./css/Sidebar.css";
 import "../style/chat.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "";
 
-function Sidebar({ className }) {
+function Sidebar({ className, isOpen, onToggleSidebar }) {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -38,6 +40,7 @@ function Sidebar({ className }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const { sessionId } = useParams();
+  
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -109,6 +112,7 @@ function Sidebar({ className }) {
     sessionStorage.removeItem("sessionId");
     window.dispatchEvent(new Event("newChat"));
     navigate("/");
+
   };
 
   const deleteSession = async (sessionId) => {
@@ -136,6 +140,13 @@ function Sidebar({ className }) {
         window.dispatchEvent(new Event("sessionUpdated"));
         window.dispatchEvent(new Event("writingSessionUpdated"));
         setShowSessionMenu((prev) => ({ ...prev, [sessionId]: false }));
+        //đóng khi ở chế độ mobile
+        if (window.innerWidth <= 920 && typeof onToggleSidebar === "function") {
+          onToggleSidebar(); // Gọi hàm toggle sidebar từ parent
+        }
+        // ✅ Điều hướng về trang chủ
+        navigate("/");
+
       } else {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -180,7 +191,7 @@ function Sidebar({ className }) {
     sessionStorage.removeItem("writingSessionId");
     setIsLoggedIn(false);
     window.dispatchEvent(new Event("userLoggedOut"));
-    navigate("/");
+    window.location.href = "/";
     setShowMenu(false);
   };
 
@@ -193,34 +204,68 @@ function Sidebar({ className }) {
     );
   };
 
-  const renderNavItem = (Icon, text, onClick, active = false) => {
-    return (
-      <button
-        onClick={onClick}
-        className={`side-item w-full flex items-center gap-2 transition-all duration-200 ${
-          active ? "bg-gray-200 text-gray-800 font-semibold" : ""
-        } ${isCollapsed ? "justify-center" : "justify-start"}`}
-      >
-        <Icon className="sidebar-icon" />
-        {!isCollapsed && <span className="text-sm">{text}</span>}
-      </button>
-    );
-  };
+  const renderNavItem = (Icon, label, onClick) => (
+    <button
+      onClick={() => {
+        onClick();
+        onToggleSidebar(); // ✅ đóng sidebar sau khi click
+      }}
+      className={`side-item w-full flex items-center gap-2 ${isCollapsed ? "justify-center" : ""}`}
+    >
+      <Icon className="sidebar-icon" />
+      {!isCollapsed && <span className="text-sm">{label}</span>}
+    </button>
+  );
 
+  const startNewImageGeneration = () => {
+    sessionStorage.removeItem("imageHistory");
+    window.dispatchEvent(new Event("newImageGeneration"));
+    navigate("/generate-image");
+  };
   return (
     <aside
       className={`sidebar ${className} ${isCollapsed ? "collapsed" : ""}`}
     >
       <div className="side-head">
-        <Link to="/" className="logo">
-          AI
+        <Link to="/" className="logo robot-logo">
+          <svg
+            width="40"
+            height="40"
+            viewBox="0 0 80 80"
+            xmlns="http://www.w3.org/2000/svg"
+            className="robot-head-svg"
+          >
+            <defs>
+              <linearGradient id="robotGradient" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#a855f7" />
+                <stop offset="100%" stopColor="#7e22ce" />
+              </linearGradient>
+            </defs>
+
+            <circle cx="40" cy="40" r="28" fill="url(#robotGradient)" />
+
+            <circle cx="32" cy="36" r="5" fill="#fff" />
+            <circle cx="32" cy="36" r="2" fill="#7e22ce" />
+            <circle cx="48" cy="36" r="5" fill="#fff" />
+            <circle cx="48" cy="36" r="2" fill="#7e22ce" />
+
+            <rect x="30" y="50" width="20" height="5" rx="2.5" fill="#f5f3ff" opacity="0.9" />
+
+            <rect x="38" y="10" width="4" height="10" fill="#a855f7" rx="2" />
+            <circle cx="40" cy="8" r="3" fill="#ef4444" />
+          </svg>
         </Link>
+
+
+
         {!isCollapsed && (
           <div>
-            <div className="brand-name">AI Spark</div>
+            <div className="brand-name">BKAP AI</div>
             <div className="small-name">Học tập thông minh</div>
           </div>
+
         )}
+
       </div>
 
       <nav className="side-list">
@@ -233,19 +278,37 @@ function Sidebar({ className }) {
             sessionStorage.removeItem("writingHistory");
             sessionStorage.removeItem("writingSessionId");
             window.dispatchEvent(new Event("newWriting"));
+            onToggleSidebar()
+
           }}
           className={({ isActive }) =>
-            `side-item w-full flex items-center gap-2 transition-all duration-200 ${
-              isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
+            `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
             } ${isCollapsed ? "justify-center" : "justify-start"}`
           }
         >
           <FiEdit3 className="sidebar-icon" />
           {!isCollapsed && <span className="text-sm">Viết văn AI</span>}
         </NavLink>
+        <NavLink
+          to="/generate-image"
+          onClick={() => {
+            startNewImageGeneration(); // Gọi hàm reset và điều hướng
+            onToggleSidebar(); // Đóng sidebar
+          }}
+          className={({ isActive }) =>
+            `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
+            } ${isCollapsed ? "justify-center" : "justify-start"}`
+          }
+        >
+          <FiImage className="sidebar-icon" />
+          {!isCollapsed && <span className="text-sm">Tạo Ảnh AI</span>}
+        </NavLink>
+
+
         {renderNavItem(FiMessageCircle, "Trợ Lý Ảo", showComingSoon)}
         {renderNavItem(FiPlus, "Thêm công cụ", showComingSoon)}
         {renderNavItem(FiDownload, "Tải ứng dụng", showComingSoon)}
+
       </nav>
 
       {!isCollapsed && (
@@ -260,9 +323,8 @@ function Sidebar({ className }) {
               <span>Xem lịch sử</span>
             </div>
             <FiChevronDown
-              className={`sidebar-icon transition-transform ${
-                showHistory ? "rotate-180" : ""
-              }`}
+              className={`sidebar-icon transition-transform ${showHistory ? "rotate-180" : ""
+                }`}
             />
           </button>
           {showHistory && (
@@ -274,11 +336,11 @@ function Sidebar({ className }) {
                   <li key={s.sessionId} className="side-item relative">
                     <NavLink
                       to={`/chat/${s.sessionId}`}
+                      onClick={() => onToggleSidebar()}
                       className={({ isActive }) =>
-                        `flex items-center gap-2 flex-1 overflow-hidden px-2 py-1 rounded-md transition ${
-                          isActive
-                            ? "bg-gray-200 text-gray-800 font-semibold"
-                            : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
+                        `flex items-center gap-2 flex-1 overflow-hidden px-2 py-1 rounded-md transition ${isActive
+                          ? "bg-gray-200 text-gray-800 font-semibold"
+                          : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
                         }`
                       }
                     >
@@ -290,6 +352,7 @@ function Sidebar({ className }) {
                           ? new Date(s.updatedAt).toLocaleDateString("vi-VN")
                           : ""}
                       </span>
+
                     </NavLink>
                     <button
                       onClick={() =>
@@ -350,16 +413,14 @@ function Sidebar({ className }) {
             <div className="account-row flex items-center gap-2 w-full">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className={`side-item flex items-center gap-2 transition-all duration-200 ${
-                  isCollapsed ? "justify-center" : "justify-start"
-                } relative`}
+                className={`side-item flex items-center gap-2 transition-all duration-200 ${isCollapsed ? "justify-center" : "justify-start"
+                  } relative`}
               >
                 <div className="avatar">
                   <FiUser className="sidebar-icon" />
                 </div>
                 {!isCollapsed && (
                   <span className="text-sm truncate max-w-[120px]">
-                    {username || "User"}
                   </span>
                 )}
               </button>
