@@ -14,11 +14,11 @@ import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
 import 'react-toastify/dist/ReactToastify.css';
 import '../style/chat.css';
-import '../style/mobile.css'
+import '../style/mobile.css';
+
 const API_URL = process.env.REACT_APP_API_URL || '';
 
 function Home() {
-
   const [input, setInput] = useState('');
   const [chatHistory, setChatHistory] = useState(() => {
     try {
@@ -31,7 +31,7 @@ function Home() {
   const [sessionId, setSessionId] = useState(() => sessionStorage.getItem('sessionId') || null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [activeButton, setActiveButton] = useState(null); // Theo dõi nút đang nhấn
+  const [activeButton, setActiveButton] = useState(null);
   const [remainingCredit, setRemainingCredit] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -40,23 +40,56 @@ function Home() {
   const assistantMessageRef = useRef({ role: 'assistant', content: '' });
   const controllerRef = useRef(null);
   const listEndRef = useRef(null);
+  const [token, setToken] = useState(localStorage.getItem('token'));
 
   useEffect(() => {
-    sessionStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-  }, [chatHistory]);
+    const checkToken = () => {
+      const currentToken = localStorage.getItem('token');
+      if (currentToken !== token) {
+        setToken(currentToken);
+      }
+    };
+
+    const handleStorageChange = (event) => {
+      if (event.key === 'token') {
+        setToken(localStorage.getItem('token'));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    const intervalId = setInterval(checkToken, 500);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(intervalId);
+    };
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) {
+      sessionStorage.removeItem('chatHistory');
+      sessionStorage.removeItem('sessionId');
+      setChatHistory([]);
+      setSessionId(null);
+      setRemainingCredit(null);
+      setShowLoginModal(true);
+      window.dispatchEvent(new Event('userLoggedOut'));
+    } else {
+      setShowLoginModal(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      sessionStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+    }
+  }, [chatHistory, token]);
 
   useEffect(() => {
     if (listEndRef.current) {
       listEndRef.current.scrollIntoView({ behavior: 'instant', block: 'end' });
     }
   }, [chatHistory, loading]);
-
-  const token = localStorage.getItem('token');
-  useEffect(() => {
-    if (!token) {
-      setShowLoginModal(true);
-    }
-  }, [token]);
 
   useEffect(() => {
     const fetchInitialCredit = async () => {
@@ -111,10 +144,10 @@ function Home() {
   );
 
   useEffect(() => {
-    if (urlSessionId) {
+    if (urlSessionId && token) {
       loadSession(urlSessionId);
     }
-  }, [urlSessionId, loadSession]);
+  }, [urlSessionId, loadSession, token]);
 
   useEffect(() => {
     const handleNewChat = () => {
@@ -227,6 +260,7 @@ function Home() {
     const sid = sessionStorage.getItem('sessionId');
     if (!sid || !token) {
       sessionStorage.removeItem('chatHistory');
+      sessionStorage.removeItem('sessionId');
       setChatHistory([]);
       setSessionId(null);
       return;
@@ -255,7 +289,7 @@ function Home() {
   };
 
   const scheduleRef = useRef({ timer: null, pending: '' });
-  const pushAssistantChunk = useCallback((baseHistory, assistantMsgRef, chunk) => {
+  const pushAssistantChunk = useCallback((baseHistory, assistantMessageRef, chunk) => {
     scheduleRef.current.pending += chunk;
     if (scheduleRef.current.timer) return;
     scheduleRef.current.timer = setTimeout(() => {
@@ -264,10 +298,10 @@ function Home() {
       scheduleRef.current.timer = null;
       if (!take) return;
       if (isMathBalanced(take) || /\n|\.\s$/.test(take)) {
-        assistantMsgRef.current.content += take;
+        assistantMessageRef.current.content += take;
         const newHistory = [
           ...baseHistory,
-          { ...assistantMsgRef.current },
+          { ...assistantMessageRef.current },
         ];
         setChatHistory(newHistory);
       } else {
@@ -351,7 +385,7 @@ function Home() {
             setLoading(false);
             break;
           }
-
+          
           if (json.type === 'done') {
             if (scheduleRef.current.timer) {
               clearTimeout(scheduleRef.current.timer);
@@ -368,18 +402,14 @@ function Home() {
             if (json.remainingCredit !== undefined) {
               setRemainingCredit(json.remainingCredit);
             }
-
             break;
           }
           if (json.type === 'chunk') {
             const safeContent = json.content ?? '';
-
-            // ✅ Tắt chấm ngay khi có chunk đầu tiên
             if (!firstChunkReceived) {
               firstChunkReceived = true;
               setLoading(false);
             }
-
             pushAssistantChunk(updatedHistory, assistantMessageRef, safeContent);
           }
         }
@@ -435,7 +465,6 @@ function Home() {
 
   return (
     <main className="main">
-      {/* vùng hero hiển thị intro / lỗi */}
       <section className="hero">
         {!token ? (
           <div className="not-logged">
@@ -463,104 +492,104 @@ function Home() {
         )}
       </section>
 
-      {/* ✅ vùng cuộn chat */}
-      <div className={`chat-scroll-wrapper ${chatHistory.length > 0 ? 'has-messages' : ''}`}>
-        <div className="chat-container">
-          <div className="chat-inner">
-            {chatHistory.map((msg, i) => (
-              <div key={i} className={`chat-message ${msg.role}`}>
-                <div className="message-box">
-                  <Markdown>{msg.content}</Markdown>
-                  {msg.role === 'assistant' && (
-                    <div className="feedback-bar">
-                      <button className="btn-icon" onClick={() => handleCopy(msg.content)} title="Sao chép">
-                        <FiCopy className="h-5 w-5" />
-                      </button>
-                      <button className="btn-icon" onClick={() => handleFeedback(i, 'like')} title="Thích">
-                        <BsHandThumbsUp className="h-5 w-5" />
-                      </button>
-                      <button className="btn-icon" onClick={() => handleFeedback(i, 'dislike')} title="Không thích">
-                        <BsHandThumbsDown className="h-5 w-5" />
-                      </button>
-                      <button className="btn-icon" onClick={() => handleSpeak(msg.content)} title="Đọc to">
-                        <FiVolume2 className="h-5 w-5" />
-                      </button>
-                      <button className="btn-icon" onClick={handleGoal} title="Tạo mục tiêu">
-                        <FiCheck className="h-5 w-5" />
-                      </button>
+      {token && (
+        <>
+          <div className={`chat-scroll-wrapper ${chatHistory.length > 0 ? 'has-messages' : ''}`}>
+            <div className="chat-container">
+              <div className="chat-inner">
+                {chatHistory.map((msg, i) => (
+                  <div key={i} className={`chat-message ${msg.role}`}>
+                    <div className="message-box">
+                      <Markdown>{msg.content}</Markdown>
+                      {msg.role === 'assistant' && (
+                        <div className="feedback-bar">
+                          <button className="btn-icon" onClick={() => handleCopy(msg.content)} title="Sao chép">
+                            <FiCopy className="h-5 w-5" />
+                          </button>
+                          <button className="btn-icon" onClick={() => handleFeedback(i, 'like')} title="Thích">
+                            <BsHandThumbsUp className="h-5 w-5" />
+                          </button>
+                          <button className="btn-icon" onClick={() => handleFeedback(i, 'dislike')} title="Không thích">
+                            <BsHandThumbsDown className="h-5 w-5" />
+                          </button>
+                          <button className="btn-icon" onClick={() => handleSpeak(msg.content)} title="Đọc to">
+                            <FiVolume2 className="h-5 w-5" />
+                          </button>
+                          <button className="btn-icon" onClick={handleGoal} title="Tạo mục tiêu">
+                            <FiCheck className="h-5 w-5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div className="typing-indicator">
+                    <span></span>
+                  </div>
+                )}
+                <div ref={listEndRef} />
               </div>
-            ))}
+            </div>
+          </div>
 
-            {loading && (
-              <div className="typing-indicator">
-                <span></span>
+          <div
+            className="input-area"
+            style={{
+              transform: chatHistory.length === 0 ? "translateY(-25vh)" : "translateY(0)",
+              transition: "transform 0.3s ease",
+              position: "relative",
+            }}
+          >
+            <div className="composer grok-style" role="group" aria-label="Hộp nhập câu hỏi">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Tôi có thể giúp gì cho bạn?"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
+              />
+              <button
+                className="send-btn"
+                title="Gửi"
+                onClick={handleSubmit}
+                disabled={loading || remainingCredit === 0}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 19V5m7 7l-7-7-7 7"
+                    stroke="#fff"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <p className="disclaimer">
+              Khi đặt câu hỏi, bạn đồng ý với{" "}
+              <a href="#">Điều khoản</a> và{" "}
+              <a href="#">Chính sách quyền riêng tư</a>.
+            </p>
+
+            {remainingCredit === 0 && (
+              <div className="credit-warning">
+                <p>
+                  Bạn đã hết credit, vui lòng{" "}
+                  <a href="/purchase-credits">Mua thêm credit</a> để tiếp tục sử dụng.
+                </p>
               </div>
             )}
-            <div ref={listEndRef} />
           </div>
-        </div>
-      </div>
-
-      {/* ✅ thanh nhập tin nhắn cố định */}
-      <div
-        className="input-area"
-        style={{
-          transform: chatHistory.length === 0 ? "translateY(-25vh)" : "translateY(0)",
-          transition: "transform 0.3s ease",
-          position: "relative",
-        }}
-      >
-        <div className="composer grok-style" role="group" aria-label="Hộp nhập câu hỏi">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Tôi có thể giúp gì cho bạn?"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-          />
-          <button
-            className="send-btn"
-            title="Gửi"
-            onClick={handleSubmit}
-            disabled={loading || remainingCredit === 0}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 19V5m7 7l-7-7-7 7"
-                stroke="#fff"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <p className="disclaimer">
-          Khi đặt câu hỏi, bạn đồng ý với{" "}
-          <a href="#">Điều khoản</a> và{" "}
-          <a href="#">Chính sách quyền riêng tư</a>.
-        </p>
-
-        {remainingCredit === 0 && (
-          <div className="credit-warning">
-            <p>
-              Bạn đã hết credit, vui lòng{" "}
-              <a href="/purchase-credits">mua thêm credit</a> để tiếp tục sử dụng.
-            </p>
-          </div>
-        )}
-      </div>
+        </>
+      )}
     </main>
   );
 }
-
 
 export default Home;
