@@ -1,4 +1,5 @@
 // services/authService.js
+import axios from "axios";
 import api from "./apiToken";
 
 export const login = async (identifier, password) => {
@@ -8,3 +9,13 @@ export const login = async (identifier, password) => {
   });
   return response.data;
 };
+
+
+
+const API_URL = "http://localhost:8080/api"; // thay bằng URL backend của bạn
+
+export const register = async (userData) => {
+  const response = await axios.post(`${API_URL}/auth/register`, userData);
+  return response.data;
+};
+
