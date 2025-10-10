@@ -2,6 +2,7 @@ import { useState,useEffect } from "react";
 import { Route, Routes, Link } from "react-router-dom";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
+import RegisterPage from "./pages/RegisterPage"
 import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
@@ -59,6 +60,7 @@ useEffect(() => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />
           <Route path="/chat/:sessionId" element={<Home />} />
