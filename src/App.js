@@ -1,8 +1,8 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Route, Routes, Link } from "react-router-dom";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
-import RegisterPage from "./pages/RegisterPage"
+
 import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
@@ -22,7 +22,7 @@ function App() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-useEffect(() => {
+  useEffect(() => {
     // khi sidebar mở thì khóa cuộn body
     if (isSidebarOpen) {
       document.body.classList.add("sidebar-open");
@@ -42,25 +42,24 @@ useEffect(() => {
         </button>
       )}
 
-   {isSidebarOpen && (
-  <div className="sidebar-overlay" onClick={toggleSidebar}></div>
-)}
+      {isSidebarOpen && (
+        <div className="sidebar-overlay" onClick={toggleSidebar}></div>
+      )}
 
-<Sidebar
-  className={isSidebarOpen ? "open" : ""}
-  isOpen={isSidebarOpen}
-  onToggleSidebar={toggleSidebar}
-/>
-  <Header />
+      <Sidebar
+        className={isSidebarOpen ? "open" : ""}
+        isOpen={isSidebarOpen}
+        onToggleSidebar={toggleSidebar}
+      />
+      <Header />
       <main
-        className={`main-content flex-grow min-h-screen z-1 relative ${
-          isSidebarOpen ? "sidebar-open" : ""
-        }`}
+        className={`main-content flex-grow min-h-screen z-1 relative ${isSidebarOpen ? "sidebar-open" : ""
+          }`}
       >
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/edit" element={<ProfileEditPage />} />
           <Route path="/chat/:sessionId" element={<Home />} />

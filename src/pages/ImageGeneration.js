@@ -5,11 +5,11 @@ import { FiDownload, FiImage, FiSend, FiLoader, FiXCircle } from 'react-icons/fi
 // import '../style/chat.css'; // ✅ ĐÃ XÓA KẾ THỪA
 import '../style/ImageGeneration.css'; // CHỈ SỬ DỤNG CSS RIÊNG
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api'; 
+const API_URL = process.env.REACT_APP_API_URL;
 
-const DEFAULT_STYLE = "default"; 
+const DEFAULT_STYLE = "default";
 const DEFAULT_SIZE = "1024x1024";
-const ESTIMATED_CREDIT_COST = 10; 
+const ESTIMATED_CREDIT_COST = 10;
 
 function ImageGeneration() {
     const [prompt, setPrompt] = useState('');
@@ -17,15 +17,15 @@ function ImageGeneration() {
     const [remainingCredit, setRemainingCredit] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
-    
-    const [imageHistory, setImageHistory] = useState([]); 
-    
-    const listEndRef = useRef(null); 
+
+    const [imageHistory, setImageHistory] = useState([]);
+
+    const listEndRef = useRef(null);
 
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
-    const cost = ESTIMATED_CREDIT_COST; 
-    
+    const cost = ESTIMATED_CREDIT_COST;
+
     const started = imageHistory.length > 0;
 
     // --- LOGIC CUỘN TỰ ĐỘNG ---
@@ -38,40 +38,40 @@ function ImageGeneration() {
 
     // --- FETCH CREDIT (GIỮ NGUYÊN) ---
     const fetchInitialCredit = async () => {
-       if (!token) return;
-       setErrorMessage('');
-       try {
-           const res = await fetch(`${API_URL}/user/credits`, { 
-               headers: { Authorization: `Bearer ${token}` },
-           });
+        if (!token) return;
+        setErrorMessage('');
+        try {
+            const res = await fetch(`${API_URL}/user/credits`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-           const data = await res.json();
-           if (!res.ok) {
-               throw new Error(data.message || 'Không lấy được thông tin credit');
-           }
-           if (data.credit !== undefined) {
-               setRemainingCredit(data.credit);
-           } else {
-               setErrorMessage(data.message || 'Không lấy được thông tin credit.');
-           }
-       } catch (err) {
-           console.error('Fetch credit error:', err);
-           setErrorMessage(err.message || 'Lỗi kết nối API credit. Vui lòng thử lại.');
-       }
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.message || 'Không lấy được thông tin credit');
+            }
+            if (data.credit !== undefined) {
+                setRemainingCredit(data.credit);
+            } else {
+                setErrorMessage(data.message || 'Không lấy được thông tin credit.');
+            }
+        } catch (err) {
+            console.error('Fetch credit error:', err);
+            setErrorMessage(err.message || 'Lỗi kết nối API credit. Vui lòng thử lại.');
+        }
     };
     useEffect(() => {
-    const handleNewImageGeneration = () => {
-        setImageHistory([]); // Reset lịch sử
-        setPrompt('');      // Xóa input
-        // ... reset các state liên quan khác
-    };
-    window.addEventListener('newImageGeneration', handleNewImageGeneration);
-    return () => window.removeEventListener('newImageGeneration', handleNewImageGeneration);
-}, []);
+        const handleNewImageGeneration = () => {
+            setImageHistory([]); // Reset lịch sử
+            setPrompt('');      // Xóa input
+            // ... reset các state liên quan khác
+        };
+        window.addEventListener('newImageGeneration', handleNewImageGeneration);
+        return () => window.removeEventListener('newImageGeneration', handleNewImageGeneration);
+    }, []);
     useEffect(() => {
         fetchInitialCredit();
         const handleCreditUpdate = () => {
-             fetchInitialCredit();
+            fetchInitialCredit();
         };
         window.addEventListener('creditUpdated', handleCreditUpdate);
         return () => window.removeEventListener('creditUpdated', handleCreditUpdate);
@@ -83,7 +83,7 @@ function ImageGeneration() {
         try {
             const link = document.createElement('a');
             link.href = url;
-            link.download = `ai-spark-image-${Date.now()}.png`; 
+            link.download = `ai-spark-image-${Date.now()}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -109,29 +109,29 @@ function ImageGeneration() {
         }
 
         if (remainingCredit !== null && remainingCredit < cost) {
-             setErrorMessage(`Không đủ credit. Cần ${cost} credit.`);
-             toast.error(`Bạn không đủ credit! (Cần ${cost})`, { autoClose: 3000 });
-             return;
+            setErrorMessage(`Không đủ credit. Cần ${cost} credit.`);
+            toast.error(`Bạn không đủ credit! (Cần ${cost})`, { autoClose: 3000 });
+            return;
         }
-        
+
         setImageHistory(prev => [
-            ...prev, 
+            ...prev,
             { role: 'user', content: trimmedPrompt, type: 'text' }
         ]);
-        
+
         setLoading(true);
-        setPrompt(''); 
+        setPrompt('');
         setErrorMessage('');
 
         try {
             const requestBody = {
                 userId: Number(userId),
                 prompt: trimmedPrompt,
-                style: DEFAULT_STYLE, 
+                style: DEFAULT_STYLE,
                 size: DEFAULT_SIZE,
             };
 
-            const res = await fetch(`${API_URL}/images/generate`, { 
+            const res = await fetch(`${API_URL}/images/generate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -150,9 +150,9 @@ function ImageGeneration() {
                 } catch (e) {
                     errorMsg = responseText.replace('ERROR: ', '');
                 }
-                
+
                 setImageHistory(prev => [
-                    ...prev, 
+                    ...prev,
                     { role: 'assistant', content: errorMsg, type: 'error' }
                 ]);
 
@@ -160,24 +160,24 @@ function ImageGeneration() {
             }
 
             const imageUrlResult = responseText;
-            
+
             if (!imageUrlResult || imageUrlResult.length < 10) {
-                 throw new Error("API đã thành công nhưng không trả về đường dẫn ảnh hợp lệ.");
+                throw new Error("API đã thành công nhưng không trả về đường dẫn ảnh hợp lệ.");
             }
 
             setImageHistory(prev => [
-                ...prev, 
-                { 
-                    role: 'assistant', 
-                    content: imageUrlResult, 
+                ...prev,
+                {
+                    role: 'assistant',
+                    content: imageUrlResult,
                     type: 'image',
-                    prompt: trimmedPrompt 
+                    prompt: trimmedPrompt
                 }
             ]);
-            
-            setRemainingCredit(prev => (prev !== null ? prev - cost : prev)); 
+
+            setRemainingCredit(prev => (prev !== null ? prev - cost : prev));
             toast.success("✅ Ảnh đã được tạo thành công!");
-            window.dispatchEvent(new Event('creditUpdated')); 
+            window.dispatchEvent(new Event('creditUpdated'));
 
         } catch (err) {
             console.error('Lỗi tạo ảnh:', err);
@@ -234,7 +234,7 @@ function ImageGeneration() {
         //                 )}
         //             </div>
         //         )}
-                 
+
         //         {/* VÙNG CUỘN LỊCH SỬ ẢNH */}
         //         <div className={`img-scroll-wrapper ${started ? 'has-messages' : ''} ${!started ? 'hidden' : ''}`}>
         //             <div className="img-chat-container">
@@ -258,7 +258,7 @@ function ImageGeneration() {
         //             </div>
         //         </div>
         //     </section>
-            
+
         //     {/* Thanh nhập liệu cố định */}
         //     <div className="img-input-area"> 
 
@@ -295,12 +295,12 @@ function ImageGeneration() {
         //         </p>
         //     </div>
         // </main>
-        <main className="img-main"> 
-            
+        <main className="img-main">
+
             {/* ✅ KIỂM TRA ĐĂNG NHẬP TOÀN MÀN HÌNH */}
             {!token ? (
                 // --- Trạng thái CHƯA ĐĂNG NHẬP ---
-                <section className="img-hero img-full-center"> 
+                <section className="img-hero img-full-center">
                     <div className="img-auth-box"> {/* SỬ DỤNG CLASS MỚI CHO HỘP ĐĂNG NHẬP */}
                         <h1 className="text-2xl font-semibold text-gray-800 mb-4">
                             Bạn cần đăng nhập để sử dụng tính năng này
@@ -322,7 +322,7 @@ function ImageGeneration() {
                                 <FiImage className="text-purple-500 w-16 h-16 mb-4" />
                                 <h1 className="text-2xl font-semibold text-gray-800">Tạo Ảnh AI Sáng Tạo</h1>
                                 <p className="text-gray-500 mt-2">Mô tả chi tiết ảnh bạn muốn tạo trong ô bên dưới.</p>
-                                {errorMessage && ( 
+                                {errorMessage && (
                                     <div className="img-error-msg mt-4">
                                         <FiXCircle className="text-red-500 w-5 h-5" />
                                         <p>{errorMessage}</p>
@@ -330,7 +330,7 @@ function ImageGeneration() {
                                 )}
                             </div>
                         )}
-                        
+
                         {/* VÙNG CUỘN LỊCH SỬ ẢNH */}
                         <div className={`img-scroll-wrapper ${started ? 'has-messages' : ''} ${!started ? 'hidden' : ''}`}>
                             <div className="img-chat-container">
@@ -350,9 +350,9 @@ function ImageGeneration() {
                             </div>
                         </div>
                     </section>
-                    
+
                     {/* Thanh nhập liệu cố định */}
-                    <div className="img-input-area"> 
+                    <div className="img-input-area">
                         <div className="img-composer" role="group" aria-label="Hộp nhập mô tả ảnh">
                             <textarea
                                 value={prompt}
@@ -376,14 +376,14 @@ function ImageGeneration() {
                             </button>
                         </div>
                         <p className="img-disclaimer">
-                            Mỗi lần tạo ảnh tốn <span className="font-semibold text-purple-600">{cost} credit</span>. 
+                            Mỗi lần tạo ảnh tốn <span className="font-semibold text-purple-600">{cost} credit</span>.
                             Credit còn lại: <span className="font-bold text-purple-600">{remainingCredit !== null ? remainingCredit : '...'}</span>
                         </p>
                     </div>
                 </>
             )}
         </main>
-    
+
     );
 }
 
