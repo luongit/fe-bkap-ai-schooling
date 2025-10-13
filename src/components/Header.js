@@ -164,7 +164,7 @@ function Header({ toggleSidebar }) {
     fetchCredit(false); // Không show toast khi refresh
   };
 
- return (
+  return (
     <header className="header">
       <Link to="/" className="brand">
         BACHKHOA APTECH
@@ -175,17 +175,15 @@ function Header({ toggleSidebar }) {
             <span className="user-info">{profile?.username || ""}</span>
             {remainingCredit !== null && (
               // PHẦN CHỈNH SỬA: Thêm div bao bọc để xử lý onClick và cảnh báo trên header
-              <div 
-                className={`credit-header-wrapper ${
-                  remainingCredit < LOW_CREDIT_THRESHOLD ? "low-credit-warning" : ""
-                }`}
+              <div
+                className={`credit-header-wrapper ${remainingCredit < LOW_CREDIT_THRESHOLD ? "low-credit-warning" : ""
+                  }`}
                 onClick={handleCreditHeaderClick} // Kích hoạt: Click credit header -> modal
                 title="Xem chi tiết credit"
               >
                 <span
-                  className={`credit-display ${
-                    remainingCredit === 0 ? "credit-empty" : ""
-                  }`}
+                  className={`credit-display ${remainingCredit === 0 ? "credit-empty" : ""
+                    }`}
                 >
                   💳 {remainingCredit}
                 </span>
@@ -198,14 +196,14 @@ function Header({ toggleSidebar }) {
       </div>
 
       {/* Thêm Modal component */}
-      {showCreditModal && token && (
+      {/* {showCreditModal && token && (
         <CreditModal
           remainingCredit={remainingCredit}
           errorMessage={errorMessage}
           onClose={handleModalClose}
           onRefresh={handleRefreshCredit}
         />
-      )}
+      )} */}
     </header>
   );
 

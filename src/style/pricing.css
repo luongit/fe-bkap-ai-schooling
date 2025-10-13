@@ -1,0 +1,39 @@
+body.allow-body-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+
+.pricing-page {
+  height: auto;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.pricing-page::before,
+.pricing-page::after {
+  display: none;
+}
+
+@media (max-width: 920px) {
+  .pricing-page {
+    padding-top: 80px;
+  }
+}
+
+body {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+html,
+body {
+  height: auto !important;
+}
+
+/* Nếu trang Pricing bị bọc trong div .main hoặc #root thì thêm: */
+.main.pricing-page,
+#root {
+  overflow-y: auto !important;
+  min-height: 100vh;
+}

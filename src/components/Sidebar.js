@@ -22,6 +22,7 @@ import {
   FiMoreVertical,
   FiTrash2,
   FiImage,
+  FiDollarSign,
 } from "react-icons/fi";
 import "./css/Sidebar.css";
 import "../style/chat.css";
@@ -308,6 +309,17 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         {renderNavItem(FiMessageCircle, "Trợ Lý Ảo", showComingSoon)}
         {renderNavItem(FiPlus, "Thêm công cụ", showComingSoon)}
         {renderNavItem(FiDownload, "Tải ứng dụng", showComingSoon)}
+        <NavLink
+          to="/pricing"
+          onClick={() => onToggleSidebar()}
+          className={({ isActive }) =>
+            `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
+            } ${isCollapsed ? "justify-center" : "justify-start"}`
+          }
+        >
+          <FiDollarSign className="sidebar-icon" />
+          {!isCollapsed && <span className="text-sm">Bảng giá</span>}
+        </NavLink>
 
       </nav>
 
