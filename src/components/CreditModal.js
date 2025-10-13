@@ -107,7 +107,7 @@ function CreditModal({ remainingCredit, errorMessage, onClose, onRefresh }) {
         <button className="modal-close-btn" onClick={onClose}>&times;</button>
         
         <div className="modal-header">
-            <h2 className="modal-main-title">Quản lý Tài khoản & Credit</h2>
+            <h2 className="modal-main-title">Credit</h2>
         </div>
 
         <div className="modal-body-container">
