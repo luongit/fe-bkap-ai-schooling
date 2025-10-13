@@ -40,7 +40,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const { sessionId } = useParams();
-  
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -402,11 +402,19 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         {!isLoggedIn ? (
           <>
             {renderNavItem(FiLogIn, "Đăng nhập", () => navigate("/auth/login"))}
-            {renderNavItem(
-              FiUserPlus,
-              "Tạo tài khoản",
-              () => navigate("/register")
-            )}
+            <a
+              href="https://bkapai.vn/register"
+              className={`side-item w-full flex items-center gap-2 ${isCollapsed ? "justify-center" : ""}`}
+
+              onClick={() => {
+                if (typeof onToggleSidebar === "function") {
+                  onToggleSidebar();
+                }
+              }}
+            >
+              <FiUserPlus className="sidebar-icon" />
+              {!isCollapsed && <span className="text-sm">Tạo tài khoản</span>}
+            </a>
           </>
         ) : (
           <div className="account-section flex flex-col items-center gap-2">
