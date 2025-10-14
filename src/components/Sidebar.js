@@ -22,6 +22,7 @@ import {
   FiMoreVertical,
   FiTrash2,
   FiImage,
+  FiDollarSign,
 } from "react-icons/fi";
 import "./css/Sidebar.css";
 import "../style/chat.css";
@@ -321,6 +322,17 @@ useEffect(() => {
         {renderNavItem(FiMessageCircle, "Trợ Lý Ảo", showComingSoon)}
         {renderNavItem(FiPlus, "Thêm công cụ", showComingSoon)}
         {renderNavItem(FiDownload, "Tải ứng dụng", showComingSoon)}
+        <NavLink
+          to="/pricing"
+          onClick={() => onToggleSidebar()}
+          className={({ isActive }) =>
+            `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
+            } ${isCollapsed ? "justify-center" : "justify-start"}`
+          }
+        >
+          <FiDollarSign className="sidebar-icon" />
+          {!isCollapsed && <span className="text-sm">Bảng giá</span>}
+        </NavLink>
 
       </nav>
 
@@ -415,11 +427,19 @@ useEffect(() => {
         {!isLoggedIn ? (
           <>
             {renderNavItem(FiLogIn, "Đăng nhập", () => navigate("/auth/login"))}
-            {renderNavItem(
-              FiUserPlus,
-              "Tạo tài khoản",
-              () => navigate("/register")
-            )}
+            <a
+              href="https://bkapai.vn/register"
+              className={`side-item w-full flex items-center gap-2 ${isCollapsed ? "justify-center" : ""}`}
+
+              onClick={() => {
+                if (typeof onToggleSidebar === "function") {
+                  onToggleSidebar();
+                }
+              }}
+            >
+              <FiUserPlus className="sidebar-icon" />
+              {!isCollapsed && <span className="text-sm">Tạo tài khoản</span>}
+            </a>
           </>
         ) : (
           <div className="account-section flex flex-col items-center gap-2">

@@ -449,7 +449,7 @@
   bottom: 0;
   background: var(--bg);
   padding: 10px 0 26px; /* 👈 thêm khoảng đệm dưới để chat không bị che */
-  z-index: 50;
+  z-index: 10;
   width: 100%;
   max-width: 940px;
   margin: 0 auto;

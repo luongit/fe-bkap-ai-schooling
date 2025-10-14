@@ -33,7 +33,7 @@
     align-items: center;
     background: var(--bg);
     padding: 10px 0;              /* padding trên + dưới */
-    z-index: 50;                 /* luôn trên chat */
+    z-index: 10;                 /* luôn trên chat */
     transform: none !important;   /* tắt hiệu ứng dịch lên xuống */
   }
 
