@@ -196,14 +196,14 @@ function Header({ toggleSidebar }) {
       </div>
 
       {/* Thêm Modal component */}
-      {/* {showCreditModal && token && (
+      {showCreditModal && token && (
         <CreditModal
           remainingCredit={remainingCredit}
           errorMessage={errorMessage}
           onClose={handleModalClose}
           onRefresh={handleRefreshCredit}
         />
-      )} */}
+      )}
     </header>
   );
 

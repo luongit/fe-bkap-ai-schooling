@@ -1,5 +1,4 @@
 
-
 .robot-animation {
   position: relative;
   margin: 0 auto 24px;
@@ -324,6 +323,41 @@
 }
 
 /* === Responsive === */
+@media (max-width: 920px) {
+  /* Sidebar vẫn fixed */
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    z-index: 60; /* trên topintro */
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Overlay */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 59; /* giữa sidebar và topintro */
+    display: none;
+  }
+
+  .sidebar.open ~ .sidebar-overlay {
+    display: block;
+  }
+
+  /* Không cần thay đổi topintro, vẫn padding bình thường */
+}
+
+
+
 @media (max-width: 768px) {
   .topintro {
     padding: 40px 12px 80px;
@@ -365,5 +399,6 @@
 }
 
 .topintro {
-  padding-bottom: 120px; /* 👈 thêm dòng này */
+  position: relative; /* đã có */
+  z-index: 10; /* thêm để nổi lên trên các phần tử fixed */
 }

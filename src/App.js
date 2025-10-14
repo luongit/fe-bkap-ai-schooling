@@ -10,13 +10,14 @@ import ProfilePage from "./pages/ProfilePage";
 import GoalsPage from "./pages/GoalsPage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import WritingPage from "./pages/WritingPage";
+import TopIntro from "./components/TopIntro";
 import ImageGeneration from "./pages/ImageGeneration";
 import PricingPage from "./pages/PricingPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./style/mobile.css";
 import "./components/css/Sidebar.css";
-
+import './components/css/TopIntro.css';
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 

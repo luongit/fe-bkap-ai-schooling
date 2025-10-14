@@ -1,36 +1,47 @@
-/* src/css/mobile.css */
-
-
-
 /* App layout trên mobile */
-@media (max-width: 932px) {
+@media (max-width: 920px) {
   .app {
     grid-template-columns: 1fr;
   }
-  .header, .main, .footer {
+  .main, .footer {
     grid-column: 1;
   }
-  .header {
-    padding: 8px 12px;
-  }
+  
   .brand {
     font-size: 16px;
     text-align: center;
     margin: 0;
   }
-  .header-right {
-    right: 12px;
+ 
+  /* Main scroll wrapper */
+  .main {
+    overflow: visible;       /* sticky/fixed hoạt động */
+    padding-bottom: 80px;    /* chừa chỗ cho input-area */
   }
-  .hello {
-    display: none; /* Ẩn "Hello AI" trên mobile */
+
+  /* Input-area luôn sát đáy */
+  .input-area {
+    position: fixed !important;  /* dùng fixed trên mobile */
+    bottom: 0 !important;        /* sát đáy */
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 940px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg);
+    padding: 10px 0;              /* padding trên + dưới */
+    z-index: 10;                 /* luôn trên chat */
+    transform: none !important;   /* tắt hiệu ứng dịch lên xuống */
   }
+
+
 }
 
 @media (max-width: 768px) {
-  .hero {
-    width: 100%;
-    padding-inline: 8px;
-  }
+  
   .carousel {
     gap: 8px;
   }
@@ -38,9 +49,6 @@
     min-width: auto;
     padding: 6px 10px;
     font-size: 14px;
-  }
-  .header {
-    padding: 10px 12px;
   }
   .brand {
     font-size: 14px;
@@ -58,14 +66,8 @@
     width: 30px;
     height: 30px;
   }
-  .header {
-    padding: 8px 10px;
-  }
   .brand {
     font-size: 12px;
-  }
-  .header-right {
-    right: 10px;
   }
   .credit-display {
     padding: 3px 5px;
@@ -77,12 +79,6 @@
 }
 /* Responsive Breakpoints */
 @media (max-width: 1280px) {
-  .hello {
-    font-size: 36px;
-  }
-  .header {
-    padding: 12px 16px;
-  }
   .main {
     padding: 20px 14px 120px;
   }
@@ -94,42 +90,7 @@
   }
 }
 
-@media (max-width: 940px) {
-  .app {
-    grid-template-columns: 1fr;
-  }
-  .header, .main, .footer {
-    grid-column: 1;
-  }
-  .burger {
-    display: flex;
-  }
-  .promo {
-    display: none;
-  }
-  .header {
-    justify-content: center;
-  }
-  .brand {
-    display: block;
-    font-size: 16px;
-    text-align: center;
-    margin: 0;
-  }
-  .header-right {
-    position: absolute;
-    right: 16px;
-  }
-  .header-menu-toggle {
-    display: flex;
-  }
-  .header-menu {
-    right: 10px;
-  }
-  .hello {
-    display: none; /* Ẩn chào "Hello AI" trên mobile */
-  }
-}
+
 
 @media (max-width: 768px) {
   .hero {
@@ -144,18 +105,13 @@
     padding: 6px 10px;
     font-size: 14px;
   }
-  .header {
-    padding: 10px 12px;
-  }
   .brand {
     font-size: 14px;
   }
 }
 
 @media (max-width: 480px) {
-  .hello {
-    font-size: 20px;
-  }
+
   .btn {
     padding: 6px 10px;
   }
@@ -163,22 +119,8 @@
     width: 30px;
     height: 30px;
   }
-  .header {
-    padding: 8px 10px;
-  }
   .brand {
     font-size: 12px;
   }
-  .header-menu-toggle {
-    width: 36px;
-    height: 36px;
-  }
-  .header-menu {
-    min-width: 140px;
-    right: 8px;
-  }
-  .header-menu li {
-    font-size: 13px;
-    padding: 6px 12px;
-  }
+
 }

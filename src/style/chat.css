@@ -449,7 +449,7 @@
   bottom: 0;
   background: var(--bg);
   padding: 10px 0 26px; /* 👈 thêm khoảng đệm dưới để chat không bị che */
-  z-index: 50;
+  z-index: 10;
   width: 100%;
   max-width: 940px;
   margin: 0 auto;
@@ -537,78 +537,5 @@ padding: 11px 12px 0px;
   height: 18px;
   fill: currentColor;
 }
-@media (max-width: 920px) {
-  /* ===== Ô nhập tin nhắn ===== */
-  .input-area {
-    position: fixed !important;
-    bottom: 0; /* 👈 dính sát đáy */
-    left: 0;
-    right: 0;
-    background: var(--bg, #fff);
-    padding: 8px 0 12px;
-    z-index: 999;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 90px;
-    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
-  }
 
-  /* ===== Ô nhập văn bản ===== */
-  .composer.grok-style {
-    width: 92%;
-    max-width: 600px;
-    background: #fff;
-    border: none;
-    outline: none;
-    border-radius: 9999px;
-    padding: 12px 16px;
-    box-shadow: 0 0 0 1px #e5e7eb inset;
-  }
-
-  .composer.grok-style:focus {
-    box-shadow: 0 0 0 2px #2563eb inset;
-  }
-
-  /* ===== Vùng chứa tin nhắn ===== */
-  .chat-scroll-wrapper {
-    flex: 1;
-    position: relative;
-    overflow-y: auto;
-    min-height: calc(100dvh - 90px); /* 👈 trừ chiều cao ô nhập */
-    padding-bottom: 120px !important;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* ✅ Nếu chưa có tin nhắn — không hiển thị thanh cuộn */
-  .chat-scroll-wrapper:empty {
-    overflow: hidden !important;
-  }
-
-  /* ===== Ngăn scroll thừa khi chưa có nội dung ===== */
-  html, body {
-    height: 100%;
-    overflow-y: hidden; /* 👈 không cho cuộn khi chưa có nội dung */
-  }
-
-  /* Khi có nội dung dài — bật lại cuộn */
-  body.has-messages,
-  html.has-messages {
-    overflow-y: auto !important;
-  }
-
-  /* Ẩn scrollbar mặc định (trên Android, iOS) */
-  ::-webkit-scrollbar {
-    width: 0 !important;
-    background: transparent !important;
-  }
-
-  /* Ẩn dòng điều khoản */
-  .terms,
-  .privacy-note,
-  .chat-disclaimer {
-    display: none !important;
-  }
-}
 
