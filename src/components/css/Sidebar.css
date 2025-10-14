@@ -451,11 +451,140 @@
     background: #94a3b8;
   }
   /* Responsive */
+ @media (max-width: 920px) {
+  /* Sidebar */
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    z-index: 60; /* cao hơn header */
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    width: 72px;
+  }
+
+  /* Main content */
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+  .main-content.sidebar-open {
+    margin-left: 72px !important;
+  }
+
+  /* Sidebar overlay */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 59; /* dưới sidebar nhưng trên header */
+    display: none; /* mặc định ẩn */
+  }
+
+  /* Hiển thị overlay khi sidebar mở */
+  .sidebar.open ~ .sidebar-overlay {
+    display: block;
+  }
+
+  /* Burger button */
+  .burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 5px;
+    left: 10px;
+    z-index: 70; /* nổi trên tất cả */
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+  }
+
+  .burger-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .burger-icon .line {
+    height: 2px;
+    border-radius: 2px;
+    background-color: #333;
+  }
+
+  .burger-icon .top {
+    width: 22px;
+  }
+
+  .burger-icon .bottom {
+    width: 14px;
+  }
+  .side-head > * {
+    display: none; /* ẩn logo và brand-name, small-name */
+  }
+  .collapse-toggle {
+    display: none !important;
+  }
+  .side-list > .side-item:nth-last-child(-n+2) {
+  display: none !important;
+}
+.collapse-toggle {
+    display: none !important; /* ẩn nút collapse trên mobile */
+  }
+
+  /* Ẩn các nút “Thêm công cụ” & “Tải ứng dụng” */
+  .side-list > .side-item[data-mobile-hide="true"] {
+    display: none !important;
+  }
+
+ /* Lịch sử luôn hiển thị */
+  .history-list {
+    display: block !important;
+    max-height: 300px; /* hoặc auto */
+    overflow-y: auto;
+  }
+
+  /* Ẩn nút xổ xuống lịch sử */
+  .side-item button:has(.sidebar-icon.FiChevronDown) {
+    display: none !important;
+  }
+}
+
+/* === ROBOT LOGO === */
+.robot-logo {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.robot-logo:hover .robot-head-svg {
+  animation: head-shake 0.8s ease-in-out;
+}
+
+/* Lắc đầu */
+@keyframes head-shake {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+  75% { transform: rotate(-2deg); }
+  100% { transform: rotate(0deg); }
+}
+  /* Responsive */
   @media (max-width: 920px) {
     .sidebar {
       transform: translateX(-100%);
       position: fixed;
-      z-index: 50;
+  z-index: 210 !important; /* cao nhất để che cả header & input */
       height: 100vh;
     }
 
@@ -509,22 +638,4 @@
   background: rgba(0, 0, 0, 0.3);
   z-index: 50; /* 🔼 cao hơn sidebar */
 }
-}
-/* === ROBOT LOGO === */
-.robot-logo {
-  display: inline-block;
-  transition: transform 0.3s ease;
-}
-
-.robot-logo:hover .robot-head-svg {
-  animation: head-shake 0.8s ease-in-out;
-}
-
-/* Lắc đầu */
-@keyframes head-shake {
-  0% { transform: rotate(0deg); }
-  25% { transform: rotate(-4deg); }
-  50% { transform: rotate(4deg); }
-  75% { transform: rotate(-2deg); }
-  100% { transform: rotate(0deg); }
 }

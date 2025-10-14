@@ -40,7 +40,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const { sessionId } = useParams();
-  
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 920);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -57,6 +57,11 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     setShowSessionMenu({}); // Đóng tất cả menu ba chấm khi toggle sidebar
   };
 
+useEffect(() => {
+  const handleResize = () => setIsMobile(window.innerWidth <= 920);
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
   const fetchSessions = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -78,6 +83,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
       }
     } catch (err) {
       console.error("Load sessions error:", err);
+      if (!isMobile) {
       toast.error("Không thể tải lịch sử. Vui lòng thử lại sau!", {
         toastId: "fetchSessionsError",
         position: "top-right",
@@ -88,6 +94,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         draggable: true,
         theme: "colored",
       });
+    }
       setSessions([]);
     } finally {
       setLoading(false);
@@ -126,6 +133,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
+        if (!isMobile) {
         toast.success("Đã xóa cuộc trò chuyện!", {
           toastId: `deleteSessionSuccess_${sessionId}`,
           position: "top-right",
@@ -136,6 +144,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
           draggable: true,
           theme: "colored",
         });
+      }
         fetchSessions();
         window.dispatchEvent(new Event("sessionUpdated"));
         window.dispatchEvent(new Event("writingSessionUpdated"));
@@ -152,6 +161,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
       }
     } catch (err) {
       console.error("Delete session error:", err);
+      if (!isMobile) {
       toast.error("Lỗi khi xóa, vui lòng thử lại!", {
         toastId: `deleteSessionError_${sessionId}`,
         position: "top-right",
@@ -163,11 +173,13 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         theme: "colored",
       });
     }
+    }
   };
 
   const showComingSoon = () => {
     const toastId = "comingSoon";
     if (!toast.isActive(toastId)) {
+      if (!isMobile) {
       toast.info("Tính năng đang được phát triển, mời bạn quay lại sau!", {
         toastId,
         position: "top-right",
@@ -178,6 +190,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         draggable: true,
         theme: "colored",
       });
+    }
     }
   };
 

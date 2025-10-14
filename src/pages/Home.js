@@ -571,11 +571,12 @@ function Home() {
               </button>
             </div>
 
-            <p className="disclaimer">
-              Khi đặt câu hỏi, bạn đồng ý với{" "}
-              <a href="#">Điều khoản</a> và{" "}
-              <a href="#">Chính sách quyền riêng tư</a>.
-            </p>
+          {chatHistory.length > 0 && (
+      <p className="disclaimer">
+    Khi đặt câu hỏi, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách quyền riêng tư</a>.
+    </p>
+       )}
+
 
             {remainingCredit === 0 && (
               <div className="credit-warning">
