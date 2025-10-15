@@ -1,10 +1,9 @@
-// CreditModal.js (Code ĐÃ CHỈNH SỬA)
+
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './css/CreditModal.css'; 
 
-// Import icons
 import { FiCreditCard, FiClock, FiZap, FiUser } from 'react-icons/fi';
 
 const LOW_CREDIT_THRESHOLD = 100; 
@@ -31,7 +30,7 @@ const CreditBalanceView = ({ remainingCredit, errorMessage, onRefresh, onClose }
         )}
         
         <hr className="my-4"/>
-        <Link to="/buy-credits" onClick={onClose} className="buy-credit-btn-small">
+        <Link to="/pricing" onClick={onClose} className="buy-credit-btn-small">
             Mua thêm credit →
         </Link>
     </div>
@@ -71,7 +70,7 @@ const SubscriptionView = ({ onClose }) => (
             <p>
                 Để có trải nghiệm tốt hơn và credit không giới hạn, hãy nâng cấp lên gói **PRO**.
             </p>
-            <Link to="/upgrade-plan" onClick={onClose} className="upgrade-btn">
+            <Link to="/pricing" onClick={onClose} className="upgrade-btn">
                 Xem chi tiết các Gói & Nâng cấp ngay! ✨
             </Link>
         </div>
@@ -111,8 +110,7 @@ function CreditModal({ remainingCredit, errorMessage, onClose, onRefresh }) {
         </div>
 
         <div className="modal-body-container">
-          
-          {/* Menu Sidebar (ĐÃ CHỈNH SỬA) */}
+
           <div className="modal-sidebar">
             <div 
               className={`sidebar-item ${activeTab === 'creditBalance' ? 'active' : ''}`} 
