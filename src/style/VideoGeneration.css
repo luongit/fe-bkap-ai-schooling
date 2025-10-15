@@ -1,0 +1,286 @@
+/* Sử dụng các giá trị tương tự như trong file ImageGeneration.css gốc của bạn */
+
+.video-main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding-bottom: 90px; /* Chiều cao của thanh input cố định */
+    position: relative;
+}
+
+.video-hero {
+    flex-grow: 1;
+    overflow-y: hidden; /* Quan trọng để scroll chỉ nằm trong wrapper */
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.video-full-center {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.video-auth-box {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+.video-login-btn {
+    display: inline-block;
+    background-color: #8b5cf6; /* purple-500 */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.video-login-btn:hover {
+    background-color: #7c3aed; /* purple-600 */
+}
+
+/* --- Vùng giới thiệu ban đầu --- */
+.video-initial-intro {
+    text-align: center;
+    padding-top: 5rem;
+    flex-shrink: 0;
+}
+
+/* --- Vùng lịch sử tin nhắn/video --- */
+.video-scroll-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-top: 1rem;
+    position: relative;
+}
+
+.video-scroll-wrapper.hidden {
+    display: none;
+}
+
+.video-chat-container {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.video-chat-inner {
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Tin nhắn của người dùng và trợ lý --- */
+.video-msg {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.video-msg.user {
+    justify-content: flex-end;
+}
+
+.video-msg.assistant {
+    justify-content: flex-start;
+}
+
+.video-msg-box {
+    padding: 0.75rem 1.25rem;
+    border-radius: 1.5rem;
+    max-width: 75%;
+    line-height: 1.5;
+}
+
+.video-msg.user .video-msg-box {
+    background-color: #e5e7eb; /* gray-200 */
+    color: #1f2937; /* gray-800 */
+    border-bottom-right-radius: 0.5rem;
+}
+
+.video-msg.assistant .video-msg-box {
+    background-color: #f3f4f6; /* gray-100 */
+    color: #1f2937;
+    border-bottom-left-radius: 0.5rem;
+}
+
+/* --- Kết quả Video --- */
+.video-result-box {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.video-prompt-text {
+    font-size: 0.9rem;
+    color: #4b5563; /* gray-600 */
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.video-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f9fafb; /* gray-50 */
+    border-radius: 0.375rem;
+    padding: 1.5rem;
+}
+
+.video-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    width: 100%;
+    border: 2px dashed #d1d5db; /* gray-300 */
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+.video-actions {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.open-video-btn {
+    display: flex;
+    align-items: center;
+    background-color: #8b5cf6; /* purple-500 */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    gap: 0.5rem;
+}
+
+.open-video-btn:hover {
+    background-color: #7c3aed; /* purple-600 */
+}
+
+/* --- Thông báo Lỗi/Loading --- */
+.video-error-msg {
+    background-color: #fee2e2; /* red-100 */
+    color: #b91c1c; /* red-700 */
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.video-loading-msg {
+    background-color: #e0f2fe; /* blue-100 */
+    color: #0c4a6e; /* sky-800 */
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+/* --- Vùng Input Cố định --- */
+.video-input-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    padding: 1rem 2rem;
+    border-top: 1px solid #e5e7eb; /* gray-200 */
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.video-composer {
+    display: flex;
+    align-items: flex-end;
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #f9fafb; /* gray-50 */
+    border: 1px solid #d1d5db; /* gray-300 */
+    border-radius: 1.5rem;
+    padding: 0.5rem;
+}
+
+.video-composer textarea {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    max-height: 150px;
+    min-height: 40px;
+}
+
+.video-composer .send-btn {
+    background-color: #8b5cf6; /* purple-500 */
+    color: white;
+    padding: 0.75rem;
+    border-radius: 50%;
+    margin-left: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+}
+
+.video-composer .send-btn:hover:not(:disabled) {
+    background-color: #7c3aed;
+}
+
+.video-composer .send-btn:disabled {
+    background-color: #d1d5db; /* gray-300 */
+    cursor: not-allowed;
+}
+
+.video-disclaimer {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #6b7280; /* gray-500 */
+}
+
+/* --- Typing Indicator (giữ nguyên logic gốc) --- */
+.video-typing-indicator {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-radius: 1.5rem;
+    max-width: 75%;
+    background-color: #f3f4f6;
+    margin-bottom: 1rem;
+}
+
+.video-typing-indicator span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #4b5563;
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.video-typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.video-typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+/* Thêm cho đẹp mắt */
+.video-typing-indicator span:nth-child(3) { animation-delay: 0s; }
+
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
