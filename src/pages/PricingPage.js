@@ -1,5 +1,10 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+
+
+
 import {
   FiCheckCircle,
   FiZap,
@@ -56,33 +61,7 @@ const PRICING_PLANS = [
   },
 ];
 
-const ACTION_COSTS = [
-  {
-    label: "Chat AI (1 phiên gồm 20 lượt hội thoại)",
-    credit: "25 credit",
-    detail: "Tự động tối ưu để tiết kiệm credit khi câu trả lời ngắn.",
-  },
-  {
-    label: "Giải bài tập có kèm lời giải từng bước",
-    credit: "40 credit",
-    detail: "Bao gồm phân tích đề, gợi ý phương pháp và lời giải chi tiết.",
-  },
-  {
-    label: "Viết văn AI đầy đủ (700 - 1.000 chữ)",
-    credit: "60 credit",
-    detail: "Được phép chỉnh sửa bản nháp 2 lần trong 24 giờ.",
-  },
-  {
-    label: "Tạo ảnh minh họa độ phân giải cao",
-    credit: "20 credit",
-    detail: "Xuất PNG nền trong, giới hạn 6 ảnh/ngày với gói miễn phí.",
-  },
-  {
-    label: "Phân tích báo cáo học tập PDF",
-    credit: "80 credit",
-    detail: "Hỗ trợ tải lên tối đa 15 trang, trả kết quả trong vòng 2 phút.",
-  },
-];
+
 
 const FAQ_ITEMS = [
   {
@@ -109,13 +88,36 @@ const FAQ_ITEMS = [
 
 
 function PricingPage() {
+  const [actionCosts, setActionCosts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Tính toán dữ liệu hiển thị theo trang hiện tại
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = actionCosts.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Tổng số trang
+  const totalPages = Math.ceil(actionCosts.length / itemsPerPage);
+
+  // Hàm đổi trang
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+
+
   useEffect(() => {
     document.title = "Bảng giá chi phí thao tác | BKAP AI";
     document.body.classList.add("allow-body-scroll");
+
+    // Fetch dữ liệu từ backend
+    axios.get("http://localhost:8080/api/pricing")
+      .then((res) => setActionCosts(res.data))
+      .catch((err) => console.error("Lỗi fetch pricing:", err));
+
     return () => {
       document.body.classList.remove("allow-body-scroll");
     };
   }, []);
+
 
   return (
     <div className="pricing-page bg-gray-50 min-h-screen py-12 md:py-20 px-4">
@@ -216,20 +218,61 @@ function PricingPage() {
                       Credit tiêu tốn
                     </th>
                     <th className="px-6 py-3 text-left font-semibold text-gray-700 uppercase tracking-wide">
-                      Ghi chú
+                      Token
+                    </th>
+                    <th className="px-6 py-3 text-left font-semibold text-gray-700 uppercase tracking-wide">
+                      Giá VND
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white">
-                  {ACTION_COSTS.map((item) => (
-                    <tr key={item.label} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-4 font-medium text-gray-900">{item.label}</td>
-                      <td className="px-6 py-4 text-purple-600 font-semibold">{item.credit}</td>
-                      <td className="px-6 py-4 text-gray-600">{item.detail}</td>
+                  {currentItems.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50 transition">
+                      <td className="px-6 py-4 font-medium text-gray-900">{item.actionName}</td>
+                      <td className="px-6 py-4 text-purple-600 font-semibold">
+                        {item.creditCost} credit
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        Token: {item.tokenCost}
+                      </td>
+                      <td className="px-6 py-4 text-purple-600 font-semibold"> Giá: {item.vndCost.toLocaleString("vi-VN")}₫</td>
                     </tr>
                   ))}
+
+
                 </tbody>
               </table>
+              <div className="flex justify-center items-center gap-2 py-4">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 rounded border text-sm disabled:opacity-50 hover:bg-gray-100"
+                >
+                  ← Trước
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => handlePageChange(i + 1)}
+                    className={`px-3 py-1 rounded text-sm font-medium border ${currentPage === i + 1
+                      ? "bg-purple-600 text-white border-purple-600"
+                      : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 rounded border text-sm disabled:opacity-50 hover:bg-gray-100"
+                >
+                  Sau →
+                </button>
+              </div>
+
             </div>
           </div>
         </section>
