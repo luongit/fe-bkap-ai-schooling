@@ -6,7 +6,7 @@ import rehypeHighlight from 'rehype-highlight';
 import rehypeKatex from 'rehype-katex';
 import { toast } from 'react-toastify';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiCopy, FiVolume2, FiCheck } from 'react-icons/fi';
+import { FiCopy, FiVolume2, FiCheck, FiSquare } from 'react-icons/fi';
 import { BsHandThumbsUp, BsHandThumbsDown } from 'react-icons/bs';
 import TopIntro from '../components/TopIntro';
 import { getLangIcon, extractText, speakText } from '../services/handle/Function';
@@ -283,6 +283,37 @@ function Home() {
     }
   }, [API_URL, token]);
 
+  const handleStop = useCallback(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort(); // Ngắt fetch request
+      controllerRef.current = null;
+    }
+    if (scheduleRef.current.timer) {
+      clearTimeout(scheduleRef.current.timer); // Xóa timer
+      scheduleRef.current.timer = null;
+      scheduleRef.current.pending = ''; // Xóa buffer
+    }
+    if (assistantMessageRef.current.content) {
+      // Lưu nội dung đã nhận được vào chatHistory
+      setChatHistory((prev) => [
+        ...prev,
+        { ...assistantMessageRef.current },
+      ]);
+      assistantMessageRef.current = { role: 'assistant', content: '' }; // Reset assistant message
+    }
+    setLoading(false); // Reset loading
+    toast.info('Đã dừng trả lời.', {
+      toastId: 'stopStream',
+      position: 'top-right',
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: 'colored',
+    });
+  }, []);
+
   const isMathBalanced = (s) => {
     const dollars = (s.match(/(?<!\\)\$/g) || []).length;
     return dollars % 2 === 0;
@@ -416,8 +447,12 @@ function Home() {
         window.dispatchEvent(new Event('sessionUpdated'));
       }
     } catch (err) {
-      console.error('Lỗi trong handleSubmit:', err);
-      setErrorMessage('Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại.');
+      if (err.name === 'AbortError') {
+        console.log('Stream aborted by user');
+      } else {
+        console.error('Lỗi trong handleSubmit:', err);
+        setErrorMessage('Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại.');
+      }
       setLoading(false);
     } finally {
       if (scheduleRef.current.timer) {
@@ -553,30 +588,39 @@ function Home() {
                   }
                 }}
               />
-              <button
-                className="send-btn"
-                title="Gửi"
-                onClick={handleSubmit}
-                disabled={loading || remainingCredit === 0}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 19V5m7 7l-7-7-7 7"
-                    stroke="#fff"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+              {loading ? (
+                <button
+                  className="stop-btn"
+                  title="Dừng trả lời"
+                  onClick={handleStop}
+                >
+                  <FiSquare className="stop-icon" />
+                </button>
+              ) : (
+                <button
+                  className="send-btn"
+                  title="Gửi"
+                  onClick={handleSubmit}
+                  disabled={loading || remainingCredit === 0}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 19V5m7 7l-7-7-7 7"
+                      stroke="#fff"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              )}
             </div>
 
-          {chatHistory.length > 0 && (
-      <p className="disclaimer">
-    Khi đặt câu hỏi, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách quyền riêng tư</a>.
-    </p>
-       )}
-
+            {chatHistory.length > 0 && (
+              <p className="disclaimer">
+                Khi đặt câu hỏi, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách quyền riêng tư</a>.
+              </p>
+            )}
 
             {remainingCredit === 0 && (
               <div className="credit-warning">

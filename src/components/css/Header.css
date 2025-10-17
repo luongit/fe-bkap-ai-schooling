@@ -1,5 +1,4 @@
-
-/* src/css/Header.css */
+/* Header Base Styles */
 .header {
   display: flex;
   justify-content: center; /* Căn giữa logo */
@@ -83,6 +82,42 @@
   white-space: nowrap;
 }
 
+/* Credit Header Wrapper */
+.credit-header-wrapper {
+  cursor: pointer; /* Biểu thị rằng có thể click */
+  padding: 5px 8px;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+  margin-left: 10px;
+}
+
+.credit-header-wrapper:hover {
+  background-color: #f0f0f0; /* Hiệu ứng hover nhẹ */
+}
+
+/* Cảnh báo credit thấp trên header */
+.credit-header-wrapper.low-credit-warning {
+  border-color: #ffc107; /* Viền vàng cảnh báo */
+  background-color: #fffbe6;
+}
+
+.credit-display {
+  /* Đảm bảo style của thẻ span credit cũ vẫn hoạt động */
+  font-weight: bold;
+  color: #007bff;
+}
+
+.credit-display.credit-empty {
+  color: #dc3545; /* Màu đỏ cho credit hết */
+}
+
+.credit-error {
+  color: #dc3545;
+  margin-left: 10px;
+  font-size: 0.9em;
+}
+
 /* Responsive */
 @media (max-width: 920px) {
   .header {
@@ -90,6 +125,8 @@
   }
   .brand {
     font-size: 16px;
+    position: relative;
+    left: 15px; /* Dịch logo sang phải 15px trên mobile */
   }
   .header-right {
     right: 12px;
@@ -112,6 +149,8 @@
   }
   .brand {
     font-size: 14px;
+    position: relative;
+    left: 40px; /* Giữ dịch sang phải 15px */
   }
   .header-right {
     right: 10px;
@@ -132,38 +171,4 @@
     width: 20px;
     height: 20px;
   }
-}
-.credit-header-wrapper {
-    cursor: pointer; /* Biểu thị rằng có thể click */
-    padding: 5px 8px;
-    border: 2px solid transparent;
-    border-radius: 5px;
-    transition: all 0.2s ease;
-    margin-left: 10px;
-}
-
-.credit-header-wrapper:hover {
-    background-color: #f0f0f0; /* Hiệu ứng hover nhẹ */
-}
-
-/* Cảnh báo credit thấp trên header */
-.credit-header-wrapper.low-credit-warning {
-    border-color: #ffc107; /* Viền vàng cảnh báo */
-    background-color: #fffbe6;
-}
-
-.credit-display {
-    /* Đảm bảo style của thẻ span credit cũ vẫn hoạt động */
-    font-weight: bold;
-    color: #007bff;
-}
-
-.credit-display.credit-empty {
-    color: #dc3545; /* Màu đỏ cho credit hết */
-}
-
-.credit-error {
-    color: #dc3545;
-    margin-left: 10px;
-    font-size: 0.9em;
 }
