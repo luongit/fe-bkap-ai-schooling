@@ -12,6 +12,7 @@ import ProfileEditPage from "./pages/ProfileEditPage";
 import WritingPage from "./pages/WritingPage";
 import TopIntro from "./components/TopIntro";
 import ImageGeneration from "./pages/ImageGeneration";
+import VideoGeneration from "./pages/VideoGeneration";
 import PricingPage from "./pages/PricingPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -68,6 +69,8 @@ function App() {
           <Route path="/students/:studentId/goals" element={<GoalsPage />} />
           <Route path="/writing" element={<WritingPage />} />
           <Route path="/generate-image" element={<ImageGeneration />} />
+          <Route path="/generate-video" element={<VideoGeneration />} />
+          
           <Route path="/pricing" element={<PricingPage />} />
           <Route
             path="*"

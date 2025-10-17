@@ -23,6 +23,7 @@ import {
   FiTrash2,
   FiImage,
   FiDollarSign,
+  FiVideo,
 } from "react-icons/fi";
 import "./css/Sidebar.css";
 import "../style/chat.css";
@@ -58,11 +59,11 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     setShowSessionMenu({}); // Đóng tất cả menu ba chấm khi toggle sidebar
   };
 
-useEffect(() => {
-  const handleResize = () => setIsMobile(window.innerWidth <= 920);
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
-}, []);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 920);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   const fetchSessions = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -97,6 +98,7 @@ useEffect(() => {
         
       });
     }
+
       setSessions([]);
     } finally {
       setLoading(false);
@@ -136,17 +138,17 @@ useEffect(() => {
       });
       if (response.ok) {
         if (!isMobile) {
-        toast.success("Đã xóa cuộc trò chuyện!", {
-          toastId: `deleteSessionSuccess_${sessionId}`,
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "colored",
-        });
-      }
+          toast.success("Đã xóa cuộc trò chuyện!", {
+            toastId: `deleteSessionSuccess_${sessionId}`,
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "colored",
+          });
+        }
         fetchSessions();
         window.dispatchEvent(new Event("sessionUpdated"));
         window.dispatchEvent(new Event("writingSessionUpdated"));
@@ -164,17 +166,17 @@ useEffect(() => {
     } catch (err) {
       console.error("Delete session error:", err);
       if (!isMobile) {
-      toast.error("Lỗi khi xóa, vui lòng thử lại!", {
-        toastId: `deleteSessionError_${sessionId}`,
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "colored",
-      });
-    }
+        toast.error("Lỗi khi xóa, vui lòng thử lại!", {
+          toastId: `deleteSessionError_${sessionId}`,
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
+      }
     }
   };
 
@@ -182,17 +184,17 @@ useEffect(() => {
     const toastId = "comingSoon";
     if (!toast.isActive(toastId)) {
       if (!isMobile) {
-      toast.info("Tính năng đang được phát triển, mời bạn quay lại sau!", {
-        toastId,
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "colored",
-      });
-    }
+        toast.info("Tính năng đang được phát triển, mời bạn quay lại sau!", {
+          toastId,
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
+        });
+      }
     }
   };
 
@@ -282,22 +284,26 @@ useEffect(() => {
           <FiImage className="sidebar-icon" />
           {!isCollapsed && <span className="text-sm">Tạo Ảnh AI</span>}
         </NavLink>
-
-
-        {renderNavItem(FiMessageCircle, "Trợ Lý Ảo", showComingSoon)}
-        {renderNavItem(FiPlus, "Thêm công cụ", showComingSoon)}
-        {renderNavItem(FiDownload, "Tải ứng dụng", showComingSoon)}
         <NavLink
-          to="/pricing"
-          onClick={() => onToggleSidebar()}
+          to="/generate-video"
+          onClick={() => {
+            startNewImageGeneration(); // Gọi hàm reset và điều hướng
+            onToggleSidebar(); // Đóng sidebar
+          }}
           className={({ isActive }) =>
             `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
             } ${isCollapsed ? "justify-center" : "justify-start"}`
           }
         >
-          <FiDollarSign className="sidebar-icon" />
-          {!isCollapsed && <span className="text-sm">Bảng giá</span>}
+          <FiVideo className="sidebar-icon" />
+          {!isCollapsed && <span className="text-sm">Tạo Video AI</span>}
         </NavLink>
+
+
+        {renderNavItem(FiMessageCircle, "Trợ Lý Ảo", showComingSoon)}
+        {renderNavItem(FiPlus, "Thêm công cụ", showComingSoon)}
+        {renderNavItem(FiDownload, "Tải ứng dụng", showComingSoon)}
+
 
       </nav>
 

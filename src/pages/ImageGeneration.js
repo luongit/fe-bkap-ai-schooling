@@ -2,8 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { FiDownload, FiImage, FiSend, FiLoader, FiXCircle } from 'react-icons/fi';
-// import '../style/chat.css'; // ✅ ĐÃ XÓA KẾ THỪA
-import '../style/ImageGeneration.css'; // CHỈ SỬ DỤNG CSS RIÊNG
+import '../style/ImageGeneration.css'; 
 
 const API_URL = process.env.REACT_APP_API_URL;
 
