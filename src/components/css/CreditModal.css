@@ -264,3 +264,117 @@
     /* Đảm bảo chỉ số âm có màu đỏ */
     color: #dc3545; 
 }
+.history-table {
+  display: block;
+  overflow-x: auto;
+}
+.history-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.history-table th, .history-table td {
+  padding: 8px;
+  text-align: left;
+}
+/* ====== LỊCH SỬ CREDIT ====== */
+
+.credit-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 12px;
+  font-size: 0.95rem;
+}
+
+.credit-history-table thead {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.credit-history-table th,
+.credit-history-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.credit-history-table th {
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.credit-history-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.credit-history-table tbody tr:hover {
+  background-color: #eef2ff; /* hơi xanh lam */
+  transition: background 0.2s ease-in-out;
+}
+
+/* Số dương / âm */
+.positive {
+  color: #16a34a; /* xanh lá */
+  font-weight: 600;
+}
+
+.negative {
+  color: #dc2626; /* đỏ */
+  font-weight: 600;
+}
+
+/* Nút tiêu đề, căn giữa và icon */
+.content-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+  .credit-history-table thead {
+    display: none;
+  }
+
+  .credit-history-table,
+  .credit-history-table tbody,
+  .credit-history-table tr,
+  .credit-history-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .credit-history-table tr {
+    margin-bottom: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px;
+    background: #fff;
+  }
+
+  .credit-history-table td {
+    border: none;
+    padding: 8px 10px;
+    position: relative;
+  }
+
+  .credit-history-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+  }
+}

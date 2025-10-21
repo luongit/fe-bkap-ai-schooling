@@ -202,6 +202,7 @@ function Header({ toggleSidebar }) {
           errorMessage={errorMessage}
           onClose={handleModalClose}
           onRefresh={handleRefreshCredit}
+          userId={profile?.userId} 
         />
       )}
     </header>
