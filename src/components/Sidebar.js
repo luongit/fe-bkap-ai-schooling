@@ -317,7 +317,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
           <FiImage className="sidebar-icon" />
           {!isCollapsed && <span className="text-sm">Tạo Ảnh AI</span>}
         </NavLink>
-        <NavLink
+        {/* <NavLink
           to="/generate-video"
           onClick={() => {
             startNewImageGeneration(); // Gọi hàm reset và điều hướng
@@ -330,7 +330,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         >
           <FiImage className="sidebar-icon" />
           {!isCollapsed && <span className="text-sm">Tạo Video AI</span>}
-        </NavLink>
+        </NavLink> */}
 
 
         {renderNavItem(FiMessageCircle, "Trợ Lý Ảo", showComingSoon)}

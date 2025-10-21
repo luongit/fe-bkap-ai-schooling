@@ -69,7 +69,7 @@ function App() {
           <Route path="/students/:studentId/goals" element={<GoalsPage />} />
           <Route path="/writing" element={<WritingPage />} />
           <Route path="/generate-image" element={<ImageGeneration />} />
-          <Route path="/generate-video" element={<VideoGeneration />} />
+          {/* <Route path="/generate-video" element={<VideoGeneration />} /> */}
           
           <Route path="/pricing" element={<PricingPage />} />
           <Route
