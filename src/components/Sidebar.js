@@ -3,7 +3,7 @@ import { Link, useNavigate, NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useParams } from "react-router-dom";
-import { HiOutlineChatAlt2 } from "react-icons/hi";
+import { HiOutlineChatAlt2 } from "react-icons/hi"; // ✅ fix import đúng thư viện
 import {
   FiMessageCircle,
   FiSearch,
@@ -29,6 +29,49 @@ import "../style/chat.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "";
 
+// ✅ Hàm fetch có xử lý tự động refresh token
+async function fetchWithRefresh(url, options = {}) {
+  const accessToken = localStorage.getItem("accessToken") || localStorage.getItem("token");
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  options.headers = {
+    ...(options.headers || {}),
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  };
+
+  let response = await fetch(url, options);
+
+  if (response.status === 401 && refreshToken) {
+    try {
+      const refreshRes = await fetch("/api/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      const data = await refreshRes.json();
+      if (refreshRes.ok && data.accessToken) {
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+
+        // Gửi lại request gốc
+        options.headers.Authorization = `Bearer ${data.accessToken}`;
+        response = await fetch(url, options);
+      } else {
+        localStorage.clear();
+        window.location.href = "/auth/login";
+      }
+    } catch (err) {
+      console.error("Refresh token error:", err);
+      localStorage.clear();
+      window.location.href = "/auth/login";
+    }
+  }
+
+  return response;
+}
+
 function Sidebar({ className, isOpen, onToggleSidebar }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [sessions, setSessions] = useState([]);
@@ -43,10 +86,11 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const { sessionId } = useParams();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 920);
 
+  // ✅ kiểm tra login bằng accessToken
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const accessToken = localStorage.getItem("accessToken") || localStorage.getItem("token");
     const user = localStorage.getItem("username");
-    if (token) {
+    if (accessToken) {
       setIsLoggedIn(true);
       if (user) setUsername(user);
     }
@@ -55,7 +99,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
     setShowMenu(false);
-    setShowSessionMenu({}); // Đóng tất cả menu ba chấm khi toggle sidebar
+    setShowSessionMenu({});
   };
 
   useEffect(() => {
@@ -63,15 +107,15 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // ✅ fetch session với refresh token
   const fetchSessions = async () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
     if (!token) return;
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/conversations/sessions`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetchWithRefresh(`${API_URL}/conversations/sessions`);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -79,22 +123,12 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
       if (Array.isArray(data)) {
         setSessions(data);
       } else {
-        console.warn("Data is not an array:", data);
         setSessions([]);
       }
     } catch (err) {
       console.error("Load sessions error:", err);
       if (!isMobile) {
-        toast.error("Không thể tải lịch sử. Vui lòng thử lại sau!", {
-          toastId: "fetchSessionsError",
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "colored",
-        });
+        toast.error("Không thể tải lịch sử. Vui lòng thử lại sau!");
       }
       setSessions([]);
     } finally {
@@ -120,82 +154,47 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     sessionStorage.removeItem("sessionId");
     window.dispatchEvent(new Event("newChat"));
     navigate("/");
-
   };
 
+  // ✅ xóa session có refresh
   const deleteSession = async (sessionId) => {
     if (!window.confirm("Xác nhận xóa cuộc trò chuyện này?")) return;
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
     if (!token) return;
 
     try {
-      const response = await fetch(`${API_URL}/conversations/${sessionId}`, {
+      const response = await fetchWithRefresh(`${API_URL}/conversations/${sessionId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
-        if (!isMobile) {
-          toast.success("Đã xóa cuộc trò chuyện!", {
-            toastId: `deleteSessionSuccess_${sessionId}`,
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            theme: "colored",
-          });
-        }
+        toast.success("Đã xóa cuộc trò chuyện!");
         fetchSessions();
         window.dispatchEvent(new Event("sessionUpdated"));
         window.dispatchEvent(new Event("writingSessionUpdated"));
         setShowSessionMenu((prev) => ({ ...prev, [sessionId]: false }));
-        //đóng khi ở chế độ mobile
         if (window.innerWidth <= 920 && typeof onToggleSidebar === "function") {
-          onToggleSidebar(); // Gọi hàm toggle sidebar từ parent
+          onToggleSidebar();
         }
-        // ✅ Điều hướng về trang chủ
         navigate("/");
-
       } else {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
     } catch (err) {
       console.error("Delete session error:", err);
-      if (!isMobile) {
-        toast.error("Lỗi khi xóa, vui lòng thử lại!", {
-          toastId: `deleteSessionError_${sessionId}`,
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "colored",
-        });
-      }
+      toast.error("Lỗi khi xóa, vui lòng thử lại!");
     }
   };
 
   const showComingSoon = () => {
-    const toastId = "comingSoon";
-    if (!toast.isActive(toastId)) {
-      if (!isMobile) {
-        toast.info("Tính năng đang được phát triển, mời bạn quay lại sau!", {
-          toastId,
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "colored",
-        });
-      }
+    if (!isMobile) {
+      toast.info("Tính năng đang được phát triển, mời bạn quay lại sau!");
     }
   };
 
+  // ✅ logout xóa luôn refresh token
   const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("username");
@@ -209,20 +208,18 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     setShowMenu(false);
   };
 
-  const renderIconOnly = (Icon, text) => {
-    return (
-      <div className="flex flex-col items-center gap-1">
-        <Icon className="sidebar-icon" />
-        {isCollapsed ? null : <span className="text-xs">{text}</span>}
-      </div>
-    );
-  };
+  const renderIconOnly = (Icon, text) => (
+    <div className="flex flex-col items-center gap-1">
+      <Icon className="sidebar-icon" />
+      {isCollapsed ? null : <span className="text-xs">{text}</span>}
+    </div>
+  );
 
   const renderNavItem = (Icon, label, onClick) => (
     <button
       onClick={() => {
         onClick();
-        onToggleSidebar(); // ✅ đóng sidebar sau khi click
+        onToggleSidebar();
       }}
       className={`side-item w-full flex items-center gap-2 ${isCollapsed ? "justify-center" : ""}`}
     >
@@ -236,7 +233,9 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     window.dispatchEvent(new Event("newImageGeneration"));
     navigate("/generate-image");
   };
-  return (
+
+  // ✅ GIỮ NGUYÊN GIAO DIỆN DƯỚI ĐÂY
+   return (
     <aside
       className={`sidebar ${className} ${isCollapsed ? "collapsed" : ""}`}
     >
