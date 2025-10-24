@@ -2,9 +2,6 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-
-
-
 import {
   FiCheckCircle,
   FiZap,
@@ -87,7 +84,9 @@ const FAQ_ITEMS = [
 ];
 
 
+
 function PricingPage() {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [actionCosts, setActionCosts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -108,15 +107,17 @@ function PricingPage() {
     document.title = "Bảng giá chi phí thao tác | BKAP AI";
     document.body.classList.add("allow-body-scroll");
 
-    // Fetch dữ liệu từ backend
-    axios.get("http://localhost:8080/api/pricing")
+    // ✅ Gọi API động theo ENV
+    axios
+      .get(`${API_URL}/pricing`)
       .then((res) => setActionCosts(res.data))
       .catch((err) => console.error("Lỗi fetch pricing:", err));
 
     return () => {
       document.body.classList.remove("allow-body-scroll");
     };
-  }, []);
+  }, [API_URL]);
+
 
 
   return (
