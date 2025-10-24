@@ -67,14 +67,14 @@ const CreditHistoryView = ({ userId, token }) => {
 
   return (
     <div className="modal-content-area">
-      <h3 className="content-title">📜 Lịch sử Trừ Credit</h3>
+      <h3 className="content-title">📜 Lịch sử Giao dịch Credit</h3>
       <table className="credit-history-table">
         <thead>
           <tr>
             <th>Thời gian</th>
             <th>Mô tả</th>
             <th>Thay đổi</th>
-            <th>Tham chiếu</th>
+          
           </tr>
         </thead>
         <tbody>
@@ -87,7 +87,6 @@ const CreditHistoryView = ({ userId, token }) => {
               </td>
 
 
-              <td>{t.referenceId || "-"}</td>
             </tr>
           ))}
         </tbody>
