@@ -345,6 +345,9 @@ function Home() {
     const question = input.trim();
     if (!question || loading || remainingCredit === 0) return;
 
+
+
+
     const updatedHistory = [
       ...chatHistory,
       { role: 'user', content: question },
@@ -379,7 +382,12 @@ function Home() {
           'Authorization': `Bearer ${token}`,
         },
         cache: 'no-store',
-        body: JSON.stringify({ messages: updatedHistory, session_id: sessionToUse }),
+        body: JSON.stringify({
+          actionCode: "CHAT_AI",
+          messages: updatedHistory,
+          session_id: sessionToUse
+        }),
+
         signal,
       });
 
@@ -416,7 +424,7 @@ function Home() {
             setLoading(false);
             break;
           }
-          
+
           if (json.type === 'done') {
             if (scheduleRef.current.timer) {
               clearTimeout(scheduleRef.current.timer);
