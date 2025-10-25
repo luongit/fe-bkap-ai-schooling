@@ -8,10 +8,11 @@ import { toast } from 'react-toastify';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FiCopy, FiVolume2 } from 'react-icons/fi';
 import { BsHandThumbsUp, BsHandThumbsDown } from 'react-icons/bs';
-  import { getLangIcon, extractText, speakText } from '../services/handle/Function';
+import { getLangIcon, extractText, speakText } from '../services/handle/Function';
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
 import 'react-toastify/dist/ReactToastify.css';
+import '../style/chat.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '';
 
@@ -437,15 +438,15 @@ export default function WritingPage() {
           </div>
         ) : (
           <>
-              <div className="flex flex-col items-center text-center mb-6">
-      <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
-        <span className="text-3xl">✏️</span>
-      </div>
-      <h1 className="text-2xl font-semibold text-gray-900">AI Viết Văn</h1>
-      <p className="text-gray-500 text-sm mt-2 max-w-md">
-        AI hỗ trợ viết văn theo yêu cầu, giúp bạn sáng tạo nội dung chất lượng và dễ dàng.
-      </p>
-    </div>
+            <div className="flex flex-col items-center text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
+                <span className="text-3xl">✏️</span>
+              </div>
+              <h1 className="text-2xl font-semibold text-gray-900">AI Viết Văn</h1>
+              <p className="text-gray-500 text-sm mt-2 max-w-md">
+                AI hỗ trợ viết văn theo yêu cầu, giúp bạn sáng tạo nội dung chất lượng và dễ dàng.
+              </p>
+            </div>
 
             {errorMessage && (
               <div className="error-message">
@@ -457,6 +458,13 @@ export default function WritingPage() {
                 )}
               </div>
             )}
+          </>
+        )}
+      </section>
+
+      {token && (
+        <>
+          <div className={`chat-scroll-wrapper ${chatHistory.length > 0 ? 'has-messages' : ''}`}>
             <div className="chat-container">
               {!hasAssistantResponse && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-3xl mb-6">
@@ -571,44 +579,44 @@ export default function WritingPage() {
                 </div>
               )}
             </div>
-            <div className="composer-wrap">
-              <div className="composer grok-style" role="group" aria-label="Hộp nhập câu hỏi">
-                <textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSubmit();
-                    }
-                  }}
-                />
-                <button
-                  className="send-btn"
-                  title="Gửi"
-                  onClick={handleSubmit}
-                  disabled={loading || remainingCredit === 0}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 19V5m7 7l-7-7-7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              </div>
-              <p className="disclaimer">
-                Khi đặt câu hỏi, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách quyền riêng tư</a>.
-              </p>
-              {remainingCredit === 0 && (
-                <div className="credit-warning">
-                  <p>
-                    Bạn đã hết credit, vui lòng <a href="/purchase-credits">mua thêm credit</a> để tiếp tục sử dụng.
-                  </p>
-                </div>
-              )}
-              
+          </div>
+
+          <div className="input-area">
+            <div className="composer grok-style" role="group" aria-label="Hộp nhập câu hỏi">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
+              />
+              <button
+                className="send-btn"
+                title="Gửi"
+                onClick={handleSubmit}
+                disabled={loading || remainingCredit === 0}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 19V5m7 7l-7-7-7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
             </div>
-          </>
-        )}
-      </section>
+            <p className="disclaimer">
+              Khi đặt câu hỏi, bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách quyền riêng tư</a>.
+            </p>
+            {remainingCredit === 0 && (
+              <div className="credit-warning">
+                <p>
+                  Bạn đã hết credit, vui lòng <a href="/purchase-credits">mua thêm credit</a> để tiếp tục sử dụng.
+                </p>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </main>
   );
 }
