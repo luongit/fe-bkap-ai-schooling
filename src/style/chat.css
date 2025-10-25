@@ -1,54 +1,59 @@
   /* Root Variables (copied for compatibility) */
- :root {
-  --bg: #ffffff;
-  --text: #111827;
-  --muted: #6b7280;
-  --primary: #16a34a;
-  --border: #e5e7eb;
-  --radius: 14px;
-  --shadow: 0 2px 8px rgba(17, 24, 39, 0.06);
-}
+  :root {
+    --bg: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+    --primary: #16a34a;
+    --border: #e5e7eb;
+    --radius: 14px;
+    --shadow: 0 2px 8px rgba(17, 24, 39, 0.06);
+  }
 
   /* Chat Scroll Wrapper */
-.chat-scroll-wrapper {
-  flex: 1;
-  overflow-y: hidden;
-  display: flex;
-  justify-content: center;
-  scroll-behavior: smooth;
-  padding-bottom: 120px;
-}
+  .chat-scroll-wrapper {
+    flex: 1;
+    overflow-y: hidden;
+    display: flex;
+    justify-content: center;
+    scroll-behavior: smooth;
+    padding-bottom: 120px;
+  }
 
-.chat-scroll-wrapper.has-messages {
-  overflow-y: auto;
-}
+  .chat-scroll-wrapper.has-messages {
+    overflow-y: auto;
+  }
 
   .chat-scroll-wrapper::-webkit-scrollbar {
     width: 8px;
   }
+
   .chat-scroll-wrapper::-webkit-scrollbar-track {
     background: transparent;
   }
+
   .chat-scroll-wrapper::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 4px;
   }
+
   .chat-scroll-wrapper::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
   }
 
   /* Chat Container */
-.chat-container {
-  width: 100%;
-  max-width: 800px; /* ✅ nhỏ hơn, canh giữa */
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 0 auto;
-  padding: 0 8px;
-    padding-bottom: 140px !important; /* tăng khoảng đệm cho vùng chat */
+  .chat-container {
+    width: 100%;
+    max-width: 800px;
+    /* ✅ nhỏ hơn, canh giữa */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0 auto;
+    padding: 0 8px;
+    padding-bottom: 140px !important;
+    /* tăng khoảng đệm cho vùng chat */
 
-}
+  }
 
   /* Chat Inner */
   .chat-inner {
@@ -63,34 +68,42 @@
 
   /* Chat Message */
   .chat-message {
-  padding: 10px 14px;
-  border-radius: 18px; /* ✅ bo tròn nhẹ hơn */
-  max-width: 80%; /* ✅ thu nhỏ khung lại */
-  word-wrap: break-word;
-  box-shadow: none;
-}
-.chat-message.user {
-  align-self: flex-end;
-  background: #f5f5f5; /* ✅ xám nhẹ hơn, dịu mắt như ChatGPT */
-  color: #111827;      /* ✅ chữ đậm, dễ đọc */
-  border-radius: 22px; /* ✅ bo tròn đều, không còn góc nhọn */
-  padding: 10px 14px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* ✅ bóng nhẹ tinh tế */
-}
+    padding: 10px 14px;
+    border-radius: 18px;
+    /* ✅ bo tròn nhẹ hơn */
+    max-width: 80%;
+    /* ✅ thu nhỏ khung lại */
+    word-wrap: break-word;
+    box-shadow: none;
+  }
+
+  .chat-message.user {
+    align-self: flex-end;
+    background: #f5f5f5;
+    /* ✅ xám nhẹ hơn, dịu mắt như ChatGPT */
+    color: #111827;
+    /* ✅ chữ đậm, dễ đọc */
+    border-radius: 22px;
+    /* ✅ bo tròn đều, không còn góc nhọn */
+    padding: 10px 14px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    /* ✅ bóng nhẹ tinh tế */
+  }
 
 
-.chat-message pre,
-.chat-message code {
-  border-radius: 8px;
-  overflow-x: auto;
-}
-.chat-message.ai {
-  align-self: flex-start;
-  background: #f9fafb;
-  border-radius: 18px 18px 18px 4px;
-  color: var(--text);
-  box-shadow: var(--shadow);
-}
+  .chat-message pre,
+  .chat-message code {
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+
+  .chat-message.ai {
+    align-self: flex-start;
+    background: #f9fafb;
+    border-radius: 18px 18px 18px 4px;
+    color: var(--text);
+    box-shadow: var(--shadow);
+  }
 
   /* Message Box */
   .message-box {
@@ -105,16 +118,20 @@
     margin: 4px 0;
     text-align: left;
   }
+
   .chat-message strong {
     font-weight: 700;
   }
+
   .chat-message em {
     font-style: italic;
   }
+
   .chat-message a {
     color: var(--brand);
     text-decoration: underline;
   }
+
   .chat-message blockquote {
     border-left: 4px solid var(--primary);
     background: #ecfdf5;
@@ -134,6 +151,7 @@
     margin: 8px 0;
     position: relative;
   }
+
   .chat-message code {
     background: #e2e8f0;
     color: #0f172a;
@@ -147,6 +165,7 @@
   .code-block-wrapper {
     position: relative;
   }
+
   .code-header {
     display: flex;
     justify-content: space-between;
@@ -158,11 +177,13 @@
     font-size: 13px;
     color: #e5e7eb;
   }
+
   .code-lang {
     display: flex;
     align-items: center;
     gap: 6px;
   }
+
   .code-block {
     margin: 0;
   }
@@ -178,12 +199,14 @@
     cursor: pointer;
     transition: background 0.2s;
   }
+
   .copy-button:hover {
     background: #6b7280;
   }
+
   .copy-button.copied {
     background: var(--primary);
-   }
+  }
 
   /* Tables */
   .chat-message table {
@@ -192,16 +215,19 @@
     border-collapse: collapse;
     margin: 10px 0;
   }
+
   .chat-message th,
   .chat-message td {
     border: 1px solid var(--border);
     padding: 8px 12px;
     text-align: left;
   }
+
   .chat-message th {
     background: #e5e7eb;
     font-weight: 600;
   }
+
   .chat-message td {
     background: var(--bg);
   }
@@ -221,6 +247,7 @@
     gap: 8px;
     margin-top: 4px;
   }
+
   .btn-icon {
     background: transparent;
     border: none;
@@ -229,49 +256,62 @@
     color: var(--muted);
     transition: color 0.2s;
   }
+
   .btn-icon:hover {
     color: var(--primary);
   }
 
   /* Typing Indicator */
-/* Hiển thị chấm "đang suy nghĩ" kiểu ChatGPT */
-.typing-indicator {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent; /* Không có khung nền */
-  width: fit-content;
-  margin: 6px 0;
-  min-height: 20px;
-}
-
-/* Chấm đen rõ ràng */
-.typing-indicator span {
-  width: 10px;
-  height: 10px;
-  background: #000; /* ✅ Đen hẳn, không xám nữa */
-  border-radius: 50%;
-  opacity: 0.6;
-  animation: thinkingPulse 1.2s infinite ease-in-out;
-}
-
-/* Hiệu ứng nhịp nhẹ nhàng */
-@keyframes thinkingPulse {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
+  /* Hiển thị chấm "đang suy nghĩ" kiểu ChatGPT */
+  .typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    /* Không có khung nền */
+    width: fit-content;
+    margin: 6px 0;
+    min-height: 20px;
   }
-  50% {
-    opacity: 1;
-    transform: scale(1.5);
-  }
-}
 
-/* Khi biến mất (khi AI trả lời xong) */
-@keyframes fadeOutWhenDone {
-  from { opacity: 1; transform: scale(1); }
-  to { opacity: 0; transform: scale(0.7); }
-}
+  /* Chấm đen rõ ràng */
+  .typing-indicator span {
+    width: 10px;
+    height: 10px;
+    background: #000;
+    /* ✅ Đen hẳn, không xám nữa */
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: thinkingPulse 1.2s infinite ease-in-out;
+  }
+
+  /* Hiệu ứng nhịp nhẹ nhàng */
+  @keyframes thinkingPulse {
+
+    0%,
+    100% {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 1;
+      transform: scale(1.5);
+    }
+  }
+
+  /* Khi biến mất (khi AI trả lời xong) */
+  @keyframes fadeOutWhenDone {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    to {
+      opacity: 0;
+      transform: scale(0.7);
+    }
+  }
 
 
   /* Navigation Buttons */
@@ -289,11 +329,13 @@
     transition: all 0.3s ease;
     box-shadow: var(--shadow);
   }
+
   .nav-btn:hover {
     background: var(--paper);
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(17, 24, 39, 0.08);
   }
+
   .nav-btn:active {
     transform: scale(0.95);
   }
@@ -315,6 +357,7 @@
     max-width: 600px;
     animation: fadeIn 0.5s ease;
   }
+
   .pill .thumb {
     font-size: 24px;
   }
@@ -345,11 +388,13 @@
     transition: all 0.3s ease;
     box-shadow: var(--shadow);
   }
+
   .tag:hover {
     background: var(--paper);
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(17, 24, 39, 0.08);
   }
+
   .tag:active {
     transform: translateY(0);
   }
@@ -359,9 +404,11 @@
     font-size: 18px;
     transition: all 0.3s ease;
   }
+
   .ask-icon {
     color: var(--brand);
   }
+
   .tag:hover .ask-icon {
     animation: spin 2s linear infinite;
     background: var(--gradient);
@@ -369,9 +416,11 @@
     background-clip: text;
     color: transparent;
   }
+
   .explore-icon {
     color: var(--primary);
   }
+
   .tag:hover .explore-icon {
     animation: wobble 1.5s ease-in-out infinite;
     background: var(--gradient);
@@ -379,9 +428,11 @@
     background-clip: text;
     color: transparent;
   }
+
   .chat-icon {
     color: #22c55e;
   }
+
   .tag:hover .chat-icon {
     animation: pulse 2s ease-in-out infinite;
     background: var(--gradient);
@@ -389,9 +440,11 @@
     background-clip: text;
     color: transparent;
   }
+
   .learn-icon {
     color: var(--brand);
   }
+
   .tag:hover .learn-icon {
     animation: bounce 1.8s ease-in-out infinite;
     background: var(--gradient);
@@ -402,26 +455,68 @@
 
   /* Animations */
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
+
   @keyframes typingDot {
-    0%, 80%, 100% { opacity: 0.3; transform: scale(1); }
-    40% { opacity: 1; transform: scale(1.2); }
+
+    0%,
+    80%,
+    100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+
+    40% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
   }
+
   @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
   }
+
   @keyframes wobble {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(12deg); }
-    75% { transform: rotate(-12deg); }
+
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+
+    25% {
+      transform: rotate(12deg);
+    }
+
+    75% {
+      transform: rotate(-12deg);
+    }
   }
+
   @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-8px);
+    }
   }
+
   /* Main */
   .main {
     display: flex;
@@ -429,7 +524,8 @@
     height: 100vh;
     background: var(--bg);
     overflow: hidden;
-      padding-bottom: 25px; /* 👈 điều chỉnh tùy theo chiều cao thật của .input-area */
+    padding-bottom: 25px;
+    /* 👈 điều chỉnh tùy theo chiều cao thật của .input-area */
 
   }
 
@@ -444,96 +540,109 @@
   }
 
   /* Input Area */
- .input-area {
-  position: sticky;
-  bottom: 0;
-  background: var(--bg);
-  padding: 10px 0 26px; /* 👈 thêm khoảng đệm dưới để chat không bị che */
-  z-index: 10;
-  width: 100%;
-  max-width: 940px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  .input-area {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);
+    padding: 10px 0 26px;
+    /* 👈 thêm khoảng đệm dưới để chat không bị che */
+    z-index: 10;
+    width: 100%;
+    max-width: 940px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-.composer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 940px;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 10px 16px;
-  box-shadow: var(--shadow);
-}
+  .composer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 940px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 10px 16px;
+    box-shadow: var(--shadow);
+  }
+
   /* Composer */
-.composer.grok-style {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 999px; /* Bo tròn hoàn toàn */
-  padding: 4px 8px; /* 👈 giảm padding → mỏng hơn */
-  width: 90%;
-  max-width: 800px;
-  margin: 8px auto;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.2s ease;
-  min-height: 42px; /* 👈 thấp hơn khung cũ */
-}
-.composer.grok-style textarea {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: 15px;
-  color: var(--text);
-  resize: none;
-  min-height: 20px;        /* 👈 nhỏ hơn chút */
-  max-height: 100px;       /* 👈 vừa đủ để mở rộng */
-  overflow-y: auto;
-padding: 11px 12px 0px;
-  border-radius: 999px;
-  line-height: 1.4;
-  background: transparent;
-  vertical-align: middle;
-}
+  .composer.grok-style {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    /* Bo tròn hoàn toàn */
+    padding: 4px 8px;
+    /* 👈 giảm padding → mỏng hơn */
+    width: 90%;
+    max-width: 800px;
+    margin: 8px auto;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease;
+    min-height: 42px;
+    /* 👈 thấp hơn khung cũ */
+  }
+
+  .composer.grok-style textarea {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: var(--text);
+    resize: none;
+    min-height: 20px;
+    /* 👈 nhỏ hơn chút */
+    max-height: 100px;
+    /* 👈 vừa đủ để mở rộng */
+    overflow-y: auto;
+    padding: 11px 12px 0px;
+    border-radius: 999px;
+    line-height: 1.4;
+    background: transparent;
+    vertical-align: middle;
+  }
 
   .composer.grok-style textarea::placeholder {
     color: var(--muted);
   }
-.composer.grok-style .send-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #111; /* đen giống ChatGPT */
-  color: white;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-right: 4px; /* Dịch nhẹ sang trái */
-}
- .composer.grok-style .send-btn:hover {
-  background: #27272a; /* Hover sáng hơn nhẹ */
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
 
-.composer.grok-style .send-btn:active {
-  transform: scale(0.96);
-  background: #000;
-}
+  .composer.grok-style .send-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #111;
+    /* đen giống ChatGPT */
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 4px;
+    /* Dịch nhẹ sang trái */
+  }
 
-.composer.grok-style .send-btn svg {
-  width: 18px;
-  height: 18px;
-  fill: currentColor;
-}
+  .composer.grok-style .send-btn:hover {
+    background: #27272a;
+    /* Hover sáng hơn nhẹ */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .composer.grok-style .send-btn:active {
+    transform: scale(0.96);
+    background: #000;
+  }
+
+  .composer.grok-style .send-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+  }
