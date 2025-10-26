@@ -464,7 +464,7 @@ export default function WritingPage() {
 
       {token && (
         <>
-          <div className={`chat-scroll-wrapper ${chatHistory.length > 0 ? 'has-messages' : ''}`}>
+          <div className="chat-scroll-wrapper has-messages">
             <div className="chat-container">
               {!hasAssistantResponse && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-3xl mb-6">
