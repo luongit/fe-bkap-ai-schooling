@@ -14,6 +14,7 @@ import TopIntro from "./components/TopIntro";
 import ImageGeneration from "./pages/ImageGeneration";
 import VideoGeneration from "./pages/VideoGeneration";
 import PricingPage from "./pages/PricingPage";
+import AiJournalismPage from "./pages/AiJournalismPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./style/mobile.css";
@@ -70,6 +71,7 @@ function App() {
           <Route path="/writing" element={<WritingPage />} />
           <Route path="/generate-image" element={<ImageGeneration />} />
           <Route path="/generate-video" element={<VideoGeneration />} />
+          <Route path="/journalism" element={<AiJournalismPage />} />
           
           <Route path="/pricing" element={<PricingPage />} />
           <Route
