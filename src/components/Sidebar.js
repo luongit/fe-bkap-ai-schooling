@@ -3,7 +3,7 @@ import { Link, useNavigate, NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useParams } from "react-router-dom";
-import { HiOutlineChatAlt2 } from "react-icons/hi"; 
+import { HiOutlineChatAlt2 } from "react-icons/hi";
 import {
   FiMessageCircle,
   FiSearch,
@@ -235,7 +235,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   };
 
   // ✅ GIỮ NGUYÊN GIAO DIỆN DƯỚI ĐÂY
-   return (
+  return (
     <aside
       className={`sidebar ${className} ${isCollapsed ? "collapsed" : ""}`}
     >
@@ -330,6 +330,22 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
           <FiImage className="sidebar-icon" />
           {!isCollapsed && <span className="text-sm">Tạo Video AI</span>}
         </NavLink> */}
+        <NavLink
+          to="/journalism"
+          onClick={() => {
+            onToggleSidebar(); // đóng sidebar khi click
+          }}
+          className={({ isActive }) =>
+            `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive
+              ? "bg-gray-200 text-gray-800 font-semibold"
+              : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
+            } ${isCollapsed ? "justify-center" : "justify-start"}`
+          }
+        >
+          <FiEdit3 className="sidebar-icon" />
+          {!isCollapsed && <span className="text-sm">Cuộc thi AI </span>}
+        </NavLink>
+
 
 
         {renderNavItem(FiMessageCircle, "Trợ Lý Ảo", showComingSoon)}
