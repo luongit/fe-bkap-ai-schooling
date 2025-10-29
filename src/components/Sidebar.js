@@ -23,6 +23,7 @@ import {
   FiTrash2,
   FiImage,
   FiDollarSign,
+  FiAward
 } from "react-icons/fi";
 import "./css/Sidebar.css";
 import "../style/chat.css";
@@ -342,7 +343,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             } ${isCollapsed ? "justify-center" : "justify-start"}`
           }
         >
-          <FiEdit3 className="sidebar-icon" />
+          <FiAward className="sidebar-icon" />
           {!isCollapsed && <span className="text-sm">Cuộc thi AI </span>}
         </NavLink>
 
