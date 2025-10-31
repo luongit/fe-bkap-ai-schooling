@@ -54,6 +54,7 @@ export default function WritingPage() {
   const listEndRef = useRef(null);
   const navigate = useNavigate();
   const hasAssistantResponse = chatHistory.some(msg => msg.role === 'assistant');
+  const hasMessages = chatHistory.length > 0;
 
   useEffect(() => {
     sessionStorage.setItem('writingHistory', JSON.stringify(chatHistory));
@@ -438,15 +439,17 @@ export default function WritingPage() {
           </div>
         ) : (
           <>
-            <div className="flex flex-col items-center text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
-                <span className="text-3xl">✏️</span>
+            {!hasMessages && (
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-3">
+                  <span className="text-3xl">✏️</span>
+                </div>
+                <h1 className="text-2xl font-semibold text-gray-900">AI Viết Văn</h1>
+                <p className="text-gray-500 text-sm mt-2 max-w-md">
+                  AI hỗ trợ viết văn theo yêu cầu, giúp bạn sáng tạo nội dung chất lượng và dễ dàng.
+                </p>
               </div>
-              <h1 className="text-2xl font-semibold text-gray-900">AI Viết Văn</h1>
-              <p className="text-gray-500 text-sm mt-2 max-w-md">
-                AI hỗ trợ viết văn theo yêu cầu, giúp bạn sáng tạo nội dung chất lượng và dễ dàng.
-              </p>
-            </div>
+            )}
 
             {errorMessage && (
               <div className="error-message">
