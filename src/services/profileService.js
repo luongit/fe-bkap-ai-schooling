@@ -6,6 +6,6 @@ export const getProfile = async () => {
 };
 
 export const updateProfile = async (data) => {
-  const response = await api.put("/profile", data); 
+  const response = await api.put("/profile", data);
   return response.data;
 };

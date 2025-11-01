@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './css/CreditModal.css';
 import { FiCreditCard, FiClock, FiZap, FiUser } from 'react-icons/fi';
+import api from "../services/apiToken"; // ✅ Dùng axios instance có auto refresh token
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
 const LOW_CREDIT_THRESHOLD = 100;
 
 // --- Component 1: Credit Balance ---
@@ -34,8 +34,8 @@ const CreditBalanceView = ({ remainingCredit, errorMessage, onRefresh, onClose }
   </div>
 );
 
-// --- Component 2: Credit History (đã tích hợp API thật) ---
-const CreditHistoryView = ({ userId, token }) => {
+// --- Component 2: Credit History ---
+const CreditHistoryView = ({ userId }) => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -45,11 +45,8 @@ const CreditHistoryView = ({ userId, token }) => {
       if (!userId) return;
       setLoading(true);
       try {
-        const res = await fetch(`${API_URL}/credit/history/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Lỗi tải lịch sử credit");
-        const data = await res.json();
+        const res = await api.get(`/credit/history/${userId}`); // ✅ dùng axios instance
+        const data = res.data;
         setHistory(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("❌ Lỗi lấy lịch sử:", err);
@@ -59,7 +56,7 @@ const CreditHistoryView = ({ userId, token }) => {
       }
     };
     fetchHistory();
-  }, [userId, token]);
+  }, [userId]);
 
   if (loading) return <p>Đang tải lịch sử...</p>;
   if (error) return <p className="error-message">{error}</p>;
@@ -74,7 +71,6 @@ const CreditHistoryView = ({ userId, token }) => {
             <th>Thời gian</th>
             <th>Mô tả</th>
             <th>Thay đổi</th>
-          
           </tr>
         </thead>
         <tbody>
@@ -85,8 +81,6 @@ const CreditHistoryView = ({ userId, token }) => {
               <td className={t.amount < 0 ? "negative" : "positive"}>
                 {t.amount > 0 ? `+${t.amount}` : `-${Math.abs(t.amount)}`}
               </td>
-
-
             </tr>
           ))}
         </tbody>
@@ -119,7 +113,6 @@ const SubscriptionView = ({ onClose }) => (
 // --- Main Modal ---
 function CreditModal({ remainingCredit, errorMessage, onClose, onRefresh, userId }) {
   const [activeTab, setActiveTab] = useState('creditBalance');
-  const token = localStorage.getItem("token");
 
   const renderContent = () => {
     switch (activeTab) {
@@ -133,7 +126,7 @@ function CreditModal({ remainingCredit, errorMessage, onClose, onRefresh, userId
           />
         );
       case 'creditHistory':
-        return <CreditHistoryView userId={userId} token={token} />;
+        return <CreditHistoryView userId={userId} />;
       case 'subscription':
         return <SubscriptionView onClose={onClose} />;
       default:

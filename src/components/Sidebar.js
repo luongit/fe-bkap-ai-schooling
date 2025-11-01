@@ -22,56 +22,11 @@ import {
   FiMoreVertical,
   FiTrash2,
   FiImage,
-  FiDollarSign,
   FiAward
 } from "react-icons/fi";
 import "./css/Sidebar.css";
 import "../style/chat.css";
-
-const API_URL = process.env.REACT_APP_API_URL || "";
-
-// ✅ Hàm fetch có xử lý tự động refresh token
-async function fetchWithRefresh(url, options = {}) {
-  const accessToken = localStorage.getItem("accessToken") || localStorage.getItem("token");
-  const refreshToken = localStorage.getItem("refreshToken");
-
-  options.headers = {
-    ...(options.headers || {}),
-    Authorization: `Bearer ${accessToken}`,
-    "Content-Type": "application/json",
-  };
-
-  let response = await fetch(url, options);
-
-  if (response.status === 401 && refreshToken) {
-    try {
-      const refreshRes = await fetch("/api/auth/refresh", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      const data = await refreshRes.json();
-      if (refreshRes.ok && data.accessToken) {
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-
-        // Gửi lại request gốc
-        options.headers.Authorization = `Bearer ${data.accessToken}`;
-        response = await fetch(url, options);
-      } else {
-        localStorage.clear();
-        window.location.href = "/auth/login";
-      }
-    } catch (err) {
-      console.error("Refresh token error:", err);
-      localStorage.clear();
-      window.location.href = "/auth/login";
-    }
-  }
-
-  return response;
-}
+import api from "../services/apiToken"; // ✅ dùng axios instance
 
 function Sidebar({ className, isOpen, onToggleSidebar }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -89,7 +44,8 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
   // ✅ kiểm tra login bằng accessToken
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken") || localStorage.getItem("token");
+    const accessToken =
+      localStorage.getItem("accessToken") || localStorage.getItem("token");
     const user = localStorage.getItem("username");
     if (accessToken) {
       setIsLoggedIn(true);
@@ -109,18 +65,16 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ✅ fetch session với refresh token
+  // ✅ fetch sessions bằng axios instance (có refresh token auto)
   const fetchSessions = async () => {
-    const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+    const token =
+      localStorage.getItem("accessToken") || localStorage.getItem("token");
     if (!token) return;
 
     setLoading(true);
     try {
-      const response = await fetchWithRefresh(`${API_URL}/conversations/sessions`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
+      const res = await api.get("/conversations/sessions");
+      const data = res.data;
       if (Array.isArray(data)) {
         setSessions(data);
       } else {
@@ -157,29 +111,24 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     navigate("/");
   };
 
-  // ✅ xóa session có refresh
+  // ✅ xóa session bằng axios instance (có refresh token auto)
   const deleteSession = async (sessionId) => {
     if (!window.confirm("Xác nhận xóa cuộc trò chuyện này?")) return;
-    const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+    const token =
+      localStorage.getItem("accessToken") || localStorage.getItem("token");
     if (!token) return;
 
     try {
-      const response = await fetchWithRefresh(`${API_URL}/conversations/${sessionId}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        toast.success("Đã xóa cuộc trò chuyện!");
-        fetchSessions();
-        window.dispatchEvent(new Event("sessionUpdated"));
-        window.dispatchEvent(new Event("writingSessionUpdated"));
-        setShowSessionMenu((prev) => ({ ...prev, [sessionId]: false }));
-        if (window.innerWidth <= 920 && typeof onToggleSidebar === "function") {
-          onToggleSidebar();
-        }
-        navigate("/");
-      } else {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      await api.delete(`/conversations/${sessionId}`);
+      toast.success("Đã xóa cuộc trò chuyện!");
+      fetchSessions();
+      window.dispatchEvent(new Event("sessionUpdated"));
+      window.dispatchEvent(new Event("writingSessionUpdated"));
+      setShowSessionMenu((prev) => ({ ...prev, [sessionId]: false }));
+      if (window.innerWidth <= 920 && typeof onToggleSidebar === "function") {
+        onToggleSidebar();
       }
+      navigate("/");
     } catch (err) {
       console.error("Delete session error:", err);
       toast.error("Lỗi khi xóa, vui lòng thử lại!");
@@ -209,20 +158,15 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     setShowMenu(false);
   };
 
-  const renderIconOnly = (Icon, text) => (
-    <div className="flex flex-col items-center gap-1">
-      <Icon className="sidebar-icon" />
-      {isCollapsed ? null : <span className="text-xs">{text}</span>}
-    </div>
-  );
-
   const renderNavItem = (Icon, label, onClick) => (
     <button
       onClick={() => {
         onClick();
         onToggleSidebar();
       }}
-      className={`side-item w-full flex items-center gap-2 ${isCollapsed ? "justify-center" : ""}`}
+      className={`side-item w-full flex items-center gap-2 ${
+        isCollapsed ? "justify-center" : ""
+      }`}
     >
       <Icon className="sidebar-icon" />
       {!isCollapsed && <span className="text-sm">{label}</span>}
