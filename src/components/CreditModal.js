@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './css/CreditModal.css';
 import { FiCreditCard, FiClock, FiZap, FiUser } from 'react-icons/fi';
-import api from "../services/apiToken"; // ✅ Dùng axios instance có auto refresh token
+import api from "../services/apiToken"; // 
 
 const LOW_CREDIT_THRESHOLD = 100;
 
@@ -45,7 +45,7 @@ const CreditHistoryView = ({ userId }) => {
       if (!userId) return;
       setLoading(true);
       try {
-        const res = await api.get(`/credit/history/${userId}`); // ✅ dùng axios instance
+        const res = await api.get(`/credit/history/${userId}`); // 
         const data = res.data;
         setHistory(Array.isArray(data) ? data : []);
       } catch (err) {

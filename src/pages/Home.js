@@ -92,7 +92,7 @@ function Home() {
     }
   }, [chatHistory, loading]);
 
-  // ✅ đổi fetch → api.get
+  //  đổi fetch sang api.get
   useEffect(() => {
     const fetchInitialCredit = async () => {
       if (!token) return;
@@ -112,7 +112,7 @@ function Home() {
     fetchInitialCredit();
   }, [token, API_URL]);
 
-  // ✅ đổi fetch → api.get
+  
   const loadSession = useCallback(
     async (sid) => {
       if (!token) return;
@@ -249,7 +249,7 @@ function Home() {
     setTimeout(() => setActiveButton(null), 200);
   }, [navigate, chatHistory]);
 
-  // ✅ đổi fetch → api.delete
+  // 
   const handleClear = useCallback(async () => {
     if (!window.confirm('Bạn có chắc muốn xóa toàn bộ cuộc trò chuyện này?')) return;
     const sid = sessionStorage.getItem('sessionId');
@@ -321,7 +321,7 @@ function Home() {
     }, 80);
   }, []);
 
-  // ⚠️ giữ nguyên fetch /stream (axios không hỗ trợ NDJSON tốt)
+  //
   const handleSubmit = useCallback(async () => {
     const question = input.trim();
     if (!question || loading || remainingCredit === 0) return;

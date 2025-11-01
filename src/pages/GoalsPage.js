@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import api from "../services/apiToken"; // ✅ dùng axios instance có auto refresh
+import api from "../services/apiToken"; 
 
 function GoalsPage() {
   const { studentId } = useParams();

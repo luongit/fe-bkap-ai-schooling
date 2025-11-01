@@ -26,7 +26,7 @@ import {
 } from "react-icons/fi";
 import "./css/Sidebar.css";
 import "../style/chat.css";
-import api from "../services/apiToken"; // ✅ dùng axios instance
+import api from "../services/apiToken"; 
 
 function Sidebar({ className, isOpen, onToggleSidebar }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -42,7 +42,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const { sessionId } = useParams();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 920);
 
-  // ✅ kiểm tra login bằng accessToken
+  //  kiểm tra login bằng accessToken
   useEffect(() => {
     const accessToken =
       localStorage.getItem("accessToken") || localStorage.getItem("token");
@@ -65,7 +65,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // ✅ fetch sessions bằng axios instance (có refresh token auto)
+  //  fetch sessions bằng axios instance 
   const fetchSessions = async () => {
     const token =
       localStorage.getItem("accessToken") || localStorage.getItem("token");
@@ -111,7 +111,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     navigate("/");
   };
 
-  // ✅ xóa session bằng axios instance (có refresh token auto)
+  //  xóa session bằng axios instance (có refresh token auto)
   const deleteSession = async (sessionId) => {
     if (!window.confirm("Xác nhận xóa cuộc trò chuyện này?")) return;
     const token =
@@ -141,7 +141,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     }
   };
 
-  // ✅ logout xóa luôn refresh token
+  //  logout xóa luôn refresh token
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
@@ -179,7 +179,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     navigate("/generate-image");
   };
 
-  // ✅ GIỮ NGUYÊN GIAO DIỆN DƯỚI ĐÂY
+  
   return (
     <aside
       className={`sidebar ${className} ${isCollapsed ? "collapsed" : ""}`}

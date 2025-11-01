@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./css/Header.css";
 import CreditModal from "./CreditModal";
-import api from "../services/apiToken"; // ✅ dùng axios instance có refresh
+import api from "../services/apiToken"; 
 
 const LOW_CREDIT_THRESHOLD = 100;
 
@@ -71,7 +71,7 @@ function Header({ toggleSidebar }) {
     fetchProfile();
   }, [token]);
 
-  // ✅ Dùng axios instance cho credit
+  // 
   const fetchCredit = async (showToast = true) => {
     if (!token) {
       setRemainingCredit(null);
