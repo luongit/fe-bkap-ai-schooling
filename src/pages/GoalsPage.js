@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-const API_URL = process.env.REACT_APP_API_URL;
+import api from "../services/apiToken"; // ✅ dùng axios instance có auto refresh
 
 function GoalsPage() {
-  const { studentId } = useParams(); // Lấy studentId từ URL
+  const { studentId } = useParams();
   const [goals, setGoals] = useState([]);
   const [goal, setGoal] = useState("");
   const [subject, setSubject] = useState("");
@@ -21,9 +19,7 @@ function GoalsPage() {
   const fetchGoals = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_URL}/student-goals/student/${studentId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const res = await api.get(`/student-goals/student/${studentId}`);
       setGoals(res.data);
     } catch (err) {
       console.error("Lỗi load mục tiêu:", err);
@@ -36,26 +32,16 @@ function GoalsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = {
-        goal,
-        subject,
-        level,
-        style,
-        status,
-        deadline,
-      };
+      const payload = { goal, subject, level, style, status, deadline };
 
       if (editingId) {
-        await axios.put(`${API_URL}/student-goals/${editingId}`, payload, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        await api.put(`/student-goals/${editingId}`, payload);
         toast.success("Cập nhật mục tiêu thành công!");
       } else {
-        await axios.post(`${API_URL}/student-goals/student/${studentId}`, payload, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        await api.post(`/student-goals/student/${studentId}`, payload);
         toast.success("Thêm mục tiêu thành công!");
       }
+
       resetForm();
       fetchGoals();
     } catch (err) {
@@ -67,9 +53,7 @@ function GoalsPage() {
   const deleteGoal = async (id) => {
     if (!window.confirm("Bạn có chắc muốn xóa mục tiêu này?")) return;
     try {
-      await axios.delete(`${API_URL}/student-goals/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      await api.delete(`/student-goals/${id}`);
       toast.success("Xóa mục tiêu thành công!");
       fetchGoals();
     } catch (err) {
@@ -78,7 +62,6 @@ function GoalsPage() {
     }
   };
 
-  // Hàm chuyển status sang tiếng Việt
   const getStatusLabel = (status) => {
     switch (status) {
       case "PENDING":

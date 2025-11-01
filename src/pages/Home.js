@@ -10,6 +10,7 @@ import { FiCopy, FiVolume2, FiCheck, FiSquare } from 'react-icons/fi';
 import { BsHandThumbsUp, BsHandThumbsDown } from 'react-icons/bs';
 import TopIntro from '../components/TopIntro';
 import { getLangIcon, extractText, speakText } from '../services/handle/Function';
+import api from '../services/apiToken'; // ✅ thêm dòng này
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -91,18 +92,13 @@ function Home() {
     }
   }, [chatHistory, loading]);
 
+  // ✅ đổi fetch → api.get
   useEffect(() => {
     const fetchInitialCredit = async () => {
       if (!token) return;
       try {
-        const res = await fetch(`${API_URL}/user/credits`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.message || 'Không lấy được thông tin credit');
-        }
-        const data = await res.json();
+        const res = await api.get('/user/credits');
+        const data = res.data;
         if (data.credit !== undefined) {
           setRemainingCredit(data.credit);
         } else if (data.error) {
@@ -116,15 +112,13 @@ function Home() {
     fetchInitialCredit();
   }, [token, API_URL]);
 
+  // ✅ đổi fetch → api.get
   const loadSession = useCallback(
     async (sid) => {
       if (!token) return;
       try {
-        const res = await fetch(`${API_URL}/conversations/${sid}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error('Không tải được lịch sử');
-        const data = await res.json();
+        const res = await api.get(`/conversations/${sid}`);
+        const data = res.data;
         const mapped = data
           .flatMap((log) => [
             log.message && { role: 'user', content: log.message },
@@ -255,6 +249,7 @@ function Home() {
     setTimeout(() => setActiveButton(null), 200);
   }, [navigate, chatHistory]);
 
+  // ✅ đổi fetch → api.delete
   const handleClear = useCallback(async () => {
     if (!window.confirm('Bạn có chắc muốn xóa toàn bộ cuộc trò chuyện này?')) return;
     const sid = sessionStorage.getItem('sessionId');
@@ -266,11 +261,7 @@ function Home() {
       return;
     }
     try {
-      const res = await fetch(`${API_URL}/conversations/${sid}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error('Xóa session thất bại');
+      await api.delete(`/conversations/${sid}`);
       sessionStorage.removeItem('chatHistory');
       sessionStorage.removeItem('sessionId');
       setChatHistory([]);
@@ -285,31 +276,23 @@ function Home() {
 
   const handleStop = useCallback(() => {
     if (controllerRef.current) {
-      controllerRef.current.abort(); // Ngắt fetch request
+      controllerRef.current.abort();
       controllerRef.current = null;
     }
     if (scheduleRef.current.timer) {
-      clearTimeout(scheduleRef.current.timer); // Xóa timer
+      clearTimeout(scheduleRef.current.timer);
       scheduleRef.current.timer = null;
-      scheduleRef.current.pending = ''; // Xóa buffer
+      scheduleRef.current.pending = '';
     }
     if (assistantMessageRef.current.content) {
-      // Lưu nội dung đã nhận được vào chatHistory
-      setChatHistory((prev) => [
-        ...prev,
-        { ...assistantMessageRef.current },
-      ]);
-      assistantMessageRef.current = { role: 'assistant', content: '' }; // Reset assistant message
+      setChatHistory((prev) => [...prev, { ...assistantMessageRef.current }]);
+      assistantMessageRef.current = { role: 'assistant', content: '' };
     }
-    setLoading(false); // Reset loading
+    setLoading(false);
     toast.info('Đã dừng trả lời.', {
       toastId: 'stopStream',
       position: 'top-right',
       autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
       theme: 'colored',
     });
   }, []);
@@ -330,10 +313,7 @@ function Home() {
       if (!take) return;
       if (isMathBalanced(take) || /\n|\.\s$/.test(take)) {
         assistantMessageRef.current.content += take;
-        const newHistory = [
-          ...baseHistory,
-          { ...assistantMessageRef.current },
-        ];
+        const newHistory = [...baseHistory, { ...assistantMessageRef.current }];
         setChatHistory(newHistory);
       } else {
         scheduleRef.current.pending = take + scheduleRef.current.pending;
@@ -341,17 +321,12 @@ function Home() {
     }, 80);
   }, []);
 
+  // ⚠️ giữ nguyên fetch /stream (axios không hỗ trợ NDJSON tốt)
   const handleSubmit = useCallback(async () => {
     const question = input.trim();
     if (!question || loading || remainingCredit === 0) return;
 
-
-
-
-    const updatedHistory = [
-      ...chatHistory,
-      { role: 'user', content: question },
-    ];
+    const updatedHistory = [...chatHistory, { role: 'user', content: question }];
     setChatHistory(updatedHistory);
     setInput('');
     setLoading(true);
@@ -364,16 +339,13 @@ function Home() {
       const token = localStorage.getItem('token');
       let sessionToUse = sessionId;
       if (!sessionToUse) {
-        const startRes = await fetch(`${API_URL}/conversations/start`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!startRes.ok) throw new Error('Không tạo được session');
-        const startData = await startRes.json();
+        const startRes = await api.post('/conversations/start');
+        const startData = startRes.data;
         sessionToUse = startData.sessionId;
         setSessionId(sessionToUse);
         sessionStorage.setItem('sessionId', sessionToUse);
       }
+
       const res = await fetch(`${API_URL}/stream`, {
         method: 'POST',
         headers: {
@@ -383,11 +355,10 @@ function Home() {
         },
         cache: 'no-store',
         body: JSON.stringify({
-          actionCode: "CHAT_AI",
+          actionCode: 'CHAT_AI',
           messages: updatedHistory,
-          session_id: sessionToUse
+          session_id: sessionToUse,
         }),
-
         signal,
       });
 
@@ -398,10 +369,10 @@ function Home() {
       assistantMessageRef.current = { role: 'assistant', content: '' };
       let bufferTail = '';
       let firstChunkReceived = false;
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunkStr = decoder.decode(value, { stream: true });
         const lines = chunkStr.split('\n').filter((line) => line.trim() !== '');
 
@@ -409,7 +380,7 @@ function Home() {
           let json;
           try {
             if (!line || line === 'undefined') {
-              console.warn('Dòng NDJSON không hợp lệ, bỏ qua:', line);
+              console.warn('Dòng NDJSON không hợp lệ:', line);
               continue;
             }
             json = JSON.parse(line);
@@ -433,10 +404,7 @@ function Home() {
             const rest = scheduleRef.current.pending;
             scheduleRef.current.pending = '';
             assistantMessageRef.current.content += rest;
-            const finalHistory = [
-              ...updatedHistory,
-              { ...assistantMessageRef.current },
-            ];
+            const finalHistory = [...updatedHistory, { ...assistantMessageRef.current }];
             setChatHistory(finalHistory);
             if (json.remainingCredit !== undefined) {
               setRemainingCredit(json.remainingCredit);
@@ -455,9 +423,7 @@ function Home() {
         window.dispatchEvent(new Event('sessionUpdated'));
       }
     } catch (err) {
-      if (err.name === 'AbortError') {
-        console.log('Stream aborted by user');
-      } else {
+      if (err.name !== 'AbortError') {
         console.error('Lỗi trong handleSubmit:', err);
         setErrorMessage('Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại.');
       }
@@ -513,9 +479,7 @@ function Home() {
           <div className="not-logged">
             <div className="not-logged-box">
               <p className="not-logged-text">Bạn cần đăng nhập để bắt đầu trò chuyện</p>
-              <a href="/auth/login" className="login-btn">
-                Đăng nhập
-              </a>
+              <a href="/auth/login" className="login-btn">Đăng nhập</a>
             </div>
           </div>
         ) : (
@@ -525,9 +489,7 @@ function Home() {
               <div className="error-message">
                 <p>{errorMessage}</p>
                 {errorMessage.includes('hết credit') && (
-                  <p>
-                    <a href="/purchase-credits">Mua thêm credit</a>
-                  </p>
+                  <p><a href="/purchase-credits">Mua thêm credit</a></p>
                 )}
               </div>
             )}
@@ -546,44 +508,27 @@ function Home() {
                       <Markdown>{msg.content}</Markdown>
                       {msg.role === 'assistant' && (
                         <div className="feedback-bar">
-                          <button className="btn-icon" onClick={() => handleCopy(msg.content)} title="Sao chép">
-                            <FiCopy className="h-5 w-5" />
-                          </button>
-                          <button className="btn-icon" onClick={() => handleFeedback(i, 'like')} title="Thích">
-                            <BsHandThumbsUp className="h-5 w-5" />
-                          </button>
-                          <button className="btn-icon" onClick={() => handleFeedback(i, 'dislike')} title="Không thích">
-                            <BsHandThumbsDown className="h-5 w-5" />
-                          </button>
-                          <button className="btn-icon" onClick={() => handleSpeak(msg.content)} title="Đọc to">
-                            <FiVolume2 className="h-5 w-5" />
-                          </button>
-                          <button className="btn-icon" onClick={handleGoal} title="Tạo mục tiêu">
-                            <FiCheck className="h-5 w-5" />
-                          </button>
+                          <button className="btn-icon" onClick={() => handleCopy(msg.content)} title="Sao chép"><FiCopy /></button>
+                          <button className="btn-icon" onClick={() => handleFeedback(i, 'like')} title="Thích"><BsHandThumbsUp /></button>
+                          <button className="btn-icon" onClick={() => handleFeedback(i, 'dislike')} title="Không thích"><BsHandThumbsDown /></button>
+                          <button className="btn-icon" onClick={() => handleSpeak(msg.content)} title="Đọc to"><FiVolume2 /></button>
+                          <button className="btn-icon" onClick={handleGoal} title="Tạo mục tiêu"><FiCheck /></button>
                         </div>
                       )}
                     </div>
                   </div>
                 ))}
-                {loading && (
-                  <div className="typing-indicator">
-                    <span></span>
-                  </div>
-                )}
+                {loading && (<div className="typing-indicator"><span></span></div>)}
                 <div ref={listEndRef} />
               </div>
             </div>
           </div>
 
-          <div
-            className="input-area"
-            style={{
-              transform: chatHistory.length === 0 ? "translateY(-25vh)" : "translateY(0)",
-              transition: "transform 0.3s ease",
-              position: "relative",
-            }}
-          >
+          <div className="input-area" style={{
+            transform: chatHistory.length === 0 ? "translateY(-25vh)" : "translateY(0)",
+            transition: "transform 0.3s ease",
+            position: "relative",
+          }}>
             <div className="composer grok-style" role="group" aria-label="Hộp nhập câu hỏi">
               <textarea
                 value={input}
@@ -597,28 +542,11 @@ function Home() {
                 }}
               />
               {loading ? (
-                <button
-                  className="stop-btn"
-                  title="Dừng trả lời"
-                  onClick={handleStop}
-                >
-                  <FiSquare className="stop-icon" />
-                </button>
+                <button className="stop-btn" title="Dừng trả lời" onClick={handleStop}><FiSquare className="stop-icon" /></button>
               ) : (
-                <button
-                  className="send-btn"
-                  title="Gửi"
-                  onClick={handleSubmit}
-                  disabled={loading || remainingCredit === 0}
-                >
+                <button className="send-btn" title="Gửi" onClick={handleSubmit} disabled={loading || remainingCredit === 0}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 19V5m7 7l-7-7-7 7"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                    <path d="M12 19V5m7 7l-7-7-7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
               )}
@@ -632,10 +560,7 @@ function Home() {
 
             {remainingCredit === 0 && (
               <div className="credit-warning">
-                <p>
-                  Bạn đã hết credit, vui lòng{" "}
-                  <a href="/purchase-credits">Mua thêm credit</a> để tiếp tục sử dụng.
-                </p>
+                <p>Bạn đã hết credit, vui lòng <a href="/purchase-credits">Mua thêm credit</a> để tiếp tục sử dụng.</p>
               </div>
             )}
           </div>
