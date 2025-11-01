@@ -12,7 +12,8 @@ export default function LoginPage(){
     const data = await login(identifier, password);
 
     // Lưu token + user info vào localStorage
-    localStorage.setItem("token", data.token);
+    localStorage.setItem('token', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
     localStorage.setItem("userId", data.userId);       
     localStorage.setItem("username", data.username); // tiện cho Header
     localStorage.setItem("user", JSON.stringify(data));
