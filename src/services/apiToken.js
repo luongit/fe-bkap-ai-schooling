@@ -5,14 +5,14 @@ const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || "",
 });
 
-// ✅ Gắn accessToken tự động
+//  Gắn accessToken tự động
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// ✅ Tự refresh khi 401
+//  Tự refresh khi 401
 api.interceptors.response.use(
   (res) => res,
   async (error) => {

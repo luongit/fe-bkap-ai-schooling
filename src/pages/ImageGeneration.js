@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { FiDownload, FiImage, FiSend, FiLoader, FiXCircle } from 'react-icons/fi';
-import api from "../services/apiToken"; // ✅ interceptor tự refresh token
+import api from "../services/apiToken"; 
 import '../style/ImageGeneration.css';
 
 const DEFAULT_STYLE = "default";
@@ -35,7 +35,7 @@ function ImageGeneration() {
     if (!token) return;
     setErrorMessage('');
     try {
-      const res = await api.get(`/user/credits`); // ✅ dùng axios instance
+      const res = await api.get(`/user/credits`); // 
       const data = res.data;
       if (data.credit !== undefined) {
         setRemainingCredit(data.credit);
@@ -109,7 +109,7 @@ function ImageGeneration() {
         size: DEFAULT_SIZE,
       };
 
-      const res = await api.post(`/images/generate`, requestBody); // ✅ auto token
+      const res = await api.post(`/images/generate`, requestBody); 
       const imageUrlResult = res.data;
 
       if (!imageUrlResult || imageUrlResult.length < 10) {

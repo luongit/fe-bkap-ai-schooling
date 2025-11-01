@@ -9,7 +9,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FiCopy, FiVolume2 } from 'react-icons/fi';
 import { BsHandThumbsUp, BsHandThumbsDown } from 'react-icons/bs';
 import { getLangIcon, extractText, speakText } from '../services/handle/Function';
-import api from '../services/apiToken'; // ✅ Thêm dòng này
+import api from '../services/apiToken'; 
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
 import 'react-toastify/dist/ReactToastify.css';
@@ -74,7 +74,7 @@ export default function WritingPage() {
     }
   }, [token]);
 
-  // ✅ Đổi fetch sang api
+  
   useEffect(() => {
     const fetchInitialCredit = async () => {
       if (!token) return;
@@ -88,7 +88,7 @@ export default function WritingPage() {
     fetchInitialCredit();
   }, [token]);
 
-  // ✅ Đổi fetch sang api
+  // Đổi fetch sang api
   const loadSession = useCallback(async (sid) => {
     if (!token) return;
     try {
