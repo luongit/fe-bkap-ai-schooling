@@ -50,6 +50,7 @@ export default function AiJournalismPage() {
           studentId: me.objectId, // 👈 dùng làm studentId
           objectType: me.objectType,
           fullName: me.fullName,
+          role: me.role,
         });
       } catch (e) {
         // fallback cũ nếu trước đó app lưu user ở localStorage
@@ -331,7 +332,18 @@ export default function AiJournalismPage() {
                   Khám phá và tham gia các cuộc thi giáo dục hàng đầu trên toàn thế giới
                 </p>
               </div>
+
+              {/* ✅ Nút tạo cuộc thi — chỉ hiện với ADMIN / TEACHER / SYSTEM_ADMIN */}
+              {["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user?.role) && (
+                <button
+                  onClick={() => (window.location.href = "ai-journalism/create")}
+                  className="bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white font-semibold px-5 py-2 rounded-lg shadow hover:opacity-90 transition-all"
+                >
+                  ➕ Tạo Cuộc Thi Mới
+                </button>
+              )}
             </div>
+
 
             {/* Search */}
             <div className="relative">
@@ -471,9 +483,8 @@ export default function AiJournalismPage() {
                       aria-selected={active}
                       data-state={active ? "active" : "inactive"}
                       onClick={() => setTab(t.key)}
-                      className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 ${
-                        active ? "bg-white text-gray-900 shadow" : "text-gray-500"
-                      }`}
+                      className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 ${active ? "bg-white text-gray-900 shadow" : "text-gray-500"
+                        }`}
                     >
                       {t.label}
                     </button>
@@ -552,7 +563,7 @@ export default function AiJournalismPage() {
           .animate-float-medium { animation: floatMedium 4.5s ease-in-out infinite; }
           .animate-float-fast { animation: floatFast 3.5s ease-in-out infinite; }
         `}</style>
-      </div>
+      </div >
     );
   }
 
@@ -577,9 +588,8 @@ export default function AiJournalismPage() {
           </div>
           <div className="flex items-center gap-3">
             <span
-              className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                isContestOpen() ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
-              }`}
+              className={`px-3 py-1 rounded-full text-sm font-semibold ${isContestOpen() ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                }`}
             >
               {isContestOpen() ? "Đang mở" : "Đã đóng / Chưa mở"}
             </span>
@@ -608,11 +618,10 @@ export default function AiJournalismPage() {
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
-            className={`px-4 py-2 rounded-xl font-semibold transition ${
-              activeTab === t.key
-                ? "bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
+            className={`px-4 py-2 rounded-xl font-semibold transition ${activeTab === t.key
+              ? "bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white"
+              : "text-gray-700 hover:bg-gray-100"
+              }`}
           >
             {t.label}
           </button>

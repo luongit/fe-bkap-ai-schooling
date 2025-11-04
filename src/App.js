@@ -20,6 +20,13 @@ import "react-toastify/dist/ReactToastify.css";
 import "./style/mobile.css";
 import "./components/css/Sidebar.css";
 import './components/css/TopIntro.css';
+
+import AiJournalismCreatePage from "./pages/AiJournalismCreatePage";
+import Error403Page from "./pages/Error403Page";
+import RoleGuard from "./components/RoleGuard";
+
+
+
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -61,7 +68,13 @@ function App() {
           }`}
       >
         <Routes>
+          <Route element={<RoleGuard allowRoles={["SYSTEM_ADMIN", "ADMIN", "TEACHER"]} />}>
+            <Route path="/ai-journalism/create" element={<AiJournalismCreatePage />} />
+          </Route>
+
           <Route path="/" element={<Home />} />
+          <Route path="/403" element={<Error403Page />} />
+
           <Route path="/login" element={<LoginPage />} />
 
           <Route path="/profile" element={<ProfilePage />} />
@@ -72,7 +85,7 @@ function App() {
           <Route path="/generate-image" element={<ImageGeneration />} />
           <Route path="/generate-video" element={<VideoGeneration />} />
           <Route path="/journalism" element={<AiJournalismPage />} />
-          
+
           <Route path="/pricing" element={<PricingPage />} />
           <Route
             path="*"
