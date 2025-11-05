@@ -15,6 +15,8 @@ import ImageGeneration from "./pages/ImageGeneration";
 import VideoGeneration from "./pages/VideoGeneration";
 import PricingPage from "./pages/PricingPage";
 import AiJournalismPage from "./pages/AiJournalismPage";
+import AiSubmissionPage from "./pages/AiSubmissionPage";
+import AiSubmissionViewPage from "./pages/AiSubmissionViewPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./style/mobile.css";
@@ -85,6 +87,9 @@ function App() {
           <Route path="/generate-image" element={<ImageGeneration />} />
           <Route path="/generate-video" element={<VideoGeneration />} />
           <Route path="/journalism" element={<AiJournalismPage />} />
+          <Route path="/ai-journalism/submit" element={<AiSubmissionPage />} /> 
+          <Route path="/ai-submission-view/:entryId" element={<AiSubmissionViewPage />} />
+
 
           <Route path="/pricing" element={<PricingPage />} />
           <Route

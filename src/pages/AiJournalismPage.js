@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
 import {
   Clock,
   Calendar as CalendarIcon,
@@ -24,6 +26,7 @@ export default function AiJournalismPage() {
   const [grading, setGrading] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   // Chế độ hiển thị tổng (list | detail)
   const [viewMode, setViewMode] = useState("list");
@@ -629,60 +632,14 @@ export default function AiJournalismPage() {
       </div>
 
       {/* TAB: Nộp bài */}
-      {activeTab === "submit" && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-          {!isContestOpen() && (
-            <div className="mb-4 p-3 rounded-lg bg-yellow-50 text-yellow-800">
-              Cuộc thi hiện không trong thời gian nộp bài.
-            </div>
-          )}
-
-          <h3 className="text-lg font-semibold text-white bg-gradient-to-r from-purple-700 to-fuchsia-500 p-3 rounded-lg mb-4">
-            ✍️ Nộp bài: {activeContest?.title}
-          </h3>
-
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <input
-              type="text"
-              placeholder="Tiêu đề bài viết..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              disabled={!isContestOpen()}
-              className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-purple-500 outline-none disabled:bg-gray-100"
-            />
-
-            <div>
-              <textarea
-                rows={10}
-                placeholder="Nhập nội dung bài viết..."
-                value={article}
-                onChange={(e) => setArticle(e.target.value)}
-                disabled={!isContestOpen()}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-purple-500 outline-none disabled:bg-gray-100"
-              />
-              <div className="flex justify-end text-xs text-gray-500 mt-1">
-                <span>{wordStats.words} từ • {wordStats.chars} ký tự</span>
-              </div>
-            </div>
-
-            <div className="text-right">
-              <button
-                type="submit"
-                disabled={loading || !isContestOpen()}
-                className="bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-60"
-              >
-                {loading ? "Đang nộp..." : "📨 Nộp bài"}
-              </button>
-            </div>
-
-            {entries?.length > 0 && (
-              <p className="text-sm text-gray-500">
-                Bạn đã nộp {entries.length} bài cho cuộc thi này. Xem tab <b>“Bài đã nộp”</b>.
-              </p>
-            )}
-          </form>
-        </div>
-      )}
+      <button
+        onClick={() =>
+          navigate(`/ai-journalism/submit?contestId=${activeContest.id}`)
+        }
+        className="bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-all"
+      >
+        ✍️ Nộp bài thi
+      </button>
 
       {/* TAB: Bài đã nộp */}
       {activeTab === "my" && (
