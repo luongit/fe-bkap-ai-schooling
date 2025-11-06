@@ -51,7 +51,7 @@ export default function AiJournalismCreatePage() {
 
         setLoading(true);
         try {
-            const res = await api.post(`/journalism?creatorId=${user.userId}`, form); // hoặc lấy userId từ token/profile
+            const res = await api.post(`/journalism/create?creatorId=${user.userId}`, form); // hoặc lấy userId từ token/profile
             toast.success("🎉 Tạo cuộc thi thành công!");
             console.log("Created contest:", res.data);
 
