@@ -22,6 +22,7 @@ import {
   FiMoreVertical,
   FiTrash2,
   FiImage,
+  FiVideo,
   FiAward
 } from "react-icons/fi";
 import "./css/Sidebar.css";
@@ -261,7 +262,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
           <FiImage className="sidebar-icon" />
           {!isCollapsed && <span className="text-sm">Tạo Ảnh AI</span>}
         </NavLink>
-        {/* <NavLink
+        <NavLink
           to="/generate-video"
           onClick={() => {
             startNewImageGeneration(); // Gọi hàm reset và điều hướng
@@ -272,9 +273,9 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             } ${isCollapsed ? "justify-center" : "justify-start"}`
           }
         >
-          <FiImage className="sidebar-icon" />
+          <FiVideo className="sidebar-icon" />
           {!isCollapsed && <span className="text-sm">Tạo Video AI</span>}
-        </NavLink> */}
+        </NavLink>
         <NavLink
           to="/journalism"
           onClick={() => {
