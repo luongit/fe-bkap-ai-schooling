@@ -12,7 +12,7 @@ export const login = async (identifier, password) => {
 
 
 
-const API_URL = "http://localhost:8080/api"; // thay bằng URL backend của bạn
+const API_URL = "http://bkapai.vn/api"; // thay bằng URL backend của bạn
 
 export const register = async (userData) => {
   const response = await axios.post(`${API_URL}/auth/register`, userData);
