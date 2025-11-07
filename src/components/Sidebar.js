@@ -3,6 +3,8 @@ import { Link, useNavigate, NavLink, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { HiOutlineChatAlt2 } from "react-icons/hi";
+import CreditModal from "../components/CreditModal";
+import { getProfile } from "../services/profileService";
 import {
   FiMessageCircle,
   FiBookOpen,
@@ -24,6 +26,8 @@ import {
   FiFeather,
   FiStar,
   FiTool,
+  FiLogOut,
+  FiCreditCard,
 } from "react-icons/fi";
 import "./css/Sidebar.css";
 import "../style/chat.css";
@@ -35,23 +39,41 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const [showHistory, setShowHistory] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-
-  // ✅ Chỉ cho phép mở duy nhất 1 menu "3 chấm" tại một thời điểm
   const [openMenuId, setOpenMenuId] = useState(null);
-
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
+  const [remainingCredit, setRemainingCredit] = useState(null);
+  const [creditError, setCreditError] = useState("");
+  const [profile, setProfile] = useState(null);
+  const [showCreditModal, setShowCreditModal] = useState(false);
   const { sessionId } = useParams();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 920);
-
-  // nhóm mở/đóng cho sidebar gọn theo cụm
   const [openGroups, setOpenGroups] = useState({
     chat: true,
     creative: false,
     contest: false,
     tools: false,
   });
+
+  const fetchCredit = async (showToast = false) => {
+    const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await api.get("/user/credits");
+      setRemainingCredit(res.data.credit);
+      setCreditError("");
+      if (showToast && res.data.credit === 0) {
+        toast.error("Đã hết credit, vui lòng mua thêm");
+      }
+    } catch (err) {
+      setCreditError("Không tải được credit");
+    }
+  };
+
+
+
 
   const toggleGroup = (key) =>
     setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -66,6 +88,12 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
       if (user) setUsername(user);
     }
   }, []);
+
+
+  useEffect(() => {
+    fetchCredit();
+  }, [isLoggedIn]);
+
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -133,7 +161,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
       toast.success("Đã xóa cuộc trò chuyện!");
       // cập nhật UI tại chỗ
       setSessions((prev) => prev.filter((x) => x.sessionId !== id));
-      setOpenMenuId(null); // ✅ đóng mọi menu khác ngay khi xóa
+      setOpenMenuId(null);
       window.dispatchEvent(new Event("sessionUpdated"));
       window.dispatchEvent(new Event("writingSessionUpdated"));
 
@@ -177,9 +205,8 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         onClick();
         if (typeof onToggleSidebar === "function") onToggleSidebar();
       }}
-      className={`side-item w-full flex items-center gap-2 ${
-        isCollapsed ? "justify-center" : ""
-      } px-2 py-1.5`}
+      className={`side-item w-full flex items-center gap-2 ${isCollapsed ? "justify-center" : ""
+        } px-2 py-1.5`}
     >
       <Icon className="sidebar-icon w-4 h-4" />
       {!isCollapsed && <span className="text-xs">{label}</span>}
@@ -209,9 +236,8 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const Group = ({ icon: Icon, title, open, onToggle, children }) => (
     <div className="mb-2">
       <button
-        className={`side-item w-full flex items-center justify-between ${
-          isCollapsed ? "justify-center" : ""
-        }`}
+        className={`side-item w-full flex items-center justify-between ${isCollapsed ? "justify-center" : ""
+          }`}
         onClick={() => {
           if (isCollapsed) {
             setIsCollapsed(false);
@@ -227,9 +253,8 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         </div>
         {!isCollapsed && (
           <FiChevronDown
-            className={`sidebar-icon transition-transform ${
-              open ? "rotate-180" : ""
-            }`}
+            className={`sidebar-icon transition-transform ${open ? "rotate-180" : ""
+              }`}
           />
         )}
       </button>
@@ -306,8 +331,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
               if (typeof onToggleSidebar === "function") onToggleSidebar();
             }}
             className={({ isActive }) =>
-              `side-item w-full flex items-center gap-2 transition-all duration-200 ${
-                isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
+              `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
               } px-2 py-1.5`
             }
           >
@@ -322,8 +346,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
               if (typeof onToggleSidebar === "function") onToggleSidebar();
             }}
             className={({ isActive }) =>
-              `side-item w-full flex items-center gap-2 transition-all duration-200 ${
-                isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
+              `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
               } px-2 py-1.5`
             }
           >
@@ -338,8 +361,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
               if (typeof onToggleSidebar === "function") onToggleSidebar();
             }}
             className={({ isActive }) =>
-              `side-item w-full flex items-center gap-2 transition-all duration-200 ${
-                isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
+              `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
               } px-2 py-1.5`
             }
           >
@@ -361,10 +383,9 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
               if (typeof onToggleSidebar === "function") onToggleSidebar();
             }}
             className={({ isActive }) =>
-              `side-item w-full flex items-center gap-2 transition-all duration-200 ${
-                isActive
-                  ? "bg-gray-200 text-gray-800 font-semibold"
-                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
+              `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive
+                ? "bg-gray-200 text-gray-800 font-semibold"
+                : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
               } px-2 py-1.5`
             }
           >
@@ -398,9 +419,8 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
               <span>Xem lịch sử</span>
             </div>
             <FiChevronDown
-              className={`sidebar-icon transition-transform ${
-                showHistory ? "rotate-180" : ""
-              }`}
+              className={`sidebar-icon transition-transform ${showHistory ? "rotate-180" : ""
+                }`}
             />
           </button>
           {showHistory && (
@@ -419,10 +439,9 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                           onToggleSidebar()
                         }
                         className={({ isActive }) =>
-                          `flex items-center gap-2 flex-1 overflow-hidden px-2 py-1 rounded-md transition ${
-                            isActive
-                              ? "bg-gray-200 text-gray-800 font-semibold"
-                              : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
+                          `flex items-center gap-2 flex-1 overflow-hidden px-2 py-1 rounded-md transition ${isActive
+                            ? "bg-gray-200 text-gray-800 font-semibold"
+                            : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
                           }`
                         }
                       >
@@ -493,9 +512,8 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             {renderNavItem(FiLogIn, "Đăng nhập", () => navigate("/auth/login"))}
             <a
               href="https://bkapai.vn/register"
-              className={`side-item w-full flex items-center gap-2 ${
-                isCollapsed ? "justify-center" : ""
-              }`}
+              className={`side-item w-full flex items-center gap-2 ${isCollapsed ? "justify-center" : ""
+                }`}
               onClick={() => {
                 if (typeof onToggleSidebar === "function") {
                   onToggleSidebar();
@@ -511,9 +529,8 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             <div className="account-row flex items-center gap-2 w-full">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className={`side-item flex items-center gap-2 transition-all duration-200 ${
-                  isCollapsed ? "justify-center" : "justify-start"
-                } relative`}
+                className={`side-item flex items-center gap-2 transition-all duration-200 ${isCollapsed ? "justify-center" : "justify-start"
+                  } relative`}
               >
                 <div className="avatar">
                   <FiUser className="sidebar-icon" />
@@ -527,7 +544,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
               {!isCollapsed && (
                 <button
                   onClick={toggleSidebar}
-                  className="collapse-toggle w-8 h-8 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center"
+                  className="collapse-toggle w-8 h-8 rounded-full transition-colors flex items-center justify-center"
                   title="Thu gọn sidebar"
                 >
                   <FiChevronLeft className="sidebar-icon w-4 h-4" />
@@ -537,7 +554,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             {isCollapsed && (
               <button
                 onClick={toggleSidebar}
-                className="collapse-toggle w-8 h-8 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center mt-2"
+                className="collapse-toggle w-8 h-8 rounded-full transition-colors flex items-center justify-center mt-2"
                 title="Mở sidebar"
               >
                 <FiChevronLeft className="sidebar-icon w-4 h-4 rotate-180" />
@@ -549,29 +566,69 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                   <li>
                     <Link
                       to="/profile"
-                      className="flex items-center gap-2 w-full hover:bg-gray-100 px-4 py-2"
+                      className="flex items-center gap-2 w-full  px-4 py-2"
                       onClick={() => setShowMenu(false)}
                     >
+                      <FiUser className="w-4 h-4 text-gray-600" />
                       <span className="text-xs">Xem profile</span>
                     </Link>
                   </li>
+
+
+                  <li>
+                    <button
+                      onClick={() => {
+                        setShowCreditModal(true);
+                        setShowMenu(false);
+                      }}
+                      className="flex items-center justify-between w-full px-4 py-2 text-left"
+                    >
+                      <div className="flex items-center gap-2" title="Xem chi tiết credit">
+                        <FiCreditCard className="w-4 h-4 text-gray-600" />
+                        <span className="text-xs">Credit</span>
+                      </div>
+
+                      {remainingCredit !== null && (
+                        <span
+                          className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white shadow-sm"
+                        >
+                          {remainingCredit}
+                        </span>
+                      )}
+
+                    </button>
+                  </li>
+
+
                   <li>
                     <button
                       onClick={() => {
                         handleLogout();
                         setShowMenu(false);
                       }}
-                      className="flex items-center gap-2 w-full hover:bg-gray-100 px-4 py-2 text-left"
+                      className="flex items-center gap-2 w-full px-4 py-2 text-left text-red-600"
                     >
+                      <FiLogOut className="w-4 h-4" />
                       <span className="text-xs">Đăng xuất</span>
                     </button>
                   </li>
+
                 </ul>
               </div>
             )}
           </div>
         )}
       </div>
+      {showCreditModal && (
+        <CreditModal
+          remainingCredit={remainingCredit}
+          errorMessage={creditError}
+          onClose={() => setShowCreditModal(false)}
+          onRefresh={() => fetchCredit(true)}
+          userId={profile?.userId}
+        />
+      )}
+
     </aside>
   );
 }
