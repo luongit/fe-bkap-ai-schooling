@@ -78,7 +78,12 @@ export default function AiJournalismPage() {
     if (!activeContest) return;
     api
       .get(`/journalism/contests/${activeContest.id}`)
-      .then((res) => setRubrics(res.data?.rubrics || []))
+      .then((res) => {
+        console.log("data test : ", res.data)
+        const data = res.data;
+        const list = data?.rubrics || data?.rubricResponses || [];
+        setRubrics(list);
+      })
       .catch(() => setRubrics([]));
   }, [activeContest]);
 
@@ -128,10 +133,14 @@ export default function AiJournalismPage() {
 
     try {
       // bạn của bạn dùng studentId từ profile
-      if (user?.studentId) {
+      if (["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) {
+        // 👇 gọi API cho giáo viên
+        const res1 = await api.get(`/journalism/entries/contest/${contest.id}`);
+        setEntries(res1.data || []);
+      } else if (user?.studentId) {
+        // 👇 học sinh chỉ xem bài của mình
         const res1 = await api.get(`/journalism/entries/student/${user.studentId}`);
-        const data1 = res1.data || [];
-        const filtered = data1.filter((e) => e.contest?.id === Number(contest.id));
+        const filtered = res1.data.filter(e => e.contest?.id === Number(contest.id));
         setEntries(filtered);
         if (filtered.length > 0) setShowForm(false);
       }
@@ -215,18 +224,88 @@ export default function AiJournalismPage() {
   }
 
   // --------- COMPONENT PHỤ (bạn của bạn) ---------
-  function ManualScoreButton({ entry }) {
+  function ManualScoreButton({ entry, rubrics }) {
+    const [open, setOpen] = useState(false);
+    const [criteria, setCriteria] = useState({});
+    const [feedback, setFeedback] = useState("");
+
+    const handleSubmit = async () => {
+      const total = Object.values(criteria).reduce((a, b) => a + Number(b || 0), 0);
+      try {
+        await api.post(`/journalism/entries/${entry.id}/grade-manual`, {
+          totalScore: total / Object.keys(criteria).length,
+          feedback,
+          criteriaJson: criteria,
+        });
+        toast.success("Đã gửi điểm thủ công!");
+        setOpen(false);
+      } catch (err) {
+        toast.error("Chấm điểm thất bại!");
+      }
+    };
+
+    if (!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) return null;
+
     return (
-      <button
-        onClick={() =>
-          toast("Chấm thủ công sẽ bật modal rubric (mẫu modal có thể thêm sau).")
-        }
-        className="ml-2 bg-white border border-purple-300 text-purple-700 px-4 py-2 rounded-lg font-semibold hover:bg-purple-50 transition"
-      >
-        ✍️ Chấm thủ công
-      </button>
+      <>
+        <button
+          onClick={() => setOpen(true)}
+          className="ml-2 bg-white border border-purple-300 text-purple-700 px-4 py-2 rounded-lg font-semibold hover:bg-purple-50 transition"
+        >
+          ✍️ Chấm thủ công
+        </button>
+
+        {open && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            onClick={() => setOpen(false)}
+          >
+            <div
+              className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold mb-4 text-purple-700">
+                ✍️ Chấm bài thủ công
+              </h3>
+
+              {rubrics.map((r) => (
+                <div key={r.id} className="flex items-center justify-between mb-2">
+                  <label className="text-gray-700">{r.criterion}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="0.5"
+                    className="border rounded px-2 py-1 w-20 text-right"
+                    onChange={(e) =>
+                      setCriteria({ ...criteria, [r.criterion]: e.target.value })
+                    }
+                  />
+                </div>
+              ))}
+
+              <textarea
+                placeholder="Nhận xét của giáo viên..."
+                className="border rounded-lg w-full p-2 mt-3"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+              ></textarea>
+
+              <div className="text-right mt-4">
+                <button
+                  onClick={handleSubmit}
+                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+                >
+                  Gửi điểm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
+
 
   function RubricTable({ items }) {
     if (!items?.length)
@@ -681,7 +760,7 @@ export default function AiJournalismPage() {
                             >
                               {grading ? "🤖 AI đang chấm..." : "Chấm điểm bằng AI"}
                             </button>
-                            <ManualScoreButton entry={e} />
+                            <ManualScoreButton entry={e} rubrics={rubrics} />
                           </div>
                         )}
                       </div>
