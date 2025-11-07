@@ -138,7 +138,7 @@ function Header({ toggleSidebar }) {
         BACHKHOA APTECH
       </Link>
       <div className="header-right">
-        {token && (
+        {/* {token && (
           <>
             <span className="user-info">{profile?.username || ""}</span>
             {remainingCredit !== null && (
@@ -160,10 +160,10 @@ function Header({ toggleSidebar }) {
             )}
             {errorMessage && <span className="credit-error">{errorMessage}</span>}
           </>
-        )}
+        )} */}
       </div>
 
-      {showCreditModal && token && (
+      {/* {showCreditModal && token && (
         <CreditModal
           remainingCredit={remainingCredit}
           errorMessage={errorMessage}
@@ -171,7 +171,7 @@ function Header({ toggleSidebar }) {
           onRefresh={handleRefreshCredit}
           userId={profile?.userId}
         />
-      )}
+      )} */}
     </header>
   );
 }

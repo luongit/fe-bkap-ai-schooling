@@ -219,6 +219,12 @@
   transition: color 0.2s ease;
 }
 
+.menu-dropdown li::before {
+  display: none !important;
+  content: none !important;
+}
+
+
 .sidebar.collapsed .sidebar-icon {
   width: 20px;
   height: 20px;
@@ -479,22 +485,6 @@
   color: #4b5563;
 }
 
-.menu-dropdown li::before {
-  content: " ";
-  width: 16px;
-  height: 16px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  display: inline-block;
-}
-
-.menu-dropdown li:nth-child(1)::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='5'/%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3C/svg%3E");
-}
-
-.menu-dropdown li:nth-child(2)::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpolyline points='16 17 21 12 16 7'/%3E%3Cline x1='21' y1='12' x2='9' y2='12'/%3E%3C/svg%3E");
-}
 
 .sidebar.collapsed .menu-dropdown {
   position: fixed;
