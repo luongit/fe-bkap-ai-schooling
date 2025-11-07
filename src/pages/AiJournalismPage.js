@@ -67,11 +67,13 @@ export default function AiJournalismPage() {
 
   // Load danh sách cuộc thi (bạn)
   useEffect(() => {
-    api
-      .get("/journalism/contests")
-      .then((res) => setContests(res.data || []))
-      .catch((err) => console.error("Lỗi load contests:", err));
+    api.get("/journalism/contests")
+      .then(res => setContests(res.data))
+      .catch(err => console.error(err));
   }, []);
+
+
+
 
   // Lấy rubric khi có activeContest (bạn của bạn)
   useEffect(() => {
@@ -79,7 +81,7 @@ export default function AiJournalismPage() {
     api
       .get(`/journalism/contests/${activeContest.id}`)
       .then((res) => {
-        console.log("data test : ", res.data)
+
         const data = res.data;
         const list = data?.rubrics || data?.rubricResponses || [];
         setRubrics(list);
@@ -696,18 +698,19 @@ export default function AiJournalismPage() {
           { key: "submit", label: "✍️ Nộp bài" },
           { key: "my", label: "📜 Bài đã nộp" },
           { key: "rubric", label: "📐 Tiêu chí chấm" },
-        ].map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={`px-4 py-2 rounded-xl font-semibold transition ${activeTab === t.key
-              ? "bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white"
-              : "text-gray-700 hover:bg-gray-100"
-              }`}
-          >
-            {t.label}
-          </button>
-        ))}
+        ]
+          .map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setActiveTab(t.key)}
+              className={`px-4 py-2 rounded-xl font-semibold transition ${activeTab === t.key
+                ? "bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white"
+                : "text-gray-700 hover:bg-gray-100"
+                }`}
+            >
+              {t.label}
+            </button>
+          ))}
       </div>
 
       {/* TAB: Nộp bài */}
