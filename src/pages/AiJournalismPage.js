@@ -76,7 +76,7 @@ export default function AiJournalismPage() {
       .catch((err) => console.error(err));
   }, []);
 
-  // Lấy rubric khi có activeContest
+  // Lấy rubric khi có activeContest (bạn của bạn)
   useEffect(() => {
     if (!activeContest) return;
     api
@@ -228,22 +228,34 @@ export default function AiJournalismPage() {
     }
   }
 
-  // --------- COMPONENT PHỤ ---------
-  function ManualScoreButton({ entry, rubrics }) {
+  // --------- COMPONENT PHỤ (bạn của bạn) ---------
+  function ManualScoreButton({ entry, rubrics, totalScore }) {
     const [open, setOpen] = useState(false);
     const [criteria, setCriteria] = useState({});
     const [feedback, setFeedback] = useState("");
+    const [files, setFiles] = useState([]);
+
+
+    useEffect(() => {
+      if (open) {
+        api.get(`/journalism/entries/${entry.id}/submissions`)
+          .then(res => setFiles(res.data || []))
+          .catch(() => setFiles([]));
+      }
+    }, [open, entry.id]);
+
+    // tổng điểm giáo viên đang nhập
+    const total = Object.values(criteria).reduce(
+      (a, b) => a + Number(b || 0),
+      0
+    );
 
     const handleSubmit = async () => {
-      const total = Object.values(criteria).reduce(
-        (a, b) => a + Number(b || 0),
-        0
-      );
       try {
         await api.post(`/journalism/entries/${entry.id}/grade-manual`, {
-          totalScore: total / (Object.keys(criteria).length || 1),
+          totalScore: total,            // điểm giáo viên chấm
           feedback,
-          criteriaJson: criteria,
+          criteriaJson: criteria,       // gửi từng tiêu chí
         });
         toast.success("Đã gửi điểm chấm thủ công!");
         setOpen(false);
@@ -252,6 +264,7 @@ export default function AiJournalismPage() {
       }
     };
 
+    // chỉ hiện cho role giáo viên/admin
     if (!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) return null;
 
     return (
@@ -276,13 +289,38 @@ export default function AiJournalismPage() {
                 ✍️ Chấm bài thủ công
               </h3>
 
+              {files.length > 0 && (
+                <div className="mb-4">
+                  <p className="font-semibold text-gray-700 mb-2">📎 Tệp bài nộp:</p>
+                  <ul className="space-y-1">
+                    {files.map((f) => (
+                      <li key={f.id} className="flex items-center justify-between text-sm border-b py-1">
+                        <span className="truncate w-2/3 text-gray-800">
+                          {f.fileName || f.fileUrl?.split("/").pop() || "Không có tên file"}
+                        </span>
+                        <a
+                          href={f.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-600 hover:underline font-medium"
+                        >
+                          📂 Mở
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+
               {rubrics.map((r) => (
                 <div key={r.id} className="flex items-center justify-between mb-2">
                   <label className="text-gray-700">{r.criterion}</label>
                   <input
                     type="number"
                     min="0"
-                    max="10"
+                    // nếu bạn lưu điểm tối đa của từng tiêu chí ở r.weight thì để max = r.weight
+                    max={r.weight || undefined}
                     step="0.5"
                     className="border rounded px-2 py-1 w-20 text-right"
                     onChange={(e) =>
@@ -291,6 +329,15 @@ export default function AiJournalismPage() {
                   />
                 </div>
               ))}
+
+              {/* ✅ dòng này chính là cái bạn muốn: 55 / 100 */}
+              <div className="mt-4 text-right font-semibold text-purple-700">
+                Tổng điểm hiện tại:{" "}
+                <span className="text-fuchsia-600 text-lg">{total}</span>
+                {typeof totalScore === "number" && (
+                  <span className="text-gray-500 text-sm ml-1">/ {totalScore}</span>
+                )}
+              </div>
 
               <textarea
                 placeholder="Nhận xét của giáo viên..."
@@ -313,6 +360,9 @@ export default function AiJournalismPage() {
       </>
     );
   }
+
+
+
 
   function RubricTable({ items }) {
     if (!items?.length)
@@ -919,7 +969,11 @@ export default function AiJournalismPage() {
                             >
                               {grading ? "🤖 AI đang chấm..." : "Chấm điểm bằng AI"}
                             </button>
-                            <ManualScoreButton entry={e} rubrics={rubrics} />
+                            <ManualScoreButton
+                              entry={e}
+                              rubrics={rubrics}
+                              totalScore={activeContest?.totalScore} // 👈 thêm dòng này
+                            />
                           </div>
                         )}
                       </div>
