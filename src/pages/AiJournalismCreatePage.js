@@ -6,6 +6,9 @@ import api from "../services/apiToken"; // axios instance có refresh token
 export default function AiJournalismCreatePage() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
+    // luu anh bia cuoc thi va xem truoc anh bia cuoc thi
+    const [coverFile, setCoverFile] = useState(null);
+    const [coverPreview, setCoverPreview] = useState(null);
 
     const [form, setForm] = useState({
         title: "",
@@ -73,22 +76,29 @@ export default function AiJournalismCreatePage() {
 
         setLoading(true);
         try {
-            // ✅ 1️⃣ Tính tổng điểm dựa vào các rubric
             const totalScore = form.rubrics.reduce(
                 (sum, r) => sum + parseFloat(r.weight || 0),
                 0
             );
+            // upload cover ảnh bìa cuộc thi
+            const formData = new FormData();
+            formData.append(
+                "dto",
+                new Blob([JSON.stringify({ ...form, totalScore })], {
+                    type: "application/json",
+                })
+            );
 
-            // ✅ 2️⃣ Gắn thêm totalScore vào body gửi lên backend
-            const body = { ...form, totalScore };
-
-            // ✅ 3️⃣ Gửi request
-            const res = await api.post(`/journalism/create?creatorId=${user.userId}`, body);
+            if (coverFile) formData.append("cover", coverFile);
+            const res = await api.post(
+                `/journalism/create?creatorId=${user.userId}`,
+                formData
+            );
 
             toast.success("🎉 Tạo cuộc thi thành công!");
             console.log("Created contest:", res.data);
 
-            // ✅ 4️⃣ Reset form
+            // ♻️ Reset form
             setForm({
                 title: "",
                 theme: "",
@@ -100,13 +110,26 @@ export default function AiJournalismCreatePage() {
                 status: "ACTIVE",
                 rubrics: [{ criterion: "", description: "", weight: 0 }],
             });
+            if (coverPreview) URL.revokeObjectURL(coverPreview);
+            setCoverFile(null);
+            setCoverPreview(null);
         } catch (err) {
-            console.error("Lỗi tạo cuộc thi:", err);
-            toast.error("Không thể tạo cuộc thi!");
+            console.error("🔥 Lỗi tạo cuộc thi:", err);
+            if (err.response) {
+                console.error("🧩 Response status:", err.response.status);
+                console.error("📜 Response data:", err.response.data);
+                toast.error(
+                    `Không thể tạo cuộc thi (${err.response.status}): ${err.response.data.message || "Lỗi không xác định"
+                    }`
+                );
+            } else {
+                toast.error("Không thể tạo cuộc thi (Lỗi mạng hoặc server)");
+            }
         } finally {
             setLoading(false);
         }
     };
+
 
 
     // ===== UI =====
@@ -216,7 +239,6 @@ export default function AiJournalismCreatePage() {
                     </div>
 
                     {/* Tiêu chí chấm điểm */}
-                    {/* Tiêu chí chấm điểm */}
                     <div className="pt-4 border-t border-gray-200">
                         <h2 className="text-xl font-semibold mb-2 flex items-center gap-2 text-purple-700">
                             <Scale className="h-5 w-5" /> Tiêu chí chấm điểm
@@ -321,14 +343,39 @@ export default function AiJournalismCreatePage() {
                         </select>
                     </div>
 
+
+                    {/* Chọn ảnh bìa cuộc thi */}
+                    <div>
+                        <label className="font-semibold block mb-1">Ảnh bìa cuộc thi</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (coverPreview) URL.revokeObjectURL(coverPreview);
+                                setCoverFile(file);
+                                if (file) setCoverPreview(URL.createObjectURL(file));
+                            }}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        />
+
+                        {coverPreview && (
+                            <img
+                                src={coverPreview}
+                                alt="Xem trước ảnh bìa cuộc thi"
+                                className="mt-2 w-full h-[500px] object-cover rounded-lg border"
+                            />
+                        )}
+                    </div>
+
+
                     {/* Nút tạo */}
                     <div className="text-right pt-4">
                         <button
                             type="submit"
                             disabled={loading}
-                            className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-60"
-                        >
-                            <Send className="h-4 w-4" />
+                            className="inline-flex items-center gap-2 px-6 py-3 font-semibold text-white rounded-xl bg-gradient-to-r from-green-400 via-blue-500 to-cyan-500 hover:scale-105 transition-transform disabled:opacity-50">
+                            <Send className="h-5 w-5" />
                             {loading ? "Đang tạo..." : "Tạo cuộc thi"}
                         </button>
                     </div>

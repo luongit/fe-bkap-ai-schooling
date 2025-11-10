@@ -267,40 +267,27 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
       ref={containerRef}
       className={`sidebar ${className} ${isCollapsed ? "collapsed" : ""}`}
     >
-      <div className="side-head">
-        <Link to="/" className="logo robot-logo">
-          <svg
-            width="40"
-            height="40"
-            viewBox="0 0 80 80"
-            xmlns="http://www.w3.org/2000/svg"
-            className="robot-head-svg"
-          >
-            <defs>
-              <linearGradient id="robotGradient" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#a855f7" />
-                <stop offset="100%" stopColor="#7e22ce" />
-              </linearGradient>
-            </defs>
-
-            <circle cx="40" cy="40" r="28" fill="url(#robotGradient)" />
-            <circle cx="32" cy="36" r="5" fill="#fff" />
-            <circle cx="32" cy="36" r="2" fill="#7e22ce" />
-            <circle cx="48" cy="36" r="5" fill="#fff" />
-            <circle cx="48" cy="36" r="2" fill="#7e22ce" />
-            <rect x="30" y="50" width="20" height="5" rx="2.5" fill="#f5f3ff" opacity="0.9" />
-            <rect x="38" y="10" width="4" height="10" fill="#a855f7" rx="2" />
-            <circle cx="40" cy="8" r="3" fill="#ef4444" />
-          </svg>
-        </Link>
+      <div className="side-head flex items-center gap-3 px-2 py-2">
+        <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-md flex-shrink-0">
+          <img
+            src="/logo.jpg"
+            alt="logo"
+            className="w-full h-full object-cover"
+          />
+        </div>
 
         {!isCollapsed && (
-          <div>
-            <div className="brand-name">BKAP AI</div>
-            <div className="small-name">Học tập thông minh</div>
+          <div className="leading-tight">
+            <div className="brand-name text-lg font-extrabold text-blue-600 tracking-tight">
+              BKAP AI
+            </div>
+            <div className="small-name text-xs text-gray-500 font-medium">
+              Học tập thông minh
+            </div>
           </div>
         )}
       </div>
+
 
       {/* NAV: cụm thu gọn */}
       <nav className="side-list">
