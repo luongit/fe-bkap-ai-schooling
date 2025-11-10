@@ -267,7 +267,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
       ref={containerRef}
       className={`sidebar ${className} ${isCollapsed ? "collapsed" : ""}`}
     >
-      <div className="side-head flex items-center gap-3 px-2 py-2">
+      <Link to="/" className="side-head flex items-center gap-3 px-2 py-2">
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-md flex-shrink-0">
           <img
             src="/logo.jpg"
@@ -286,7 +286,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             </div>
           </div>
         )}
-      </div>
+      </Link>
 
 
       {/* NAV: cụm thu gọn */}
