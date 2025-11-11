@@ -357,29 +357,22 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
           </NavLink>
         </Group>
 
-        {/* Cụm: Cuộc thi */}
-        <Group
-          icon={FiAward}
-          title="Cuộc thi"
-          open={openGroups.contest}
-          onToggle={() => toggleGroup("contest")}
+        {/* Cuộc thi */}
+        <NavLink
+          to="/journalism"
+          onClick={() => {
+            if (typeof onToggleSidebar === "function") onToggleSidebar();
+          }}
+          className={({ isActive }) =>
+            `mb-2 side-item w-full flex items-center justify-between ${isCollapsed ? "justify-center" : ""
+            }`
+          }
         >
-          <NavLink
-            to="/journalism"
-            onClick={() => {
-              if (typeof onToggleSidebar === "function") onToggleSidebar();
-            }}
-            className={({ isActive }) =>
-              `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive
-                ? "bg-gray-200 text-gray-800 font-semibold"
-                : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
-              } px-2 py-1.5`
-            }
-          >
-            <FiStar className="sidebar-icon w-4 h-4" />
-            <span className="text-xs">Cuộc thi AI</span>
-          </NavLink>
-        </Group>
+          <div className="flex items-center gap-2">
+            <FiAward className="sidebar-icon" />
+            {!isCollapsed && <span className="text-sm font-medium">Cuộc thi</span>}
+          </div>
+        </NavLink>
 
         {/* Cụm: Công cụ khác */}
         <Group
