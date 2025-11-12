@@ -628,12 +628,6 @@ export default function AiJournalismPage() {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold ml-5">Tất Cả Cuộc Thi Hiện Tại</h2>
 
-        <p className="text-gray-500 text-sm mt-3">
-          👉 Nếu bạn thấy các khối này cuộn ngang được bằng chuột hoặc trackpad,
-          nghĩa là Tailwind và CSS cuộn ngang đang hoạt động.
-        </p>
-      </div>
-    </div>
               <div
                 role="tablist"
                 aria-orientation="horizontal"
