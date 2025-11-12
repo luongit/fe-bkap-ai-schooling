@@ -1,430 +1,712 @@
-// src/pages/VideoGeneration.jsx
-import api from "../services/apiToken"; // axios instance có token/refresh
-import { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
+import api from "../services/apiToken";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { CheckCircle } from "lucide-react";
 
-// ===== Inline SVG Icons =====
-const VideoIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="23 7 16 12 23 17 23 7"></polygon>
-    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-  </svg>
-);
-const SendIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="22" y1="2" x2="11" y2="13"></line>
-    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-  </svg>
-);
-const LoaderIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21.5 2v2M20.5 5.5l-1.4 1.4M18 8h-2M15.5 5.5l1.4 1.4M12 2v2M8 8H6M3.5 5.5l1.4 1.4M2 12h2M3.5 18.5l1.4-1.4M6 16v2M5.5 20.5l1.4-1.4M12 20v2M18 16v2M20.5 18.5l-1.4-1.4"></path>
-  </svg>
-);
-const XCircleIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"></circle>
-    <line x1="15" y1="9" x2="9" y2="15"></line>
-    <line x1="9" y1="9" x2="15" y2="15"></line>
-  </svg>
-);
-const ExternalLinkIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-    <polyline points="15 3 21 3 21 9"></polyline>
-    <line x1="10" y1="14" x2="21" y2="3"></line>
-  </svg>
-);
-const UserIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
-  </svg>
-);
-const ApertureIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"></circle>
-    <line x1="14.31" y1="8" x2="20.05" y2="17.94"></line>
-    <line x1="9.69" y1="8" x2="2.95" y2="6.06"></line>
-    <line x1="12" y1="2" x2="12" y2="7.07"></line>
-    <line x1="12" y1="17" x2="12" y2="22"></line>
-    <line x1="20.05" y1="6.06" x2="14.31" y2="16"></line>
-    <line x1="3.95" y1="17.94" x2="9.69" y2="8"></line>
-  </svg>
-);
+const icons = {
+  plus: (props) => (
+    <svg {...props} viewBox="0 0 24 24" stroke="currentColor">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  ),
+  edit: (props) => (
+    <svg {...props} viewBox="0 0 24 24" stroke="currentColor">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z" />
+    </svg>
+  ),
+  export: (props) => (
+    <svg {...props} viewBox="0 0 24 24" stroke="currentColor">
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    </svg>
+  ),
+};
 
-// ===== Consts =====
-const ESTIMATED_CREDIT_COST = 50;
+const defaultStyle = {
+  "font-size": "32px",
+  "font-family": "Inter",
+  "font-weight": "500",
+  color: "#000000",
+  "text-shadow": "1px 1px rgba(0,0,0,0.3)",
+  "horizontal-position": "center",
+  "vertical-position": "bottom",
+};
 
-function VideoGeneration() {
-  // --- State chính ---
-  const [prompt, setPrompt] = useState(""); // mỗi dòng 1 tiêu đề nếu muốn
+export default function VideoStudioProLayout() {
+  const [slides, setSlides] = useState([]);
+  const [current, setCurrent] = useState(0);
+  const [bgMusicUrl, setBgMusicUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [remainingCredit, setRemainingCredit] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [videoHistory, setVideoHistory] = useState([]);
-  const listEndRef = useRef(null);
+  const [videoResult, setVideoResult] = useState(null);
+  const [autoDuration, setAutoDuration] = useState(false);
+  const fileRef = useRef();
+  const slide = slides[current];
+  const disableEdit = slides.length === 0;
+  // 🎵 Danh sách nhạc nền mẫu
+  const bgMusicOptions = [
+    {
+      name: "🎧 Lo-Fi Chill",
+      url: "https://samplelib.com/lib/preview/mp3/sample-12s.mp3",
+    },
+    {
+      name: "🎹 Piano Relax",
+      url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    },
+    {
+      name: "🎬 Cinematic Epic",
+      url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    },
+    {
+      name: "🎸 Acoustic Guitar",
+      url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    },
+    { name: "🚫 Không nhạc nền", url: "" },
+  ];
+  // const handleDownload = async () => {
+  //   if (!videoResult?.url) {
+  //     toast.error("Không có video để tải!");
+  //     return;
+  //   }
 
-  // --- Ảnh: hỗ trợ nhiều ảnh (select / paste / drag-drop) ---
-  const [files, setFiles] = useState([]); // File[]
-  const [previews, setPreviews] = useState([]); // string[] (ObjectURL)
+  //   try {
+  //     setLoading(true);
+  //     toast.info("🔄 Đang tải video...");
 
-  // --- Audio: ưu tiên URL để khớp backend hiện tại (/create-batch-upload yêu cầu audioUrl) ---
-  const [audioUrl, setAudioUrl] = useState("");
+  //     // ✅ Gọi API backend (Spring Boot)
+  //     const res = await api.get("/video/download", {
+  //       params: { url: videoResult.url },
+  //       responseType: "blob",
+  //     });
+  //     const blob = new Blob([res.data], { type: "video/mp4" });
 
-  const textAreaRef = useRef(null);
-  const navigate = useNavigate();
+  //     // ✅ Tạo object URL và mở qua link ẩn
+  //     const downloadUrl = window.URL.createObjectURL(blob);
+  //     const a = document.createElement("a");
+  //     a.style.display = "none";
+  //     a.href = downloadUrl;
+  //     a.download = "video_result.mp4";
 
-  const token = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId");
-  const cost = ESTIMATED_CREDIT_COST;
-  const started = videoHistory.length > 0;
+  //     document.body.appendChild(a);
+  //     a.click();
 
-  // --- Auto scroll ---
-  useEffect(() => {
-    if (listEndRef.current) listEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [videoHistory, loading]);
+  //     // ✅ Chờ 1 chút rồi dọn
+  //     setTimeout(() => {
+  //       window.URL.revokeObjectURL(downloadUrl);
+  //       document.body.removeChild(a);
+  //     }, 1000);
 
-  // --- Auto grow textarea ---
-  const autoGrow = useCallback(() => {
-    const ta = textAreaRef.current;
-    if (!ta) return;
-    ta.style.height = "auto";
-    ta.style.height = `${ta.scrollHeight}px`;
-  }, []);
-  useEffect(() => { autoGrow(); }, [prompt, autoGrow]);
+  //     toast.success("✅ Video đã tải xong!");
+  //   } catch (err) {
+  //     console.error("❌ Lỗi khi tải video:", err);
+  //     toast.error("Không thể tải video xuống!");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  // --- Fetch credit ---
-  const fetchInitialCredit = useCallback(async () => {
-    if (!token) return;
-    setErrorMessage("");
-    try {
-      const res = await api.get("/user/credits");
-      if (res.data?.credit !== undefined) setRemainingCredit(res.data.credit);
-      else setErrorMessage(res.data?.message || "Không lấy được thông tin credit.");
-    } catch (err) {
-      console.error("Fetch credit error:", err);
-      setErrorMessage(err.response?.data?.message || "Lỗi kết nối API credit. Vui lòng thử lại.");
-    }
-  }, [token]);
+  const removeSlide = (id) => {
+    setSlides((prevSlides) => {
+      const index = prevSlides.findIndex((s) => s.id === id);
+      if (index === -1) return prevSlides; // không tìm thấy
 
-  useEffect(() => {
-    fetchInitialCredit();
-    const handleCreditUpdate = () => fetchInitialCredit();
-    window.addEventListener("creditUpdated", handleCreditUpdate);
-    return () => window.removeEventListener("creditUpdated", handleCreditUpdate);
-  }, [fetchInitialCredit]);
+      const newSlides = prevSlides.filter((s) => s.id !== id);
 
-  // --- Helpers: validate & add images ---
-  const addImageFiles = useCallback((incomingFiles) => {
-    const MAX_SIZE = 10 * 1024 * 1024; // 10MB/ảnh
-    const validTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/jpg"]);
+      // ✅ Nếu xóa xong còn ảnh -> cập nhật current đúng vị trí hợp lệ
+      setCurrent((prevCurrent) => {
+        if (newSlides.length === 0) return 0; // hết ảnh thì reset
+        if (index <= prevCurrent && prevCurrent > 0) {
+          return prevCurrent - 1; // nếu xóa ảnh trước hoặc chính ảnh hiện tại
+        }
+        return Math.min(prevCurrent, newSlides.length - 1);
+      });
 
-    const newFiles = [];
-    const newPreviews = [];
-
-    Array.from(incomingFiles || []).forEach((f) => {
-      if (!validTypes.has(f.type)) {
-        toast.error(`${f.name}: chỉ hỗ trợ JPG/PNG/WebP`);
-        return;
-      }
-      if (f.size > MAX_SIZE) {
-        toast.error(`${f.name}: >10MB`);
-        return;
-      }
-      newFiles.push(f);
-      newPreviews.push(URL.createObjectURL(f));
+      return newSlides;
     });
+  };
+  // Ước lượng thời lượng đọc (số giây) dựa trên độ dài text
+  const estimateDuration = (text) => {
+    const words = text.trim().split(/\s+/).length;
+    // Trung bình người đọc tiếng Việt 150 từ / phút = 2.5 từ / giây
+    const base = words / 2.5;
+    return Math.max(base + 1.5, 4); // tối thiểu 4s
+  };
 
-    if (!newFiles.length) return;
+  // ======================= ADD / UPDATE =======================
+  const addSlide = (file) => {
+    const preview = URL.createObjectURL(file);
+    const initText = "Nhập nội dung...";
+    const autoDur = estimateDuration(initText); // ✅ tự tính thời lượng ban đầu
 
-    setFiles((prev) => [...prev, ...newFiles]);
-    setPreviews((prev) => [...prev, ...newPreviews]);
-  }, []);
+    const newSlide = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      text: initText,
+      duration: autoDur, // ✅ thời gian auto mặc định
+      imageFile: file,
+      imagePreview: preview,
+      style: { ...defaultStyle },
+    };
 
-  const onInputFilesChange = useCallback((e) => {
-    addImageFiles(e.target.files);
-    e.target.value = ""; // cho phép chọn lại cùng file
-  }, [addImageFiles]);
-
-  const onPaste = useCallback((e) => {
-    const items = e.clipboardData?.items || [];
-    const bucket = [];
-    for (const it of items) {
-      if (it.type && it.type.startsWith("image/")) {
-        const f = it.getAsFile();
-        if (f) bucket.push(f);
-      }
-    }
-    if (bucket.length) addImageFiles(bucket);
-  }, [addImageFiles]);
-
-  const onDrop = useCallback((e) => {
-    e.preventDefault();
-    if (e.dataTransfer?.files?.length) addImageFiles(e.dataTransfer.files);
-  }, [addImageFiles]);
-  const onDragOver = useCallback((e) => e.preventDefault(), []);
-
-  const removeImageAt = useCallback((idx) => {
-    setPreviews((prev) => {
-      const url = prev[idx];
-      if (url) URL.revokeObjectURL(url);
-      const cp = prev.slice();
-      cp.splice(idx, 1);
-      return cp;
+    setSlides((prev) => {
+      const newArr = [...prev, newSlide];
+      setCurrent(newArr.length - 1); // chuyển focus sang ảnh vừa thêm
+      setAutoDuration(true); // ✅ bật chế độ Auto mặc định
+      return newArr;
     });
-    setFiles((prev) => {
-      const cp = prev.slice();
-      cp.splice(idx, 1);
-      return cp;
-    });
-  }, []);
+  };
 
-  const removeAllImages = useCallback(() => {
-    setPreviews((prev) => { prev.forEach((u) => URL.revokeObjectURL(u)); return []; });
-    setFiles([]);
-  }, []);
+  const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files);
 
-//   useEffect(() => () => { // cleanup on unmount
-//     previews.forEach((u) => URL.revokeObjectURL(u));
-//   }, [previews]);
-
-  // --- Open URL in new tab ---
-  const handleOpenVideo = useCallback((url) => {
-    if (!url) return toast.error("Không mở được đường dẫn video!");
-    toast.info("Đang mở URL kết quả trong tab mới.", { autoClose: 2500 });
-    window.open(url, "_blank", "noopener,noreferrer");
-  }, []);
-
-  // --- Submit: gửi MULTIPART tới /api/video/create-batch-upload ---
-  const handleSubmit = useCallback(async () => {
-    if (!token || !userId) {
-      toast.error("Vui lòng đăng nhập để tạo video.", { autoClose: 1800 });
-      navigate("/auth/login");
+    // ✅ Nếu đã có 7 ảnh thì không cho thêm nữa
+    if (slides.length >= 7) {
+      toast.warn("Bạn chỉ được chọn tối đa 7 ảnh!");
+      e.target.value = "";
       return;
     }
 
-    if (files.length === 0) {
-      setErrorMessage("Hãy chọn hoặc dán ít nhất 1 ảnh.");
-      return;
-    }
+    // ✅ Tính tổng số ảnh sau khi chọn
+    const total = slides.length + files.length;
 
-    if (remainingCredit !== null && remainingCredit < cost) {
-      setErrorMessage(`Không đủ credit. Cần ${cost} credit.`);
-      toast.error(`Bạn không đủ credit! (Cần ${cost})`, { autoClose: 2500 });
-      return;
-    }
-
-    // Chuẩn hoá titles từ prompt: mỗi dòng một tiêu đề (tuỳ chọn)
-    const rawLines = (prompt || "").split("\n").map((s) => s.trim()).filter(Boolean);
-    let titles = [];
-    if (rawLines.length === 1 && files.length > 1) {
-      // lặp tiêu đề 1 dòng cho mọi ảnh
-      titles = Array(files.length).fill(rawLines[0]);
-    } else if (rawLines.length === files.length) {
-      titles = rawLines;
-    } else if (rawLines.length === 0) {
-      titles = []; // để backend tự xử lý (render không caption hoặc tự sinh)
+    if (total > 7) {
+      toast.warn(`⚠️ Bạn chỉ được chọn tối đa 7 ảnh)!`);
+      // Chỉ thêm vừa đủ số ảnh còn thiếu
+      const allowedFiles = files.slice(0, 7 - slides.length);
+      allowedFiles.forEach(addSlide);
     } else {
-      toast.error(`Số dòng tiêu đề (${rawLines.length}) phải bằng số ảnh (${files.length}), hoặc chỉ 1 dòng để dùng chung.`);
-      return;
+      files.forEach(addSlide);
     }
 
-    const loadingId = Date.now();
-    setVideoHistory((prev) => [
-      ...prev,
-      { id: loadingId, role: "assistant", type: "loading_msg", content: "Đang upload và render video. Vui lòng chờ..." },
-    ]);
-    setLoading(true);
-    setErrorMessage("");
+    e.target.value = ""; // reset input
+  };
 
-    const clearLoading = () => setVideoHistory((prev) => prev.filter((m) => m.id !== loadingId));
+  const updateField = (key, value) => {
+    setSlides((prev) => {
+      return prev.map((s, i) => {
+        if (i !== current) return s;
+
+        // Nếu chỉ sửa text và đang bật AutoDuration → tự cập nhật thời lượng mới
+        if (key === "text" && autoDuration) {
+          const newDur = estimateDuration(value);
+          // Cập nhật duration tức thời
+          clearTimeout(window._autoToastTimer);
+          window._autoToastTimer = setTimeout(() => {
+            toast.dismiss("auto-update"); // huỷ thông báo cũ nếu có
+            toast.info(`🔄 Auto cập nhật thời lượng: ${newDur.toFixed(1)}s`, {
+              toastId: "auto-update", // chỉ 1 toast tồn tại
+              position: "bottom-right",
+              autoClose: 1800,
+            });
+          }, 600); // chỉ hiển thị khi người dùng ngừng gõ 0.6s
+
+          return { ...s, text: value, duration: newDur };
+        }
+
+        return { ...s, [key]: value };
+      });
+    });
+  };
+
+  const updateStyle = (key, value) => {
+    setSlides((prev) =>
+      prev.map((s, i) =>
+        i === current ? { ...s, style: { ...s.style, [key]: value } } : s
+      )
+    );
+  };
+
+  // ======================= EXPORT =======================
+  const handleExport = async () => {
+    if (!slides.length) return toast.error("⚠️ Thêm ít nhất 1 ảnh!");
 
     try {
-      const fd = new FormData();
-      files.forEach((f) => fd.append("files", f)); // \uD83D\uDCCE tên field đúng theo backend
-      fd.append("titles", JSON.stringify(titles)); // backend sẽ parse JSON chuỗi này
-      fd.append("audioUrl", audioUrl || ""); // yêu cầu backend hiện tại
+      setLoading(true);
+      setVideoResult(null);
 
-      const res = await api.post("/video/create-batch-upload", fd, {
+      // 🧩 1. Chuẩn bị FormData gửi backend
+      const fd = new FormData();
+
+      // Upload nhiều ảnh
+      slides.forEach((s) => fd.append("files", s.imageFile));
+
+      // Chuẩn hóa slidesJson
+      const slidesJson = slides.map((s) => ({
+        durationSec: s.duration || estimateDuration(s.text),
+        texts: [
+          {
+            text: s.text,
+            style: {
+              color: s.style.color,
+              "font-size": s.style["font-size"],
+              "font-family": s.style["font-family"],
+              "font-weight": s.style["font-weight"],
+              "text-shadow": s.style["text-shadow"],
+              "horizontal-position": s.style["horizontal-position"],
+              "vertical-position": s.style["vertical-position"],
+            },
+          },
+        ],
+      }));
+
+      fd.append("slidesJson", JSON.stringify(slidesJson));
+      fd.append("bgMusicUrl", bgMusicUrl || "");
+
+      // 🧩 2. Gửi đến backend 1 lần duy nhất
+      const res = await api.post("/video/create-slides-advanced-upload", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      clearLoading();
-
-      const videoUrl = res.data?.videoUrl;
-      if (!videoUrl) throw new Error("API không trả về videoUrl.");
-
-      setVideoHistory((prev) => [
-        ...prev,
-        { role: "user", type: "text", content: prompt || "(Không nhập tiêu đề)" },
-        { role: "assistant", type: "video", content: videoUrl, prompt: prompt || "(Không có tiêu đề)" },
-      ]);
-
-      setRemainingCredit((prev) => (prev !== null ? prev - cost : prev));
-      toast.success("✅ Video đã tạo xong!", { autoClose: 2500 });
-      window.dispatchEvent(new Event("creditUpdated"));
-
-      // reset input
-      removeAllImages();
-      setPrompt("");
-      setAudioUrl("");
+      // 🧩 3. Nhận kết quả
+      if (res.data?.videoUrl) {
+        toast.success("Video đã tạo thành công!");
+        setVideoResult({ url: res.data.videoUrl, status: "success" });
+      } else {
+        throw new Error(res.data?.error || "Không có URL trả về!");
+      }
     } catch (err) {
-      console.error("Lỗi tạo video:", err);
-      clearLoading();
-      const msg = err.response?.data?.error || err.message || "Lỗi không xác định";
-      setVideoHistory((prev) => [...prev, { role: "assistant", type: "error", content: msg }]);
+      console.error("❌ Lỗi khi tạo video:", err);
+      toast.error("❌ " + (err.message || "Lỗi không xác định"));
+      setVideoResult({ status: "error", message: err.message });
     } finally {
       setLoading(false);
     }
-  }, [token, userId, files, prompt, audioUrl, remainingCredit, cost, navigate, removeAllImages]);
+  };
 
-  // --- Render message ---
-  const RenderMessageContent = useCallback(({ message }) => {
-    if (message.role === "user") {
-      return (
-        <div className="flex items-start space-x-3 p-3 bg-blue-50/70 border border-blue-200 rounded-lg">
-          <UserIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
-          <p className="text-gray-800 whitespace-pre-wrap">{message.content}</p>
-        </div>
-      );
-    }
-    if (message.type === "video") {
-      return (
-        <div className="bg-white p-4 rounded-xl shadow-lg border-2 border-purple-200 w-full max-w-lg mx-auto">
-          <p className="text-sm text-gray-700 mb-3 font-semibold">
-            Yêu cầu: <span className="text-purple-700 font-normal italic">"{message.prompt}"</span>
-          </p>
-          <div className="w-full aspect-video rounded-lg overflow-hidden border border-gray-300 mb-4">
-            <video key={message.content} controls autoPlay={false} muted className="w-full h-full object-cover" poster="https://via.placeholder.com/640x360?text=AI+Video+Result">
-              <source src={message.content} type="video/mp4" />
-              Trình duyệt của bạn không hỗ trợ thẻ video.
-            </video>
-          </div>
-          <div className="flex justify-center">
-            <button onClick={() => handleOpenVideo(message.content)} className="flex items-center justify-center space-x-2 px-4 py-2 bg-purple-600 text-white font-semibold rounded-full hover:bg-purple-700 transition duration-150 shadow-md hover:shadow-lg text-sm" title="Mở video kết quả trong tab mới">
-              <ExternalLinkIcon className="h-4 w-4" />
-              <span>Mở Video (URL Tab Mới)</span>
-            </button>
-          </div>
-        </div>
-      );
-    }
-    if (message.type === "error") {
-      return (
-        <div className="flex items-start space-x-3 p-3 bg-red-100 border border-red-400 text-red-800 rounded-lg">
-          <XCircleIcon className="w-5 h-5 flex-shrink-0 mt-1" />
-          <div>
-            {/* <strong>Lỗi quan trọng:</strong> */}
-            <p className="text-sm mt-1">{message.content}</p>
-          </div>
-        </div>
-      );
-    }
-    if (message.type === "loading_msg") {
-      return (
-        <div className="flex items-start space-x-3 p-3 bg-yellow-100/80 border border-yellow-300 text-yellow-800 rounded-lg animate-pulse">
-          <LoaderIcon className="w-5 h-5 flex-shrink-0 mt-1 animate-spin" />
-          <div className="text-sm font-medium">{message.content}</div>
-        </div>
-      );
-    }
-    return <p className="text-gray-700 whitespace-pre-wrap">{message.content}</p>;
-  }, [handleOpenVideo]);
-
-  // ====== UI ======
+  // ======================= RENDER UI =======================
   return (
-    <main className="flex flex-col h-screen bg-gray-50 font-sans antialiased" onPaste={onPaste}>
-      {!token ? (
-        <section className="flex flex-1 items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl text-center">
-            <ApertureIcon className="text-purple-600 w-12 h-12 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-800 mb-3">Tạo Video AI</h1>
-            <p className="text-gray-500 mb-6">Vui lòng đăng nhập để bắt đầu tạo video.</p>
-            <a href="/auth/login" className="inline-flex items-center justify-center px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition duration-200 shadow-md">Đăng nhập ngay</a>
+    <div className="flex h-screen bg-white text-gray-900">
+      {/* LEFT PANEL */}
+      {/* LEFT PANEL */}
+      <aside className="w-[300px] flex flex-col bg-[#F4F1FF] border-r border-[#DDD]">
+        {/* Header */}
+        <div className="flex items-center justify-between p-3 border-b border-[#DDD]">
+          <div className="text-sm font-semibold text-[#3A0CA3] uppercase">
+            🎞️ Danh sách ảnh
           </div>
-        </section>
-      ) : (
-        <>
-          <section className="flex-1 overflow-hidden flex flex-col pt-4">
-            {!started && (
-              <div className="flex-grow flex flex-col items-center justify-center p-8 text-center max-w-2xl mx-auto">
-                <VideoIcon className="text-purple-500 w-20 h-20 mb-6 bg-purple-100 p-4 rounded-full shadow-inner" />
-                <h1 className="text-3xl font-extrabold text-gray-800 mb-2">Tạo Video AI Sáng Tạo</h1>
-                <p className="text-gray-500 text-lg">Dán/Chọn nhiều ảnh và (tuỳ chọn) nhập tiêu đề cùng Audio URL.</p>
-                {errorMessage && (
-                  <div className="mt-6 p-4 w-full bg-red-100 border border-red-400 text-red-800 rounded-lg flex items-center space-x-3">
-                    <XCircleIcon className="text-red-500 w-5 h-5 flex-shrink-0" />
-                    <p className="text-sm font-medium">{errorMessage}</p>
+
+          <button
+            onClick={!disableEdit ? handleExport : undefined}
+            disabled={disableEdit || loading}
+            className={`px-3 py-1.5 rounded-md font-semibold text-xs flex items-center gap-1 text-white shadow-sm bg-gradient-to-r from-[#3A0CA3] via-[#4361EE] to-[#7209B7] ${
+              disableEdit
+                ? "cursor-not-allowed opacity-40"
+                : loading
+                ? "cursor-wait opacity-70"
+                : "hover:scale-[1.03] active:scale-[0.97]"
+            }`}
+          >
+            <icons.export className="w-3.5 h-3.5" />
+            {loading ? "🎬" : "✨"}
+          </button>
+        </div>
+
+        {/* Danh sách Scene */}
+        <div
+          className={`flex-1 overflow-y-auto p-3 space-y-4 transition ${
+            disableEdit ? "opacity-60 pointer-events-none" : ""
+          } ${loading ? "opacity-50" : ""}`}
+        >
+          {slides.length === 0 ? (
+            <div className="text-center text-gray-500 text-sm mt-10">
+              Chưa có ảnh nào. <br />
+              <span className="text-[#3A0CA3] font-medium">
+                Hãy chọn ảnh ở bên dưới để bắt đầu tạo video.
+              </span>
+            </div>
+          ) : (
+            slides.map((s, i) => (
+              <div
+                key={s.id}
+                className={`p-2 rounded-lg border cursor-pointer transition ${
+                  i === current
+                    ? "border-[#3A0CA3] bg-[#EDE5FF]"
+                    : "border-gray-300 hover:bg-gray-50"
+                }`}
+                onClick={() => !loading && setCurrent(i)}
+              >
+                <div className="flex items-center justify-between">
+                  <img
+                    src={s.imagePreview}
+                    className="w-12 h-12 rounded object-cover border border-gray-300"
+                    alt=""
+                  />
+                  <label
+                    className={`cursor-pointer ${
+                      disableEdit || loading
+                        ? "opacity-40 pointer-events-none"
+                        : "bg-[#3A0CA3] hover:bg-[#5023BA]"
+                    } p-1.5 rounded text-white`}
+                    title="Đổi ảnh"
+                  >
+                    <icons.edit className="w-4 h-4" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={disableEdit || loading}
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files[0];
+                        if (f) {
+                          updateField("imageFile", f);
+                          updateField("imagePreview", URL.createObjectURL(f));
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {i === current && (
+                  <>
+                    <textarea
+                      value={s.text}
+                      disabled={disableEdit || loading}
+                      maxLength={150}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val.length >= 150) {
+                          toast.warn("⚠️ Giới hạn 150 ký tự cho mỗi ảnh!", {
+                            toastId: "limit-text",
+                            position: "bottom-right",
+                            autoClose: 2000,
+                          });
+                        }
+                        updateField("text", val);
+                      }}
+                      className="w-full mt-2 text-sm bg-white border border-gray-300 rounded p-2 resize-none text-gray-800 disabled:opacity-60 disabled:cursor-not-allowed"
+                      placeholder="Nhập nội dung cho ảnh (tối đa 150 ký tự)..."
+                    />
+
+                    {/* ✅ Hiển thị bộ đếm ký tự */}
+                    <div className="text-right text-xs text-gray-500 mt-1">
+                      {s.text.length}/150 ký tự
+                    </div>
+                  </>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </aside>
+
+      {/* RIGHT PANEL */}
+      <div className="flex-1 flex flex-col">
+        {/* TOP BAR */}
+        <div
+          className={`flex justify-between items-center bg-[#F9F8FF] border-b border-gray-200 px-4 py-3 ${
+            disableEdit
+              ? "opacity-60 pointer-events-none"
+              : loading
+              ? "opacity-60 pointer-events-none"
+              : ""
+          }`}
+        >
+          <div className="flex items-center gap-4 flex-wrap">
+            <label className="flex items-center gap-2 text-sm">
+              Độ đậm
+              <select
+                disabled={disableEdit || loading}
+                className="bg-white border border-gray-300 rounded px-4 py-1 disabled:opacity-60"
+                value={slide?.style?.["font-weight"] || "400"}
+                onChange={(e) => updateStyle("font-weight", e.target.value)}
+              >
+                <option value="300">Mảnh</option>
+                <option value="500">Thông thường</option>
+                <option value="700">Đậm</option>
+              </select>
+            </label>
+
+            <label className="flex items-center gap-2 text-sm">
+              Màu chữ
+              <input
+                type="color"
+                disabled={disableEdit || loading}
+                value={slide?.style?.["color"] || "#000000"}
+                onChange={(e) => updateStyle("color", e.target.value)}
+              />
+            </label>
+
+            <label className="flex items-center gap-2 text-sm">
+              ⏱ Thời gian (giây)
+              <select
+                disabled={disableEdit || loading}
+                className="bg-white border border-gray-300 rounded px-2 py-1 w-28 disabled:opacity-60"
+                value={autoDuration ? "auto" : slide?.duration || 6}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "auto") {
+                    const autoDur = estimateDuration(slide?.text || "");
+                    const dur = Math.min(autoDur, 15); // ✅ giới hạn max 15 giây
+                    updateField("duration", dur);
+                    setAutoDuration(true);
+                    toast.info(`⏱ Tự tính: ${dur.toFixed(1)} giây`, {
+                      position: "bottom-right",
+                    });
+                  } else {
+                    const num = parseFloat(val);
+                    if (num < 0 || num > 15) {
+                      toast.warn("⚠️ Thời lượng chỉ được từ 0–15 giây!", {
+                        position: "bottom-right",
+                      });
+                      return;
+                    }
+                    updateField("duration", num);
+                    setAutoDuration(false);
+                  }
+                }}
+              >
+                <option value="auto">Auto ⏱ (tự tính)</option>
+                {[0, 3, 5, 8, 10, 12, 15].map((sec) => (
+                  <option key={sec} value={sec}>
+                    {sec}s
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex items-center gap-2 text-sm">
+              🎵 Nhạc nền
+              <select
+                disabled={disableEdit || loading}
+                className="bg-white border border-gray-300 rounded px-2 py-1 w-48 disabled:opacity-60"
+                value={bgMusicUrl}
+                onChange={(e) => setBgMusicUrl(e.target.value)}
+              >
+                {bgMusicOptions.map((opt) => (
+                  <option key={opt.url} value={opt.url}>
+                    {opt.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
+
+        {/* PREVIEW */}
+        <main className="flex-1 flex flex-col items-center justify-center bg-white">
+          {slide ? (
+            <div className="relative aspect-video w-[75%] rounded-xl overflow-hidden shadow-md border border-gray-200">
+              <img
+                src={slide.imagePreview}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover opacity-95"
+              />
+              <div
+                className="absolute inset-x-0 flex justify-center text-center px-8"
+                style={{
+                  top:
+                    slide.style["vertical-position"] === "top"
+                      ? "15%"
+                      : slide.style["vertical-position"] === "center"
+                      ? "50%"
+                      : "90%", // ✅ đẩy vị trí cao hơn chút so với đáy
+                  transform:
+                    slide.style["vertical-position"] === "bottom"
+                      ? "translateY(-100%)" // ✅ nếu ở đáy thì neo phần đầu khối vào top (đẩy toàn bộ chữ lên trên)
+                      : "translateY(-50%)", // giữ nguyên cho các vị trí khác
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: slide.style["font-size"],
+                    fontFamily: slide.style["font-family"],
+                    fontWeight: slide.style["font-weight"],
+                    color: slide.style["color"],
+                    textShadow: slide.style["text-shadow"],
+
+                    width: "100%",
+                    maxWidth: "100%",
+                    overflowWrap: "break-word",
+                    wordBreak: "break-word",
+                    textAlign:
+                      slide.style["horizontal-position"] === "left"
+                        ? "left"
+                        : slide.style["horizontal-position"] === "right"
+                        ? "right"
+                        : "center",
+                  }}
+                >
+                  {slide.text}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-gray-500">Chưa có ảnh nào</div>
+          )}
+
+          {/* RESULT MODAL */}
+          {videoResult && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
+              <div className="bg-white rounded-2xl shadow-2xl w-[80%] max-w-3xl relative p-8">
+                {/* Nút đóng */}
+                <button
+                  onClick={() => setVideoResult(null)}
+                  className="absolute top-3 right-4 text-gray-400 hover:text-[#7209B7] text-2xl font-bold transition"
+                >
+                  ×
+                </button>
+
+                {videoResult.status === "success" ? (
+                  <>
+                    {/* ✅ Header: Video thành công + Nút tải xuống ngang hàng */}
+                    <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-5">
+                      <div className="flex items-center gap-2 text-lg font-semibold bg-gradient-to-r from-[#3A0CA3] to-[#7209B7] bg-clip-text text-transparent">
+                        
+                        <span>Video đã tạo thành công!</span>
+                      </div>
+
+                      {/* <button
+                        onClick={handleDownload}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm text-white bg-gradient-to-r from-[#3A0CA3] via-[#4361EE] to-[#7209B7] shadow-md hover:scale-[1.03] active:scale-[0.97] transition-transform"
+                      >
+                        ⬇️ Tải xuống
+                      </button> */}
+                    </div>
+
+                    {/* 🎬 Preview video */}
+                    <video
+                      src={videoResult.url}
+                      controls
+                      autoPlay
+                      className="w-full rounded-xl border border-gray-300 shadow-lg"
+                    />
+
+                    {/* Footer buttons */}
+                    {/* <div className="mt-6 flex justify-center gap-4">
+                      <a
+                        href={videoResult.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-5 py-2 rounded-lg font-medium text-white bg-gradient-to-r from-[#7209B7] to-[#3A0CA3] hover:opacity-90 transition-all shadow-sm"
+                      >
+                        🔗 Xem toàn màn hình
+                      </a>
+                    </div> */}
+                  </>
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-red-600 font-semibold text-lg">
+                      ❌ Lỗi khi tạo video
+                    </p>
+                    <p className="text-gray-700 mt-2">{videoResult.message}</p>
                   </div>
                 )}
               </div>
-            )}
-
-            {/* Lịch sử */}
-            <div className={`overflow-y-auto px-4 sm:px-8 pb-4 ${started ? "flex-grow" : "flex-grow-0"}`}>
-              <div className="max-w-3xl mx-auto space-y-4">
-                {videoHistory.map((msg, i) => (
-                  <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[90%] md:max-w-[75%] lg:max-w-[60%] ${msg.role === "user" ? "self-end" : "self-start"}`}>
-                      <RenderMessageContent message={msg} />
-                    </div>
-                  </div>
-                ))}
-                <div ref={listEndRef} className="pt-4" />
-              </div>
             </div>
-          </section>
+          )}
+        </main>
 
-          {/* Thanh nhập liệu */}
-          <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 shadow-xl">
-            <div className="max-w-3xl mx-auto space-y-3">
-              {/* Preview ảnh */}
-              {previews.length > 0 && (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                  {previews.map((src, idx) => (
-                    <div key={idx} className="relative group">
-                      <img src={src} alt={`preview-${idx}`} className="h-20 w-full object-cover rounded-lg border" />
-                      <button type="button" onClick={() => removeImageAt(idx)} className="absolute -top-2 -right-2 bg-white shadow-md text-black rounded-full w-6 h-6 text-xs hidden group-hover:flex items-center justify-center" title="Bỏ ảnh">×</button>
-                    </div>
-                  ))}
-                  {/* <button type="button" onClick={removeAllImages} className="col-span-full text-left text-sm text-black-600 hover:underline">Bỏ tất cả ảnh</button> */}
-                  
+        <footer
+          className={`relative border-t border-gray-200 bg-[#F9F8FF] ${
+            slides.length === 0
+              ? "flex items-center justify-start"
+              : "flex flex-wrap items-start justify-start"
+          } gap-4 px-4 ${
+            slides.length === 0
+              ? "py-[10px] overflow-hidden"
+              : "py-4 overflow-y-auto"
+          } max-h-[240px] scroll-smooth ${
+            loading ? "pointer-events-none opacity-60" : ""
+          }`}
+        >
+          {slides.length === 0 ? (
+            // 🟣 Khi chưa có ảnh
+            <div className="w-full flex items-center justify-start">
+              {/* Nút thêm ảnh — cách trái 15px, căn giữa chiều cao */}
+              <label
+                className={`cursor-pointer w-24 h-24 border-2 border-dashed border-[#C7B6FF] rounded-xl flex items-center justify-center 
+        text-[#3A0CA3] transition-all shadow-sm flex-shrink-0 ml-[15px] ${
+          loading
+            ? "opacity-40 pointer-events-none"
+            : "hover:border-[#3A0CA3] hover:text-white hover:bg-[#3A0CA3]/90"
+        }`}
+              >
+                <icons.plus className="w-8 h-8" />
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </label>
+
+              {/* Văn bản hướng dẫn — cách nút 30px */}
+              <div className="flex flex-col items-start text-left ml-8 text-gray-600 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">📁</span>
+                  <span>Chưa có ảnh nào được chọn.</span>
                 </div>
-              )}
-
-              <div onDrop={onDrop} onDragOver={onDragOver} className="flex items-end gap-3 rounded-2xl border border-gray-300 p-2 focus-within:ring-2 focus-within:ring-purple-500">
-                {/* nút chọn nhiều ảnh */}
-                <label className="shrink-0 px-3 py-2 rounded-xl border border-dashed border-purple-400 hover:bg-purple-50 cursor-pointer text-sm font-medium">
-                  <input type="file" accept="image/png,image/jpeg,image/webp" multiple className="hidden" onChange={onInputFilesChange} disabled={loading} />
-                  + Ảnh (nhiều)
-                </label>
-
-                {/* textarea: nhập tiêu đề mỗi dòng */}
-                <textarea ref={textAreaRef} value={prompt} onChange={(e) => setPrompt(e.target.value)} onInput={autoGrow} onPaste={onPaste} placeholder="Mỗi dòng 1 tiêu đề (tuỳ chọn). Bạn cũng có thể Ctrl+V ảnh hoặc kéo-thả vào đây." rows={1} className="flex-1 resize-none border-0 outline-none p-2 rounded-xl min-h-[40px] max-h-[240px] overflow-y-auto" onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }} disabled={loading} />
-
-                {/* nút gửi */}
-                <button className={`flex items-center justify-center w-10 h-10 rounded-full transition ${loading || (files.length === 0) || remainingCredit === 0 || (remainingCredit !== null && remainingCredit < cost) ? "bg-gray-300 text-gray-100 cursor-not-allowed" : "bg-purple-600 text-white hover:bg-purple-700"}`} title="Gửi" onClick={handleSubmit} disabled={loading || files.length === 0 || remainingCredit === 0 || (remainingCredit !== null && remainingCredit < cost)}>
-                  {loading ? <LoaderIcon className="h-5 w-5 animate-spin" /> : <SendIcon className="h-5 w-5" />}
-                </button>
+                <div className="flex items-center gap-2 mt-1 text-[#3A0CA3] font-medium">
+                  <span className="text-xl">➕</span>
+                  <span>Bấm nút bên trái để thêm ảnh vào video.</span>
+                </div>
               </div>
-
-              {/* Audio URL */}
-              <div className="flex items-center gap-2">
-                <input type="url" placeholder="Audio URL (tuỳ chọn)" value={audioUrl} onChange={(e) => setAudioUrl(e.target.value)} className="flex-1 border rounded-lg px-3 py-2" />
-                <span className="text-xs text-gray-500">Backend hiện nhận <code>audioUrl</code></span>
-              </div>
-
-              <p className="text-xs text-gray-500 mt-1 text-right">
-                Mỗi lần tạo video tốn <span className="font-semibold text-purple-600">{cost} credit</span>. Còn lại: <span className="font-bold text-purple-600">{remainingCredit !== null ? remainingCredit.toLocaleString() : "..."}</span>
-              </p>
             </div>
-          </div>
-        </>
-      )}
-    </main>
+          ) : (
+            // 🟢 Khi đã có ảnh
+            <>
+              {slides.map((s, i) => (
+                <div
+                  key={s.id}
+                  className={`relative cursor-pointer flex flex-col items-center text-xs transition-all ${
+                    i === current
+                      ? "opacity-100 scale-105"
+                      : "opacity-80 hover:opacity-90 hover:scale-105"
+                  }`}
+                  onClick={() => !loading && setCurrent(i)}
+                >
+                  <img
+                    src={s.imagePreview}
+                    alt=""
+                    className={`w-24 h-24 object-cover rounded-xl border shadow-sm ${
+                      i === current
+                        ? "border-[#3A0CA3] ring-2 ring-[#B197FC]/60"
+                        : "border-gray-300"
+                    }`}
+                  />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeSlide(s.id);
+                    }}
+                    disabled={loading}
+                    className="absolute top-1 right-1 text-black text-lg font-bold leading-none hover:text-red-600 disabled:opacity-40 transition"
+                    title="Xóa ảnh này"
+                  >
+                    ×
+                  </button>
+                  <span className="truncate w-24 mt-1 text-gray-700 text-center">
+                    {s.text.slice(0, 14) || "Ảnh"}
+                  </span>
+                </div>
+              ))}
+
+              {/* ➕ Nút thêm ảnh cuối danh sách */}
+              <label
+                className={`cursor-pointer w-24 h-24 border-2 border-dashed border-[#C7B6FF] rounded-xl 
+        flex items-center justify-center text-[#3A0CA3] transition-all shadow-sm flex-shrink-0 ${
+          loading
+            ? "opacity-40 pointer-events-none"
+            : "hover:border-[#3A0CA3] hover:text-white hover:bg-[#3A0CA3]/90"
+        }`}
+              >
+                <icons.plus className="w-8 h-8" />
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </label>
+            </>
+          )}
+        </footer>
+      </div>
+    </div>
   );
 }
-
-export default VideoGeneration;
