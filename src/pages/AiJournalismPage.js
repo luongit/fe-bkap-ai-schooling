@@ -36,7 +36,7 @@ export default function AiJournalismPage() {
 
   // --------- STATE thuộc “LIST VIEW” ---------
   const [query, setQuery] = useState("");
-  const [tab, setTab] = useState("upcoming"); // upcoming | popular | recommended
+  const [tab, setTab] = useState("ongoing"); // upcoming | ongoing | ended
 
   // --------- STATE thuộc “DETAIL VIEW” ---------
   const [user, setUser] = useState(null);
@@ -72,9 +72,35 @@ export default function AiJournalismPage() {
   useEffect(() => {
     api
       .get("/journalism/contests")
-      .then((res) => setContests(res.data || []))
-      .catch((err) => console.error(err));
+      .then((res) => {
+        const sorted = (res.data || []).sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setContests(sorted);
+      })
+      .catch((err) => {
+        console.error("Lỗi khi tải contests:", err);
+        toast.error("Không thể tải danh sách cuộc thi");
+      });
   }, []);
+
+
+
+  useEffect(() => {
+    if (!contests.length) return;
+
+    const now = new Date();
+    const hasOngoing = contests.some((c) => {
+      const s = c.startDate ? new Date(c.startDate) : null;
+      const e = c.endDate ? new Date(c.endDate) : null;
+      return s && e && now >= s && now <= e;
+    });
+
+    if (!hasOngoing) {
+      setTab("upcoming"); // nếu không có ongoing thì tự chuyển sang sắp diễn ra
+    }
+  }, [contests]);
+
 
   // Lấy rubric khi có activeContest (bạn của bạn)
   useEffect(() => {
@@ -448,6 +474,7 @@ export default function AiJournalismPage() {
   const filtered = useMemo(() => {
     let arr = contests || [];
     const q = query.trim().toLowerCase();
+
     if (q) {
       arr = arr.filter(
         (c) =>
@@ -456,17 +483,33 @@ export default function AiJournalismPage() {
           (c.description || "").toLowerCase().includes(q)
       );
     }
-    if (tab === "popular") {
-      arr = [...arr].sort(
-        (a, b) => (b.description?.length || 0) - (a.description?.length || 0)
-      );
-    } else if (tab === "recommended") {
-      arr = [...arr].sort(
-        (a, b) => Number(Boolean(b.theme)) - Number(Boolean(a.theme))
-      );
+
+    const now = new Date();
+
+    if (tab === "ongoing") {
+      arr = arr.filter((c) => {
+        const s = c.startDate ? new Date(c.startDate) : null;
+        const e = c.endDate ? new Date(c.endDate) : null;
+        return s && e && now >= s && now <= e;
+      });
+    } else if (tab === "upcoming") {
+      arr = arr.filter((c) => {
+        const s = c.startDate ? new Date(c.startDate) : null;
+        return s && now < s;
+      });
+    } else if (tab === "ended") {
+      arr = arr.filter((c) => {
+        const e = c.endDate ? new Date(c.endDate) : null;
+        return e && now > e;
+      });
     }
+
+    // sắp xếp mới nhất lên đầu
+    arr = [...arr].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
     return arr;
   }, [contests, query, tab]);
+
 
   // --------- RENDER ---------
   if (viewMode === "list") {
@@ -479,11 +522,10 @@ export default function AiJournalismPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight ml-5">
-                  Các Cuộc Thi Học Thuật
+                  Các Cuộc Thi Giáo Dục
                 </h1>
                 <p className="text-gray-500 mt-1 ml-5">
-                  Khám phá và tham gia các cuộc thi giáo dục hàng đầu trên toàn
-                  thế giới
+                  Khám phá và tham gia các cuộc thi giáo dục hàng đầu Việt Nam
                 </p>
               </div>
 
@@ -491,9 +533,9 @@ export default function AiJournalismPage() {
               {["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user?.role) && (
                 <button
                   onClick={() => (window.location.href = "ai-journalism/create")}
-                  className="bg-gradient-to-r from-purple-600 to-fuchsia-500 text-black font-semibold px-5 py-2 rounded-lg shadow hover:opacity-90 transition-all"
+                  className="border border-purple-500 text-purple-700 font-semibold px-5 py-2 rounded-lg hover:bg-purple-50 transition-all shadow-sm"
                 >
-                  Tạo Cuộc Thi Mới
+                  + Tạo Cuộc Thi Mới
                 </button>
               )}
             </div>
@@ -531,21 +573,6 @@ export default function AiJournalismPage() {
                       <div className="text-gray/100 md:text-xs">
                         {featured.description}
                       </div>
-
-
-                    </div>
-
-                    {/* vài ký hiệu bay nhẹ */}
-                    <div className="pointer-events-none select-none">
-                      <div className="absolute top-4 right-8 text-white/100 text-5xl font-serif animate-float-fast">
-                        ∑
-                      </div>
-                      <div className="absolute top-20 right-16 text-white/100 text-4xl font-serif animate-float-fast">
-                        π
-                      </div>
-                      <div className="absolute top-10 right-32 text-white/100 text-4xl font-serif animate-float-fast">
-                        ∫
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -560,9 +587,9 @@ export default function AiJournalismPage() {
                         Quy mô cuộc thi : <b>Toàn lãnh thổ Việt Nam</b>
                       </div>
                     </div>
-                  
 
-                  <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center">
+
+                    <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center">
                       <div className="flex items-center gap-2 text-gray-600 flex-1">
                         <Users className="h-5 w-5" />
                         <div className="text-sm">
@@ -587,7 +614,7 @@ export default function AiJournalismPage() {
                     </div>
 
 
-                    
+
                   </div>
                 </div>
 
@@ -613,9 +640,10 @@ export default function AiJournalismPage() {
                 className="inline-flex h-9 items-center justify-center rounded-lg bg-gray-100 p-1 text-gray-500"
               >
                 {[
+                  { key: "ongoing", label: "Đang Diễn Ra" },
                   { key: "upcoming", label: "Sắp Diễn Ra" },
-                  { key: "popular", label: "Phổ Biến" },
-                  { key: "recommended", label: "Đề Xuất" },
+                  { key: "ended", label: "Đã Kết Thúc" },
+
                 ].map((t) => {
                   const active = tab === t.key;
                   return (
@@ -637,141 +665,139 @@ export default function AiJournalismPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((c, idx) => (
-                <div
-                  key={c.id ?? idx}
-                  className="rounded-xl border bg-card text-card-foreground shadow overflow-hidden transition-all hover:shadow-md"
-                >
-                  {/* header */}
-                  <div className="relative h-48 w-full overflow-hidden">
-                    {c.coverUrl ? (
-                      <img
-                        src={c.coverUrl}
-                        alt={c.title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div
-                        className={`absolute inset-0 flex items-center justify-center ${tintClass(
-                          idx
-                        )}`}
-                      >
-                        <span className="text-2xl md:text-4xl font-bold text-center px-2">
-                          {c.title}
-                        </span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/30" />
-                    <div className="absolute bottom-2 left-2 text-white font-semibold drop-shadow-md">
-                      {c.title}
-                    </div>
-                  </div>
-
-                  {/* body */}
-                  <div className="p-5">
-                    <div className="mb-3 text-center">
-                      <h2 className="font-bold text-lg md:text-xm text-gray-800 mb-1">
-                        {c.title}
-                      </h2>
-                      {c.theme && (
-                        <div className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 text-blue-700 px-2.5 py-0.5 text-xs font-semibold mt-1">
-                          <BadgeCheck className="w-3 h-3 text-blue-500" />
-                          {c.theme}
+              {filtered.length === 0 ? (
+                <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-xl shadow-sm border border-gray-200">
+                  {tab === "ongoing" && "Hiện không có cuộc thi nào đang diễn ra."}
+                  {tab === "upcoming" && "Hiện chưa có cuộc thi nào sắp diễn ra."}
+                  {tab === "ended" && "Chưa có cuộc thi nào đã kết thúc."}
+                </div>
+              ) : (
+                filtered.map((c, idx) => (
+                  <div
+                    key={c.id ?? idx}
+                    className="rounded-xl border bg-card text-card-foreground shadow overflow-hidden transition-all hover:shadow-md"
+                  >
+                    {/* header */}
+                    <div className="relative h-48 w-full overflow-hidden">
+                      {c.coverUrl ? (
+                        <img
+                          src={c.coverUrl}
+                          alt={c.title}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className={`absolute inset-0 flex items-center justify-center ${tintClass(
+                            idx
+                          )}`}
+                        >
+                          <span className="text-2xl md:text-4xl font-bold text-center px-2">
+                            {c.title}
+                          </span>
                         </div>
                       )}
-                    </div>
-
-                    <p className="text-sm text-gray-500 line-clamp-2 h-10 mb-3">
-                      {c.description}
-                    </p>
-
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Hash className="h-4 w-4 text-gray-500" />
-                        <span>Mã số cuộc thi: {c.id}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4 text-gray-500" />
-                        <span>Cuộc thi khởi tạo vào : {formatDate(c.createdAt)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4 text-gray-500" />
-                        <span>
-                          Ngày bắt đầu cuộc thi: <b>{formatDate(c.startDate)}</b>
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4 text-gray-500" />
-                        <span>
-                          Ngày kết thúc cuộc thi: <b>{formatDate(c.endDate)}</b>
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-gray-500" />
-                        <span>
-                          Thời gian nhận bài:{" "}
-                          <b>
-                            {formatDate(c.submissionStart)} →{" "}
-                            {formatDate(c.submissionEnd)}
-                          </b>
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Award className="h-4 w-4 text-gray-500" />
-                        <span>Tổng điểm: {c.totalScore ?? "—"} điểm</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-gray-500" />
-                        <span className="flex items-center gap-1">
-                          Trạng thái:
-                          {c.status === "ACTIVE" && (
-                            <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-300">
-                              Được công bố chính thức
-                            </span>
-                          )}
-                          {c.status === "DRAFT" && (
-                            <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 border border-yellow-300">
-                              Chưa công bố chính thức
-                            </span>
-                          )}
-                          {c.status === "CLOSED" && (
-                            <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-300">
-                              Cuộc thi đã kết thúc
-                            </span>
-                          )}
-                          {!["ACTIVE", "DRAFT", "CLOSED"].includes(c.status) && (
-                            <span className="ml-1 text-gray-500">—</span>
-                          )}
-                        </span>
-
+                      <div className="absolute inset-0 bg-black/30" />
+                      <div className="absolute bottom-2 left-2 text-white font-semibold drop-shadow-md">
+                        {c.title}
                       </div>
                     </div>
-                  </div>
 
-                  {/* footer */}
-                  <div className="items-center p-6 px-5 py-4 border-t bg-gray-50 flex justify-end">
-                    <button
-                      onClick={() => openContest(c)}
-                      className="inline-flex items-center justify-center gap-2 whitespace-nowrap border border-input bg-background shadow-sm hover:bg-gray-100 h-8 rounded-md px-3 text-xs"
-                    >
-                      Xem chi tiết <ExternalLink className="ml-1 h-3 w-3" />
-                    </button>
+                    {/* body */}
+                    <div className="p-5">
+                      <div className="mb-3 text-center">
+                        <h2 className="font-bold text-lg md:text-xm text-gray-800 mb-1">
+                          {c.title}
+                        </h2>
+                        {c.theme && (
+                          <div className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 text-blue-700 px-2.5 py-0.5 text-xs font-semibold mt-1">
+                            <BadgeCheck className="w-3 h-3 text-blue-500" />
+                            {c.theme}
+                          </div>
+                        )}
+                      </div>
+
+                      <p className="text-sm text-gray-500 line-clamp-2 h-10 mb-3">
+                        {c.description}
+                      </p>
+
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Hash className="h-4 w-4 text-gray-500" />
+                          <span>Mã số cuộc thi: {c.id}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon className="h-4 w-4 text-gray-500" />
+                          <span>Cuộc thi khởi tạo vào : {formatDate(c.createdAt)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon className="h-4 w-4 text-gray-500" />
+                          <span>
+                            Ngày bắt đầu cuộc thi: <b>{formatDate(c.startDate)}</b>
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon className="h-4 w-4 text-gray-500" />
+                          <span>
+                            Ngày kết thúc cuộc thi: <b>{formatDate(c.endDate)}</b>
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-gray-500" />
+                          <span>
+                            Thời gian nhận bài:{" "}
+                            <b>
+                              {formatDate(c.submissionStart)} → {" "}
+                              {formatDate(c.submissionEnd)}
+                            </b>
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Award className="h-4 w-4 text-gray-500" />
+                          <span>Tổng điểm: {c.totalScore} điểm</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-gray-500" />
+                          <span className="flex items-center gap-1">
+                            Trạng thái:
+                            {c.status === "ACTIVE" && (
+                              <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-300">
+                                Được công bố chính thức
+                              </span>
+                            )}
+                            {c.status === "DRAFT" && (
+                              <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 border border-yellow-300">
+                                Chưa công bố chính thức
+                              </span>
+                            )}
+                            {c.status === "CLOSED" && (
+                              <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-300">
+                                Cuộc thi đã kết thúc
+                              </span>
+                            )}
+                            {!["ACTIVE", "DRAFT", "CLOSED"].includes(c.status) && (
+                              <span className="ml-1 text-gray-500">—</span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* footer */}
+                    <div className="items-center p-6 px-5 py-4 border-t bg-gray-50 flex justify-end">
+                      <button
+                        onClick={() => openContest(c)}
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap border border-input bg-background shadow-sm hover:bg-gray-100 h-8 rounded-md px-3 text-xs"
+                      >
+                        Xem chi tiết <ExternalLink className="ml-1 h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
+
           </section>
         </main>
-
-        {/* animations */}
-        <style>{`
-          @keyframes floatSlow { 0%{ transform: translateY(0) } 50%{ transform: translateY(-10px) } 100%{ transform: translateY(0) } }
-          @keyframes floatMedium { 0%{ transform: translateY(0) } 50%{ transform: translateY(-16px) } 100%{ transform: translateY(0) } }
-          @keyframes floatFast { 0%{ transform: translateY(0) } 50%{ transform: translateY(-22px) } 100%{ transform: translateY(0) } }
-          .animate-float-slow { animation: floatSlow 6s ease-in-out infinite; }
-          .animate-float-medium { animation: floatMedium 4.5s ease-in-out infinite; }
-          .animate-float-fast { animation: floatFast 3.5s ease-in-out infinite; }
-        `}</style>
       </div>
     );
   }
