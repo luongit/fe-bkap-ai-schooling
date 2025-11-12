@@ -4,19 +4,26 @@ import { toast } from "react-toastify";
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || "",
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
+
 
 
 // GẮN ACCESS TOKEN TỰ ĐỘNG TRƯỚC MỖI REQUEST
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // 👈 FE dùng key "token"
+  const token = localStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
+
+  // Nếu data là FormData (upload file) → KHÔNG set Content-Type
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"]; // tự set multipart/form-data
+  } else {
+    config.headers["Content-Type"] = "application/json";
+  }
+
   return config;
 });
+
 
 
 //  XỬ LÝ TOKEN HẾT HẠN (401) → TỰ ĐỘNG REFRESH
