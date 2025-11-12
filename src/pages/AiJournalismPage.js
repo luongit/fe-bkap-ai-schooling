@@ -13,9 +13,8 @@ import {
   ArrowRight,
   Hash,
   BadgeCheck,
-  User as UserIcon,
 } from "lucide-react";
-import api from "../services/apiToken"; // axios instance có refresh token
+import api from "../services/apiToken"; // ✅ axios instance có refresh token
 
 export default function AiJournalismPage() {
   // --------- STATE CỐT LÕI ---------
@@ -34,26 +33,26 @@ export default function AiJournalismPage() {
   // Chế độ hiển thị tổng (list | detail)
   const [viewMode, setViewMode] = useState("list");
 
-  // --------- STATE thuộc “LIST VIEW” ---------
+  // --------- STATE thuộc “LIST VIEW” (bạn) ---------
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState("ongoing"); // upcoming | ongoing | ended
 
-  // --------- STATE thuộc “DETAIL VIEW” ---------
+  // --------- STATE thuộc “DETAIL VIEW” (bạn của bạn) ---------
   const [user, setUser] = useState(null);
   const [showForm, setShowForm] = useState(true);
   const [rubrics, setRubrics] = useState([]);
   const [activeTab, setActiveTab] = useState("submit"); // submit | my | rubric
 
   // --------- EFFECTS ---------
-  // Lấy profile (để có studentId)
+  // Lấy profile (để có studentId) – theo code của bạn mình
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get("/profile"); // Backend trả ProfileDTO
+        const res = await api.get("/profile"); // BE trả ProfileDTO
         const me = res.data;
         setUser({
           userId: me.userId,
-          studentId: me.objectId, // dùng làm studentId
+          studentId: me.objectId, // 👈 dùng làm studentId
           objectType: me.objectType,
           fullName: me.fullName,
           role: me.role,
@@ -68,7 +67,7 @@ export default function AiJournalismPage() {
     })();
   }, []);
 
-  // Load danh sách cuộc thi
+  // Load danh sách cuộc thi (bạn)
   useEffect(() => {
     api
       .get("/journalism/contests")
@@ -83,8 +82,6 @@ export default function AiJournalismPage() {
         toast.error("Không thể tải danh sách cuộc thi");
       });
   }, []);
-
-
 
   useEffect(() => {
     if (!contests.length) return;
@@ -101,7 +98,6 @@ export default function AiJournalismPage() {
     }
   }, [contests]);
 
-
   // Lấy rubric khi có activeContest (bạn của bạn)
   useEffect(() => {
     if (!activeContest) return;
@@ -115,7 +111,7 @@ export default function AiJournalismPage() {
       .catch(() => setRubrics([]));
   }, [activeContest]);
 
-  // --------- HELPERS ---------
+  // --------- HELPERS (bạn của bạn) ---------
   const formatDate = (d) => {
     if (!d) return "";
     try {
@@ -128,7 +124,9 @@ export default function AiJournalismPage() {
   const isContestOpen = () => {
     if (!activeContest) return true;
     const now = new Date();
-    const s = activeContest.startDate ? new Date(activeContest.startDate) : null;
+    const s = activeContest.startDate
+      ? new Date(activeContest.startDate)
+      : null;
     const e = activeContest.endDate ? new Date(activeContest.endDate) : null;
     if (s && now < s) return false;
     if (e && now > e) return false;
@@ -152,7 +150,7 @@ export default function AiJournalismPage() {
     return { words, chars };
   }, [article]);
 
-  // --------- ACTIONS ---------
+  // --------- ACTIONS (hợp nhất logic hai bên) ---------
   async function openContest(contest) {
     setActiveContest(contest);
     setViewMode("detail");
@@ -160,21 +158,26 @@ export default function AiJournalismPage() {
     setShowForm(true);
 
     try {
+      // bạn của bạn dùng studentId từ profile
       if (["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) {
-        // gọi API cho giáo viên
+        // 👇 gọi API cho giáo viên
         const res1 = await api.get(`/journalism/entries/contest/${contest.id}`);
         setEntries(res1.data || []);
       } else if (user?.studentId) {
-        // học sinh chỉ xem bài của mình
-        const res1 = await api.get(`/journalism/entries/student/${user.studentId}`);
-        const filtered = (res1.data || []).filter(
+        // 👇 học sinh chỉ xem bài của mình
+        const res1 = await api.get(
+          `/journalism/entries/student/${user.studentId}`
+        );
+        const filtered = res1.data.filter(
           (e) => e.contest?.id === Number(contest.id)
         );
         setEntries(filtered);
         if (filtered.length > 0) setShowForm(false);
       }
 
-      const res2 = await api.get(`/journalism/contests/${contest.id}/leaderboard`);
+      const res2 = await api.get(
+        `/journalism/contests/${contest.id}/leaderboard`
+      );
       setLeaderboard(res2.data || []);
     } catch (err) {
       console.error("Lỗi khi mở cuộc thi:", err);
@@ -190,6 +193,9 @@ export default function AiJournalismPage() {
 
     setLoading(true);
     try {
+      // ✅ Tương thích cả hai backend:
+      // - Nếu BE tự map studentId từ token → bỏ qua field studentId
+      // - Nếu BE cũ cần studentId → thêm khi có
       const entry = {
         contest: { id: activeContest.id },
         title,
@@ -202,6 +208,7 @@ export default function AiJournalismPage() {
 
       if (data?.id) {
         toast.success("✅ Nộp bài thành công!");
+        // chèn đầu danh sách (bạn của bạn)
         setEntries((prev) => {
           const withoutDup = prev.filter((e) => e.id !== data.id);
           return [data, ...withoutDup];
@@ -211,7 +218,7 @@ export default function AiJournalismPage() {
         setShowForm(false);
         setActiveTab("my");
       } else {
-        toast.error("Lỗi khi nộp bài!");
+        toast.error("❌ Lỗi khi nộp bài!");
       }
     } catch (err) {
       console.error("Lỗi nộp bài:", err);
@@ -231,21 +238,21 @@ export default function AiJournalismPage() {
       if (data?.status === "success") {
         setFeedback(data);
         setShowModal(true);
-        toast.success("🎯 Bài thi đã được chấm điểm!");
+        toast.success("🎯 Bài đã được chấm điểm!");
         setEntries((prev) =>
           prev.map((e) =>
             e.id === entryId
               ? {
-                ...e,
-                aiScore: data.score,
-                aiFeedback: data.feedback,
-                aiCriteria: data.criteria,
-              }
+                  ...e,
+                  aiScore: data.score,
+                  aiFeedback: data.feedback,
+                  aiCriteria: data.criteria,
+                }
               : e
           )
         );
       } else {
-        toast.error("" + (data?.message || "Chấm điểm không thành công"));
+        toast.error("❌ " + (data?.message || "Chấm điểm không thành công"));
       }
     } catch (err) {
       console.error("Lỗi chấm điểm AI:", err);
@@ -255,42 +262,29 @@ export default function AiJournalismPage() {
   }
 
   // --------- COMPONENT PHỤ (bạn của bạn) ---------
-  function ManualScoreButton({ entry, rubrics, totalScore }) {
+  function ManualScoreButton({ entry, rubrics }) {
     const [open, setOpen] = useState(false);
     const [criteria, setCriteria] = useState({});
     const [feedback, setFeedback] = useState("");
-    const [files, setFiles] = useState([]);
-
-
-    useEffect(() => {
-      if (open) {
-        api.get(`/journalism/entries/${entry.id}/submissions`)
-          .then(res => setFiles(res.data || []))
-          .catch(() => setFiles([]));
-      }
-    }, [open, entry.id]);
-
-    // tổng điểm giáo viên đang nhập
-    const total = Object.values(criteria).reduce(
-      (a, b) => a + Number(b || 0),
-      0
-    );
 
     const handleSubmit = async () => {
+      const total = Object.values(criteria).reduce(
+        (a, b) => a + Number(b || 0),
+        0
+      );
       try {
         await api.post(`/journalism/entries/${entry.id}/grade-manual`, {
-          totalScore: total,            // điểm giáo viên chấm
+          totalScore: total / Object.keys(criteria).length,
           feedback,
-          criteriaJson: criteria,       // gửi từng tiêu chí
+          criteriaJson: criteria,
         });
-        toast.success("Đã gửi điểm chấm thủ công!");
+        toast.success("Đã gửi điểm thủ công!");
         setOpen(false);
       } catch (err) {
         toast.error("Chấm điểm thất bại!");
       }
     };
 
-    // chỉ hiện cho role giáo viên/admin
     if (!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) return null;
 
     return (
@@ -315,55 +309,27 @@ export default function AiJournalismPage() {
                 ✍️ Chấm bài thủ công
               </h3>
 
-              {files.length > 0 && (
-                <div className="mb-4">
-                  <p className="font-semibold text-gray-700 mb-2">📎 Tệp bài nộp:</p>
-                  <ul className="space-y-1">
-                    {files.map((f) => (
-                      <li key={f.id} className="flex items-center justify-between text-sm border-b py-1">
-                        <span className="truncate w-2/3 text-gray-800">
-                          {f.fileName || f.fileUrl?.split("/").pop() || "Không có tên file"}
-                        </span>
-                        <a
-                          href={f.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-purple-600 hover:underline font-medium"
-                        >
-                          📂 Mở
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-
               {rubrics.map((r) => (
-                <div key={r.id} className="flex items-center justify-between mb-2">
+                <div
+                  key={r.id}
+                  className="flex items-center justify-between mb-2"
+                >
                   <label className="text-gray-700">{r.criterion}</label>
                   <input
                     type="number"
                     min="0"
-                    // nếu bạn lưu điểm tối đa của từng tiêu chí ở r.weight thì để max = r.weight
-                    max={r.weight || undefined}
+                    max="10"
                     step="0.5"
                     className="border rounded px-2 py-1 w-20 text-right"
                     onChange={(e) =>
-                      setCriteria({ ...criteria, [r.criterion]: e.target.value })
+                      setCriteria({
+                        ...criteria,
+                        [r.criterion]: e.target.value,
+                      })
                     }
                   />
                 </div>
               ))}
-
-              {/* ✅ dòng này chính là cái bạn muốn: 55 / 100 */}
-              <div className="mt-4 text-right font-semibold text-purple-700">
-                Tổng điểm hiện tại:{" "}
-                <span className="text-fuchsia-600 text-lg">{total}</span>
-                {typeof totalScore === "number" && (
-                  <span className="text-gray-500 text-sm ml-1">/ {totalScore}</span>
-                )}
-              </div>
 
               <textarea
                 placeholder="Nhận xét của giáo viên..."
@@ -387,9 +353,6 @@ export default function AiJournalismPage() {
     );
   }
 
-
-
-
   function RubricTable({ items }) {
     if (!items?.length)
       return (
@@ -397,10 +360,7 @@ export default function AiJournalismPage() {
           Chưa cấu hình tiêu chí cho cuộc thi này.
         </p>
       );
-    const totalWeight = items.reduce(
-      (a, b) => a + Number(b.weight || 0),
-      0
-    );
+    const totalWeight = items.reduce((a, b) => a + Number(b.weight || 0), 0);
     return (
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
@@ -437,7 +397,7 @@ export default function AiJournalismPage() {
     );
   }
 
-  // --------- LIST VIEW ---------
+  // --------- LIST VIEW (UI của bạn) ---------
   const featured = useMemo(
     () => (contests.length ? contests[0] : null),
     [contests]
@@ -505,11 +465,12 @@ export default function AiJournalismPage() {
     }
 
     // sắp xếp mới nhất lên đầu
-    arr = [...arr].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    arr = [...arr].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
 
     return arr;
   }, [contests, query, tab]);
-
 
   // --------- RENDER ---------
   if (viewMode === "list") {
@@ -529,49 +490,65 @@ export default function AiJournalismPage() {
                 </p>
               </div>
 
-              {/* Nút tạo cuộc thi — chỉ hiện với ADMIN / TEACHER / SYSTEM_ADMIN */}
+              {/* ✅ Nút tạo cuộc thi — chỉ hiện với ADMIN / TEACHER / SYSTEM_ADMIN */}
               {["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user?.role) && (
                 <button
-                  onClick={() => (window.location.href = "ai-journalism/create")}
+                  onClick={() =>
+                    (window.location.href = "ai-journalism/create")
+                  }
                   className="border border-purple-500 text-purple-700 font-semibold px-5 py-2 rounded-lg hover:bg-purple-50 transition-all shadow-sm"
                 >
                   + Tạo Cuộc Thi Mới
                 </button>
               )}
             </div>
+
+            {/* Search */}
+            <div className="relative">
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Tìm kiếm cuộc thi theo tên, chủ đề..."
+                className="flex h-9 w-full rounded-md border border-input px-3 py-1 text-sm shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-500 bg-white"
+              />
+            </div>
           </section>
 
           {/* Featured */}
           {featured && (
             <section className="mb-12">
+              <h2 className="text-2xl font-bold mb-6">Cuộc Thi Nổi Bật</h2>
+
               <div className="rounded-lg overflow-hidden bg-white relative">
-                <div className="relative w-full h-[380px] md:h-[420px]">
-                  {featured.coverUrl ? (
-                    <img
-                      src={featured.coverUrl}
-                      alt={featured.title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className={`absolute inset-0 ${bannerBgClass(0)}`} />
-                  )}
-                  <div className="absolute inset-0 bg-black/40" />
-                  <div className="relative p-6 md:p-10 text-white z-10">
+                <div className={`relative w-full ${bannerBgClass(0)}`}>
+                  <div className="relative p-6 md:p-10 text-white">
+                    {/* logo tròn nhỏ */}
+                    <div className="absolute left-6 top-6 md:static md:mb-4 md:inline-block">
+                      <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center">
+                        <div className="w-10 h-10 md:w-14 md:h-14 bg-white rounded-full flex items-center justify-center">
+                          <span className="text-xl md:text-2xl font-bold text-black/80">
+                            {(featured.title?.[0] || "C").toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
 
                     <div className="md:pl-0 pl-20">
-                      <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold border-transparent shadow bg-white/20 text-blue mb-3">
+                      <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold border-transparent shadow bg-white/20 text-white mb-3">
                         CUỘC THI NỔI BẬT
                       </div>
 
                       <h2 className="text-2xl md:text-3xl font-bold mb-2">
-                        {featured.title}
+                        {featured.title || "Cuộc thi"}
                       </h2>
                       <h3 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">
-                        {featured.theme}
+                        {featured.theme || "Chủ đề đang cập nhật"}
                       </h3>
 
-                      <div className="text-gray/100 md:text-xs">
-                        {featured.description}
+                      <div className="text-white/90 md:text-lg mb-6 md:mb-10">
+                        {featured.description ||
+                          "Mô tả đang cập nhật. Hãy mở chi tiết để xem thông tin mới nhất."}
                       </div>
                     </div>
                   </div>
@@ -580,14 +557,12 @@ export default function AiJournalismPage() {
                 {/* Footer actions */}
                 <div className="p-6 md:p-10 bg-white">
                   <div className="flex flex-col gap-4 md:gap-6">
-
                     <div className="flex items-center gap-2 text-gray-600">
                       <Globe className="h-5 w-5" />
                       <div className="text-sm">
                         Quy mô cuộc thi : <b>Toàn lãnh thổ Việt Nam</b>
                       </div>
                     </div>
-
 
                     <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center">
                       <div className="flex items-center gap-2 text-gray-600 flex-1">
@@ -601,7 +576,8 @@ export default function AiJournalismPage() {
                           onClick={() => openContest(featured)}
                           className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium text-white shadow h-9 px-4 py-2 bg-blue-700 hover:bg-blue-800 transition-colors"
                         >
-                          Truy cập chi tiết cuộc thi <ArrowRight className="ml-2 h-4 w-4" />
+                          Truy cập chi tiết cuộc thi{" "}
+                          <ArrowRight className="ml-2 h-4 w-4" />
                         </button>
                       </div>
                     </div>
@@ -609,66 +585,32 @@ export default function AiJournalismPage() {
                     <div className="flex items-center gap-2 text-gray-600">
                       <Award className="h-5 w-5" />
                       <div className="text-sm">
-                        Tổng : <b>{featured.totalScore} Điểm</b>
+                        Huy chương Vàng, Bạc + 2 giải khác
                       </div>
                     </div>
-
-
-
+                    <div className="flex gap-3 self-stretch md:self-auto">
+                      <button
+                        onClick={() => openContest(featured)}
+                        className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium text-white shadow h-9 px-4 py-2 bg-blue-600 hover:bg-blue-700"
+                      >
+                        Truy cập <ArrowRight className="ml-2 h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-
               </div>
             </section>
           )}
 
-          {/* Tabs + grid */}
+         
           <section className="mb-12">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold ml-5">Tất Cả Cuộc Thi Hiện Tại</h2>
-
-        <p className="text-gray-500 text-sm mt-3">
-          👉 Nếu bạn thấy các khối này cuộn ngang được bằng chuột hoặc trackpad,
-          nghĩa là Tailwind và CSS cuộn ngang đang hoạt động.
-        </p>
-      </div>
-    </div>
-              <div
-                role="tablist"
-                aria-orientation="horizontal"
-                className="inline-flex h-9 items-center justify-center rounded-lg bg-gray-100 p-1 text-gray-500"
-              >
-                {[
-                  { key: "ongoing", label: "Đang Diễn Ra" },
-                  { key: "upcoming", label: "Sắp Diễn Ra" },
-                  { key: "ended", label: "Đã Kết Thúc" },
-
-                ].map((t) => {
-                  const active = tab === t.key;
-                  return (
-                    <button
-                      key={t.key}
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      data-state={active ? "active" : "inactive"}
-                      onClick={() => setTab(t.key)}
-                      className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 ${active ? "bg-white text-gray-900 shadow" : "text-gray-500"
-                        }`}
-                    >
-                      {t.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.length === 0 ? (
                 <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-xl shadow-sm border border-gray-200">
-                  {tab === "ongoing" && "Hiện không có cuộc thi nào đang diễn ra."}
-                  {tab === "upcoming" && "Hiện chưa có cuộc thi nào sắp diễn ra."}
+                  {tab === "ongoing" &&
+                    "Hiện không có cuộc thi nào đang diễn ra."}
+                  {tab === "upcoming" &&
+                    "Hiện chưa có cuộc thi nào sắp diễn ra."}
                   {tab === "ended" && "Chưa có cuộc thi nào đã kết thúc."}
                 </div>
               ) : (
@@ -727,18 +669,22 @@ export default function AiJournalismPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <CalendarIcon className="h-4 w-4 text-gray-500" />
-                          <span>Cuộc thi khởi tạo vào : {formatDate(c.createdAt)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4 text-gray-500" />
                           <span>
-                            Ngày bắt đầu cuộc thi: <b>{formatDate(c.startDate)}</b>
+                            Cuộc thi khởi tạo vào : {formatDate(c.createdAt)}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <CalendarIcon className="h-4 w-4 text-gray-500" />
                           <span>
-                            Ngày kết thúc cuộc thi: <b>{formatDate(c.endDate)}</b>
+                            Ngày bắt đầu cuộc thi:{" "}
+                            <b>{formatDate(c.startDate)}</b>
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon className="h-4 w-4 text-gray-500" />
+                          <span>
+                            Ngày kết thúc cuộc thi:{" "}
+                            <b>{formatDate(c.endDate)}</b>
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -746,7 +692,7 @@ export default function AiJournalismPage() {
                           <span>
                             Thời gian nhận bài:{" "}
                             <b>
-                              {formatDate(c.submissionStart)} → {" "}
+                              {formatDate(c.submissionStart)} →{" "}
                               {formatDate(c.submissionEnd)}
                             </b>
                           </span>
@@ -774,9 +720,9 @@ export default function AiJournalismPage() {
                                 Cuộc thi đã kết thúc
                               </span>
                             )}
-                            {!["ACTIVE", "DRAFT", "CLOSED"].includes(c.status) && (
-                              <span className="ml-1 text-gray-500">—</span>
-                            )}
+                            {!["ACTIVE", "DRAFT", "CLOSED"].includes(
+                              c.status
+                            ) && <span className="ml-1 text-gray-500">—</span>}
                           </span>
                         </div>
                       </div>
@@ -795,14 +741,13 @@ export default function AiJournalismPage() {
                 ))
               )}
             </div>
-
           </section>
         </main>
       </div>
     );
   }
 
-  // --------- DETAIL VIEW ---------
+  // --------- DETAIL VIEW (UI + logic của bạn của bạn) ---------
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 font-inter">
       <Toaster position="top-right" />
@@ -817,109 +762,32 @@ export default function AiJournalismPage() {
       {/* Header chi tiết */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div className="flex items-center gap-4">
-            {activeContest?.coverUrl ? (
-              <img
-                src={activeContest.coverUrl}
-                alt={activeContest?.title}
-                className="w-16 h-16 rounded-xl object-cover border"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-xl bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-xl">
-                {(activeContest?.title?.[0] || "C").toUpperCase()}
-              </div>
-            )}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                {activeContest?.title}
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {activeContest?.theme}
-              </p>
-            </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {activeContest?.title}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">{activeContest?.theme}</p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1">
-              {isContestOpen() ? (
-                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700 border border-green-300 flex items-center gap-1">
-                  🕓 Đang mở cuộc thi
-                </span>
-              ) : new Date() < new Date(activeContest?.startDate) ? (
-                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700 border border-yellow-300 flex items-center gap-1">
-                  🕓 Chưa mở cuộc thi
-                </span>
-              ) : (
-                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-700 border border-red-300 flex items-center gap-1">
-                  🕓 Đã kết thúc
-                </span>
-              )}
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                isContestOpen()
+                  ? "bg-green-100 text-green-700"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {isContestOpen() ? "Đang mở" : "Đã đóng / Chưa mở"}
             </span>
-
-
             <div className="text-sm text-gray-600">
               <span className="mr-3">
                 📅 Bắt đầu: <b>{formatDate(activeContest?.startDate)}</b>
               </span>
               <span>
-                📅 Kết thúc: <b>{formatDate(activeContest?.endDate)}</b>
+                Kết thúc: <b>{formatDate(activeContest?.endDate)}</b>
               </span>
             </div>
           </div>
         </div>
-
-        {/* Thông tin đầy đủ */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4 text-sm">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-gray-500" />
-            <span>
-              Thời gian nhận bài:{" "}
-              <b>
-                {formatDate(activeContest?.submissionStart)} →{" "}
-                {formatDate(activeContest?.submissionEnd)}
-              </b>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Award className="w-4 h-4 text-gray-500" />
-            <span>
-              Tổng : <b>{activeContest?.totalScore} điểm</b>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Hash className="w-4 h-4 text-gray-500" />
-            <span>Mã cuộc thi: {activeContest?.id}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4 text-gray-500" />
-            <span>Tạo lúc: {formatDate(activeContest?.createdAt)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-gray-500" />
-            <span className="flex items-center gap-1">
-              Trạng thái:
-              {activeContest?.status === "ACTIVE" && (
-                <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-300">
-                  Được công bố chính thức
-                </span>
-              )}
-              {activeContest?.status === "DRAFT" && (
-                <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 border border-yellow-300">
-                  Chưa công bố chính thức
-                </span>
-              )}
-              {activeContest?.status === "CLOSED" && (
-                <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-300">
-                  Cuộc thi đã kết thúc
-                </span>
-              )}
-              {!["ACTIVE", "DRAFT", "CLOSED"].includes(activeContest?.status) && (
-                <span className="ml-1 text-gray-500">—</span>
-              )}
-            </span>
-
-          </div>
-        </div>
-
         {activeContest?.description && (
           <p className="mt-3 text-gray-700 leading-relaxed">
             {activeContest.description}
@@ -937,17 +805,18 @@ export default function AiJournalismPage() {
           <button
             key={t.key}
             onClick={() => setActiveTab(t.key)}
-            className={`px-4 py-2 rounded-xl font-semibold transition ${activeTab === t.key
-              ? "bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white"
-              : "text-gray-700 hover:bg-gray-100"
-              }`}
+            className={`px-4 py-2 rounded-xl font-semibold transition ${
+              activeTab === t.key
+                ? "bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
           >
             {t.label}
           </button>
         ))}
       </div>
 
-      {/* TAB: Nộp bài (giữ nguyên điều hướng form riêng) */}
+      {/* TAB: Nộp bài */}
       <button
         onClick={() =>
           navigate(`/ai-journalism/submit?contestId=${activeContest.id}`)
@@ -959,7 +828,7 @@ export default function AiJournalismPage() {
 
       {/* TAB: Bài đã nộp */}
       {activeTab === "my" && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mt-6">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <h3 className="text-xl font-semibold mb-4">📜 Bài đã nộp của bạn</h3>
           {entries.length === 0 ? (
             <p className="text-gray-500">
@@ -970,10 +839,15 @@ export default function AiJournalismPage() {
               {entries.map((e) => {
                 const criteria = safeParseCriteria(e.aiCriteria);
                 return (
-                  <div key={e.id} className="border border-gray-200 rounded-xl p-4">
+                  <div
+                    key={e.id}
+                    className="border border-gray-200 rounded-xl p-4"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="font-semibold text-gray-900">🧾 {e.title}</p>
+                        <p className="font-semibold text-gray-900">
+                          🧾 {e.title}
+                        </p>
                         <p className="text-gray-600 text-sm whitespace-pre-wrap mt-1">
                           {e.article?.length > 160
                             ? e.article.substring(0, 160) + "..."
@@ -999,13 +873,11 @@ export default function AiJournalismPage() {
                               disabled={grading}
                               className="bg-gradient-to-r from-emerald-500 to-green-400 text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-60"
                             >
-                              {grading ? "🤖 AI đang chấm..." : "Chấm điểm bằng AI"}
+                              {grading
+                                ? "🤖 AI đang chấm..."
+                                : "Chấm điểm bằng AI"}
                             </button>
-                            <ManualScoreButton
-                              entry={e}
-                              rubrics={rubrics}
-                              totalScore={activeContest?.totalScore} // 👈 thêm dòng này
-                            />
+                            <ManualScoreButton entry={e} rubrics={rubrics} />
                           </div>
                         )}
                       </div>
@@ -1017,14 +889,20 @@ export default function AiJournalismPage() {
                           <tbody>
                             {Object.entries(criteria).map(([k, v]) => (
                               <tr key={k} className="border-t border-gray-100">
-                                <td className="py-1 px-2 text-left text-gray-700">{k}</td>
-                                <td className="py-1 px-2 text-right font-medium">{v}</td>
+                                <td className="py-1 px-2 text-left text-gray-700">
+                                  {k}
+                                </td>
+                                <td className="py-1 px-2 text-right font-medium">
+                                  {v}
+                                </td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                         {e.aiFeedback && (
-                          <p className="italic text-gray-600 text-sm">{e.aiFeedback}</p>
+                          <p className="italic text-gray-600 text-sm">
+                            {e.aiFeedback}
+                          </p>
                         )}
                       </div>
                     )}
@@ -1038,7 +916,7 @@ export default function AiJournalismPage() {
 
       {/* TAB: Rubric */}
       {activeTab === "rubric" && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mt-6">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <h3 className="text-xl font-semibold mb-4">📐 Tiêu chí chấm</h3>
           <RubricTable items={rubrics} />
           <p className="text-xs text-gray-500 mt-3">
@@ -1048,7 +926,7 @@ export default function AiJournalismPage() {
         </div>
       )}
 
-      {/* MODAL KẾT QUẢ AI */}
+      {/* MODAL KẾT QUẢ AI (căn giữa như bản chi tiết của bạn của bạn) */}
       {showModal && feedback && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
@@ -1078,8 +956,12 @@ export default function AiJournalismPage() {
                 <tbody>
                   {Object.entries(feedback.criteria).map(([key, value]) => (
                     <tr key={key} className="border-t border-gray-100">
-                      <td className="py-1 px-2 text-left text-gray-700">{key}</td>
-                      <td className="py-1 px-2 text-right font-semibold">{value}</td>
+                      <td className="py-1 px-2 text-left text-gray-700">
+                        {key}
+                      </td>
+                      <td className="py-1 px-2 text-right font-semibold">
+                        {value}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
