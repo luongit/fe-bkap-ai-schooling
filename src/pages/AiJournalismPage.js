@@ -547,7 +547,32 @@ export default function AiJournalismPage() {
           <section className="mb-12">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Tất Cả Cuộc Thi</h2>
+<div className="w-full h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-[80%] bg-white border border-gray-300 rounded-xl shadow-md p-4">
+        <h2 className="text-lg font-semibold mb-3 text-gray-700">
+          🔍 Kiểm tra scroll ngang
+        </h2>
 
+        {/* vùng cuộn */}
+        <div className="overflow-x-auto overflow-y-hidden scrollbar-thin scroll-smooth border-t border-b py-3">
+          <div className="flex gap-4 w-max">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div
+                key={i}
+                className="w-40 h-28 flex-shrink-0 rounded-lg shadow-sm flex items-center justify-center font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-500"
+              >
+                Item {i + 1}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="text-gray-500 text-sm mt-3">
+          👉 Nếu bạn thấy các khối này cuộn ngang được bằng chuột hoặc trackpad,
+          nghĩa là Tailwind và CSS cuộn ngang đang hoạt động.
+        </p>
+      </div>
+    </div>
               <div
                 role="tablist"
                 aria-orientation="horizontal"
