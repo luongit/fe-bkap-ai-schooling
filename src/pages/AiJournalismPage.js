@@ -873,15 +873,15 @@ export default function AiJournalismPage() {
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               {isContestOpen() ? (
-                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700 border border-green-300 flex items-center gap-1">
-                  🕓 Đang mở cuộc thi
+                <span className=" text-sm font-semibold text-green-700 flex items-center gap-1">
+                  🕓 Đang mở
                 </span>
               ) : new Date() < new Date(activeContest?.startDate) ? (
-                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700 border border-yellow-300 flex items-center gap-1">
-                  🕓 Chưa mở cuộc thi
+                <span className="text-sm font-semibold text-yellow-700 flex items-center gap-1">
+                  🕓 Chưa mở
                 </span>
               ) : (
-                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-700 border border-red-300 flex items-center gap-1">
+                <span className="text-sm font-semibold text-red-700 flex items-center gap-1">
                   🕓 Đã kết thúc
                 </span>
               )}
