@@ -2,20 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './css/CreditModal.css';
 import { FiCreditCard, FiClock, FiZap, FiUser } from 'react-icons/fi';
-import api from "../services/apiToken"; // 
+import api from "../services/apiToken";
+import { createPortal } from "react-dom";
 
 const LOW_CREDIT_THRESHOLD = 100;
 
 // --- Component 1: Credit Balance ---
 const CreditBalanceView = ({ remainingCredit, errorMessage, onRefresh, onClose }) => (
   <div className="modal-content-area">
-    <h3 className="content-title">Số dư Credit Hiện tại</h3>
+    <h3 className="content-title">Số dư tín dụng hiện tại</h3>
 
     <div className={`balance-display ${remainingCredit < LOW_CREDIT_THRESHOLD ? 'low-credit' : ''}`}>
       <p className="current-balance-text">Số dư của bạn:</p>
       <strong>{remainingCredit !== null ? remainingCredit : 'Đang tải...'} credits</strong>
       {remainingCredit !== null && remainingCredit < LOW_CREDIT_THRESHOLD && (
-        <p className="warning-message">⚠️ Credit của bạn đang thấp! Vui lòng mua thêm.</p>
+        <p className="warning-message">Số dư tín dụng của bạn đang thấp! Vui lòng mua thêm.</p>
       )}
     </div>
 
@@ -23,7 +24,7 @@ const CreditBalanceView = ({ remainingCredit, errorMessage, onRefresh, onClose }
       <div className="error-section">
         <p>Lỗi tải credit: {errorMessage}</p>
         {remainingCredit !== null && <p className="cached-value-note">(Giá trị cache: {remainingCredit})</p>}
-        <button className="refresh-btn" onClick={onRefresh}>Thử tải lại 🔄</button>
+        <button className="refresh-btn" onClick={onRefresh}>Thử tải lại</button>
       </div>
     )}
 
@@ -45,11 +46,11 @@ const CreditHistoryView = ({ userId }) => {
       if (!userId) return;
       setLoading(true);
       try {
-        const res = await api.get(`/credit/history/${userId}`); // 
+        const res = await api.get(`/credit/history/${userId}`);
         const data = res.data;
         setHistory(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("❌ Lỗi lấy lịch sử:", err);
+        console.error("Lỗi lấy lịch sử:", err);
         setError("Không thể tải lịch sử giao dịch.");
       } finally {
         setLoading(false);
@@ -60,11 +61,11 @@ const CreditHistoryView = ({ userId }) => {
 
   if (loading) return <p>Đang tải lịch sử...</p>;
   if (error) return <p className="error-message">{error}</p>;
-  if (history.length === 0) return <p className="no-data">Chưa có giao dịch credit nào.</p>;
+  if (history.length === 0) return <p className="no-data">Chưa có giao dịch tín dụng nào.</p>;
 
   return (
     <div className="modal-content-area">
-      <h3 className="content-title">📜 Lịch sử Giao dịch Credit</h3>
+      <h3 className="content-title">Lịch sử Giao dịch tín dụng</h3>
       <table className="credit-history-table">
         <thead>
           <tr>
@@ -110,7 +111,7 @@ const SubscriptionView = ({ onClose }) => (
   </div>
 );
 
-// --- Main Modal ---
+// --- Modal (Dùng Portal) ---
 function CreditModal({ remainingCredit, errorMessage, onClose, onRefresh, userId }) {
   const [activeTab, setActiveTab] = useState('creditBalance');
 
@@ -134,7 +135,7 @@ function CreditModal({ remainingCredit, errorMessage, onClose, onRefresh, userId
     }
   };
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="credit-modal large-modal" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close-btn" onClick={onClose}>&times;</button>
@@ -152,6 +153,7 @@ function CreditModal({ remainingCredit, errorMessage, onClose, onRefresh, userId
               <FiCreditCard size={20} />
               <span>Số dư Credit</span>
             </div>
+
             <div
               className={`sidebar-item ${activeTab === 'creditHistory' ? 'active' : ''}`}
               onClick={() => setActiveTab('creditHistory')}
@@ -159,6 +161,7 @@ function CreditModal({ remainingCredit, errorMessage, onClose, onRefresh, userId
               <FiClock size={20} />
               <span>Lịch sử Trừ Credit</span>
             </div>
+
             <div
               className={`sidebar-item ${activeTab === 'subscription' ? 'active' : ''}`}
               onClick={() => setActiveTab('subscription')}
@@ -166,18 +169,18 @@ function CreditModal({ remainingCredit, errorMessage, onClose, onRefresh, userId
               <FiZap size={20} />
               <span>Gói Nâng cấp</span>
             </div>
+
             <div className="sidebar-item disabled">
               <FiUser size={20} />
               <span>Tài khoản (Soon)</span>
             </div>
           </div>
 
-          <div className="modal-content">
-            {renderContent()}
-          </div>
+          <div className="modal-content">{renderContent()}</div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
