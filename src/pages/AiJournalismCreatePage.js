@@ -35,7 +35,7 @@ export default function AiJournalismCreatePage() {
                     window.location.href = "/403";
                 }
             } catch (err) {
-                console.error("Không thể lấy profile:", err);
+                console.error("Không thể lấy thông tin người dùng:", err);
                 toast.error("Không thể lấy thông tin người dùng!");
                 window.location.href = "/login";
             }
@@ -93,7 +93,7 @@ export default function AiJournalismCreatePage() {
                 formData
             );
 
-            toast.success("🎉 Tạo cuộc thi thành công!");
+            toast.success("Khởi tạo cuộc thi thành công!");
             console.log("Created contest:", res.data);
 
             // Reset form
@@ -112,10 +112,10 @@ export default function AiJournalismCreatePage() {
             setCoverFile(null);
             setCoverPreview(null);
         } catch (err) {
-            console.error("🔥 Lỗi tạo cuộc thi:", err);
+            console.error("Lỗi tạo cuộc thi:", err);
             if (err.response) {
-                console.error("🧩 Response status:", err.response.status);
-                console.error("📜 Response data:", err.response.data);
+                console.error("Response status:", err.response.status);
+                console.error("Response data:", err.response.data);
                 toast.error(
                     `Không thể tạo cuộc thi (${err.response.status}): ${err.response.data.message || "Lỗi không xác định"
                     }`
@@ -139,7 +139,7 @@ export default function AiJournalismCreatePage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
                     <div>
                         <h1 className="text-3xl font-bold text-purple-700 flex items-center gap-2">
-                            Tạo Cuộc Thi Mới
+                            Khởi Tạo Cuộc Thi Mới
                         </h1>
                         <p className="text-gray-500 mt-1">
                             Nhập thông tin bên dưới để khởi tạo cuộc thi và cấu hình tiêu chí chấm điểm.
@@ -367,7 +367,7 @@ export default function AiJournalismCreatePage() {
                             className="flex items-center gap-2 px-6 py-2 border border-purple-500 text-purple-700 font-semibold rounded-lg hover:bg-purple-50 transition disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
                         >
                             <Send className="h-5 w-5" />
-                            {loading ? "Đang tạo..." : "Tạo Cuộc Thi"}
+                            {loading ? "Đang tạo..." : "Khởi Tạo Cuộc Thi"}
                         </button>
                     </div>
                 </form>
