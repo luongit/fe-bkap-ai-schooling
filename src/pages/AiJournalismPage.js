@@ -135,6 +135,45 @@ export default function AiJournalismPage() {
     return true;
   };
 
+  // logic kiểm tra điều kiện nộp bài 
+  const getSubmitStatus = () => {
+    if (!activeContest || !user) return { can: false, msg: "" };
+
+    const now = new Date();
+    const start = new Date(activeContest.startDate);
+    const end = new Date(activeContest.endDate);
+    const sStart = new Date(activeContest.submissionStart);
+    const sEnd = new Date(activeContest.submissionEnd);
+
+    // Nếu không phải học sinh
+    if (user.role !== "STUDENT") {
+      return { can: false, msg: "Tài khoản của bạn không có quyền nộp bài dự thi. Vui lòng kiểm tra lại !" };
+    }
+
+    // Cuộc thi chưa mở
+    if (now < start) {
+      return { can: false, msg: "Chưa tới thời gian diễn ra cuộc thi. Vui lòng kiểm tra lại !" };
+    }
+
+    // Cuộc thi đã kết thúc
+    if (now > end) {
+      return { can: false, msg: "Cuộc thi đã kết thúc. Vui lòng kiểm tra lại !" };
+    }
+
+    // Chưa tới thời gian nộp bài
+    if (now < sStart) {
+      return { can: false, msg: "Chưa tới thời gian nộp bài. Vui lòng kiểm tra thời gian nộp bài và thử lại sau !" };
+    }
+
+    // Hết thời gian nộp bài
+    if (now > sEnd) {
+      return { can: false, msg: "Đã hết thời gian nộp bài. Vui lòng kiểm tra lại !" };
+    }
+
+    // Mọi thứ hợp lệ 
+    return { can: true, msg: "" };
+  };
+
   const safeParseCriteria = (val) => {
     if (!val) return null;
     if (typeof val === "object") return val;
@@ -201,7 +240,7 @@ export default function AiJournalismPage() {
       const data = res.data;
 
       if (data?.id) {
-        toast.success("✅ Nộp bài thành công!");
+        toast.success("Nộp bài thành công!");
         setEntries((prev) => {
           const withoutDup = prev.filter((e) => e.id !== data.id);
           return [data, ...withoutDup];
@@ -345,7 +384,6 @@ export default function AiJournalismPage() {
                   <input
                     type="number"
                     min="0"
-                    // nếu bạn lưu điểm tối đa của từng tiêu chí ở r.weight thì để max = r.weight
                     max={r.weight || undefined}
                     step="0.5"
                     className="border rounded px-2 py-1 w-20 text-right"
@@ -356,7 +394,7 @@ export default function AiJournalismPage() {
                 </div>
               ))}
 
-              {/* ✅ dòng này chính là cái bạn muốn: 55 / 100 */}
+              {/* Tổng điểm */}
               <div className="mt-4 text-right font-semibold text-purple-700">
                 Tổng điểm hiện tại:{" "}
                 <span className="text-fuchsia-600 text-lg">{total}</span>
@@ -925,8 +963,8 @@ export default function AiJournalismPage() {
       <div className="bg-white border border-gray-200 rounded-2xl p-2 flex gap-2 mb-6">
         {[
           { key: "submit", label: "✍️ Nộp bài" },
-          { key: "my", label: "📜 Bài đã nộp" },
-          { key: "rubric", label: "📐 Tiêu chí chấm" },
+          { key: "my", label: "📜 Bài dự thi đã nộp" },
+          { key: "rubric", label: "📐 Tiêu chí chấm điểm bài dự thi" },
         ].map((t) => (
           <button
             key={t.key}
@@ -940,15 +978,33 @@ export default function AiJournalismPage() {
           </button>
         ))}
       </div>
-      {/* TAB: Nộp bài (giữ nguyên điều hướng form riêng) */}
-      <button
-        onClick={() =>
-          navigate(`/ai-journalism/submit?contestId=${activeContest.id}`)
-        }
-        className="bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-all"
-      >
-        ✍️ Nộp bài thi
-      </button>
+      {/* TAB: Nộp bài */}
+      {activeTab === "submit" && (
+        <div className="mt-2 mb-6">
+
+          {(() => {
+            const check = getSubmitStatus();
+            if (!check.can) {
+              return (
+                <div className="col-span-full text-center py-12 text-red-500 bg-white rounded-xl shadow-sm border border-gray-200">
+                  {check.msg}
+                </div>
+              );
+            }
+            return (
+              <button
+                onClick={() =>
+                  navigate(`/ai-journalism/submit?contestId=${activeContest.id}`)
+                }
+                className="bg-gradient-to-r from-purple-700 to-fuchsia-500 text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-all"
+              >
+                ✍️ Nộp bài dự thi
+              </button>
+            );
+          })()}
+
+        </div>
+      )}
 
       {/* TAB: Bài đã nộp */}
       {activeTab === "my" && (
@@ -956,7 +1012,7 @@ export default function AiJournalismPage() {
           <h3 className="text-xl font-semibold mb-4">📜 Bài đã nộp của bạn</h3>
           {entries.length === 0 ? (
             <p className="text-gray-500">
-              Bạn chưa có bài nào. Vào tab <b>Nộp bài</b> để gửi bài nhé.
+              Bạn chưa có bài dự thi nào. Vào thanh <b>Nộp bài</b> để gửi bài dự thi nhé.
             </p>
           ) : (
             <div className="space-y-4">
