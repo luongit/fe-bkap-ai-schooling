@@ -865,9 +865,13 @@ export default function AiJournalismPage() {
               <h2 className="text-2xl font-bold text-gray-900">
                 {activeContest?.title}
               </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {activeContest?.theme}
-              </p>
+              {activeContest?.theme && (
+                <div className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 text-blue-700 px-2.5 py-0.5 text-xs font-semibold mt-1">
+                  <BadgeCheck className="w-3 h-3 text-blue-500" />
+                  {activeContest.theme}
+                </div>
+              )}
+
             </div>
           </div>
           <div className="flex items-center gap-3">
