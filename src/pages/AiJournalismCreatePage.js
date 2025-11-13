@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, Clock, Send, Plus, Trash2, Scale } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import api from "../services/apiToken";
 export default function AiJournalismCreatePage() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
     const [coverFile, setCoverFile] = useState(null);
     const [coverPreview, setCoverPreview] = useState(null);
+    const navigate = useNavigate();
+
 
     const [form, setForm] = useState({
         title: "",
@@ -94,7 +97,11 @@ export default function AiJournalismCreatePage() {
             );
 
             toast.success("Khởi tạo cuộc thi thành công!");
-            console.log("Created contest:", res.data);
+            console.log("Khởi tạo cuộc thi thành công :", res.data);
+            // chuyển hướng về trang danh sách cuộc thi 800ms
+            setTimeout(() => {
+                navigate("/journalism");
+            }, 1000);
 
             // Reset form
             setForm({
