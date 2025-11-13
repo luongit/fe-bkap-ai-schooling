@@ -221,6 +221,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
   // Đóng menu khi click ra ngoài
   const containerRef = useRef(null);
+  const accountMenuRef = useRef(null);
   useEffect(() => {
     const onDocClick = (e) => {
       if (!containerRef.current) return;
@@ -231,6 +232,29 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
   }, []);
+
+
+
+
+  useEffect(() => {
+  function handleClickOutside(e) {
+    // Chỉ xử lý nếu menu đang mở
+    if (showMenu) {
+      // Nếu click KHÔNG nằm trong MENU và KHÔNG nằm trong nút avatar
+      if (
+        accountMenuRef.current &&
+        !accountMenuRef.current.contains(e.target) &&
+        !e.target.closest(".account-menu-toggle")
+      ) {
+        setShowMenu(false);
+      }
+    }
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, [showMenu]);
+
 
   // Component nhóm (accordion) — giữ tiêu đề nhóm rõ ràng (text-sm)
   const Group = ({ icon: Icon, title, open, onToggle, children }) => (
@@ -480,7 +504,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             <div className="account-row flex items-center gap-2 w-full">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className={`side-item flex items-center gap-2 transition-all duration-200 ${isCollapsed ? "justify-center" : "justify-start"
+                className={`side-item flex items-center gap-2 account-menu-toggle transition-all duration-200 ${isCollapsed ? "justify-center" : "justify-start"
                   } relative`}
               >
                 <div className="avatar">
@@ -512,7 +536,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
               </button>
             )}
             {showMenu && (
-              <div className="menu-dropdown show">
+              <div ref={accountMenuRef} className="menu-dropdown show">
                 <ul>
                   <li>
                     <Link
