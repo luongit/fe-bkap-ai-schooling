@@ -288,8 +288,6 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         )}
       </Link>
 
-
-      {/* NAV: cụm thu gọn */}
       <nav className="side-list">
         {/* Cụm: Trò chuyện & Học tập */}
         <Group
@@ -300,6 +298,13 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         >
           {renderNavItem(FiMessageCircle, "Chat mới", startNewChat)}
           {renderNavItem(FiBookOpen, "Giải bài tập", showComingSoon)}
+          {renderNavItem(FiFeather, "Viết văn AI", () => {
+            sessionStorage.removeItem("writingHistory");
+            sessionStorage.removeItem("writingSessionId");
+            window.dispatchEvent(new Event("newWriting"));
+            navigate("/writing");
+          })}
+
         </Group>
 
         {/* Cụm: Sáng tạo AI */}
@@ -309,23 +314,6 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
           open={openGroups.creative}
           onToggle={() => toggleGroup("creative")}
         >
-          <NavLink
-            to="/writing"
-            onClick={() => {
-              sessionStorage.removeItem("writingHistory");
-              sessionStorage.removeItem("writingSessionId");
-              window.dispatchEvent(new Event("newWriting"));
-              if (typeof onToggleSidebar === "function") onToggleSidebar();
-            }}
-            className={({ isActive }) =>
-              `side-item w-full flex items-center gap-2 transition-all duration-200 ${isActive ? "bg-gray-200 text-gray-800 font-semibold" : ""
-              } px-2 py-1.5`
-            }
-          >
-            <FiFeather className="sidebar-icon w-4 h-4" />
-            <span className="text-xs">Viết văn AI</span>
-          </NavLink>
-
           <NavLink
             to="/generate-image"
             onClick={() => {
@@ -353,7 +341,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             }
           >
             <FiVideo className="sidebar-icon w-4 h-4" />
-            <span className="text-xs">Tạo Video AI</span>
+            <span className="text-xs">Tạo Video</span>
           </NavLink>
         </Group>
 
@@ -373,17 +361,6 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             {!isCollapsed && <span className="text-sm font-medium">Cuộc thi</span>}
           </div>
         </NavLink>
-
-        {/* Cụm: Công cụ khác */}
-        <Group
-          icon={FiPlus}
-          title="Công cụ khác"
-          open={openGroups.tools}
-          onToggle={() => toggleGroup("tools")}
-        >
-          {renderNavItem(FiTool, "Thêm công cụ", showComingSoon)}
-          {renderNavItem(FiDownload, "Tải ứng dụng", showComingSoon)}
-        </Group>
       </nav>
 
       {/* Lịch sử (accordion gọn) */}
@@ -476,12 +453,6 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
               )}
             </ul>
           )}
-
-          <div className="side-note">Khác</div>
-          <button onClick={showComingSoon} className="side-item w-full text-left">
-            <FiHelpCircle className="sidebar-icon" />
-            <span>Trợ giúp</span>
-          </button>
         </>
       )}
 
@@ -550,36 +521,28 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                       onClick={() => setShowMenu(false)}
                     >
                       <FiUser className="w-4 h-4 text-gray-600" />
-                      <span className="text-xs">Xem profile</span>
+                      <span className="text-xs">Thông tin cá nhân</span>
                     </Link>
                   </li>
 
 
                   <li>
                     <button
-                      onClick={() => {
-                        setShowCreditModal(true);
-                        setShowMenu(false);
-                      }}
+                      onClick={() => (setShowCreditModal(true), setShowMenu(false))}
                       className="flex items-center justify-between w-full px-4 py-2 text-left"
                     >
-                      <div className="flex items-center gap-2" title="Xem chi tiết credit">
+                      <div className="flex items-center gap-2">
                         <FiCreditCard className="w-4 h-4 text-gray-600" />
-                        <span className="text-xs">Credit</span>
+                        <span className="text-xs">Tín dụng cá nhân</span>
                       </div>
 
-                      {remainingCredit !== null && (
-                        <span
-                          className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white shadow-sm"
-                        >
+                      {remainingCredit != null && (
+                        <span className="text-[10px] font-semibold text-purple-600 block mb-1 ml-1">
                           {remainingCredit}
                         </span>
                       )}
-
                     </button>
                   </li>
-
-
                   <li>
                     <button
                       onClick={() => {
@@ -589,7 +552,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                       className="flex items-center gap-2 w-full px-4 py-2 text-left text-red-600"
                     >
                       <FiLogOut className="w-4 h-4" />
-                      <span className="text-xs">Đăng xuất</span>
+                      <span className="text-xs">Đăng xuất tài khoản</span>
                     </button>
                   </li>
 

@@ -1,54 +1,30 @@
-/* Header Base Styles */
+/* HEADER WRAPPER */
 .header {
   display: flex;
-  justify-content: center; /* Căn giữa logo */
+  justify-content: space-between;
   align-items: center;
   background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
   position: sticky;
   top: 0;
   z-index: 50;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  box-sizing: border-box;
 }
 
-/* Burger Menu */
-.burger {
-  display: none; /* Ẩn trên desktop */
-  width: 40px;
-  height: 40px;
-  background: #fff;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s ease; /* Chỉ chuyển đổi nền */
-  position: absolute;
-  left: 12px;
-}
-
-.burger:hover {
-  background: #f3f4f6; /* Nền hover, không có viền */
-}
-
-.burger .sidebar-icon {
-  width: 24px;
-  height: 24px;
-  color: #16a34a; /* Màu xanh lá giống --primary */
-}
-
-/* Brand */
+/* BRAND LOGO */
 .brand {
   font-size: 18px;
   font-weight: bold;
   color: #2563eb;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-grow: 1;
+  text-align: center;
 }
 
-/* Header right */
+/* HEADER RIGHT AREA */
 .header-right {
   display: flex;
   align-items: center;
@@ -57,18 +33,32 @@
   right: 12px;
 }
 
-.user-info {
-  display: none; /* Ẩn "Xin chào, Nguyễn Văn A" */
+/* CREDIT HEADER BOX */
+.credit-header-wrapper {
+  cursor: pointer;
+  padding: 5px 8px;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  transition: all 0.2s ease;
 }
 
+.credit-header-wrapper:hover {
+  background-color: #f0f0f0;
+}
+
+/* CREDIT LOW WARNING */
+.credit-header-wrapper.low-credit-warning {
+  border-color: #ffc107;
+  background-color: #fffbe6;
+}
+
+/* SECONDARY CREDIT STYLES */
 .credit-display {
-  padding: 4px 8px;
+  padding: 6px 12px;
   border-radius: 8px;
   background: #f0fdf4;
   color: #16a34a;
   font-weight: 600;
-  font-size: 14px;
-  white-space: nowrap;
 }
 
 .credit-display.credit-empty {
@@ -78,68 +68,56 @@
 
 .credit-error {
   color: red;
-  font-size: 13px;
-  white-space: nowrap;
+  font-size: 14px;
 }
 
-/* Credit Header Wrapper */
-.credit-header-wrapper {
-  cursor: pointer; /* Biểu thị rằng có thể click */
-  padding: 5px 8px;
-  border: 2px solid transparent;
-  border-radius: 5px;
-  transition: all 0.2s ease;
-  margin-left: 10px;
+/* BURGER MENU — MOBILE */
+.burger {
+  display: none; /* Hidden on desktop */
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: absolute;
+  left: 12px;
+  transition: background 0.2s ease;
 }
 
-.credit-header-wrapper:hover {
-  background-color: #f0f0f0; /* Hiệu ứng hover nhẹ */
+.burger:hover {
+  background: #f3f4f6;
 }
 
-/* Cảnh báo credit thấp trên header */
-.credit-header-wrapper.low-credit-warning {
-  border-color: #ffc107; /* Viền vàng cảnh báo */
-  background-color: #fffbe6;
+.burger .sidebar-icon {
+  width: 24px;
+  height: 24px;
+  color: #16a34a;
 }
 
-.credit-display {
-  /* Đảm bảo style của thẻ span credit cũ vẫn hoạt động */
-  font-weight: bold;
-  color: #007bff;
-}
-
-.credit-display.credit-empty {
-  color: #dc3545; /* Màu đỏ cho credit hết */
-}
-
-.credit-error {
-  color: #dc3545;
-  margin-left: 10px;
-  font-size: 0.9em;
-}
-
-/* Responsive */
+/* RESPONSIVE */
 @media (max-width: 920px) {
   .header {
     padding: 8px 12px;
   }
+
   .brand {
     font-size: 16px;
     position: relative;
-    left: 15px; /* Dịch logo sang phải 15px trên mobile */
+    left: 15px;
   }
-  .header-right {
-    right: 12px;
-  }
+
   .credit-display {
     padding: 3px 6px;
     font-size: 13px;
   }
+
   .credit-error {
     font-size: 12px;
   }
+
   .burger {
-    display: flex; /* Hiện trên mobile */
+    display: flex; /* Show on mobile */
   }
 }
 
@@ -147,26 +125,27 @@
   .header {
     padding: 8px 10px;
   }
+
   .brand {
     font-size: 14px;
-    position: relative;
-    left: 40px; /* Giữ dịch sang phải 15px */
+    left: 40px;
   }
-  .header-right {
-    right: 10px;
-  }
+
   .credit-display {
     padding: 3px 5px;
     font-size: 12px;
   }
+
   .credit-error {
     font-size: 11px;
   }
+
   .burger {
     left: 10px;
     width: 36px;
     height: 36px;
   }
+
   .burger .sidebar-icon {
     width: 20px;
     height: 20px;
