@@ -9,9 +9,34 @@
   padding: 16px 12px;
   position: sticky;
   top: 0;
-  overflow-y: auto;
+  overflow: hidden;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
   z-index: 60;
+}
+
+.sidebar-main {
+  flex: 1;
+  overflow-y: auto;
+  margin-top: 4px;
+  padding-right: 4px;
+}
+
+.sidebar-main::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-main::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.sidebar-main::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.sidebar-main::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .sidebar.collapsed {
@@ -23,30 +48,12 @@
   transform: translateX(0);
 }
 
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 3px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
 /* Sidebar Dragbars */
 .sidebar-dragbars {
-  display: none; /* Ẩn trên desktop */
+  display: none;
   position: fixed;
   top: 5px;
-  right: 10px; /* Căn sát phải từ yêu cầu trước */
+  right: 10px;
   flex-direction: column;
   gap: 5px;
   cursor: pointer;
@@ -57,7 +64,7 @@
 }
 
 .sidebar-dragbars.open {
-  display: none; /* Ẩn khi sidebar mở */
+  display: none;
 }
 
 .sidebar-dragbars .bar {
@@ -112,7 +119,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Logo Container */
+/* Logo Container (nếu cần dùng) */
 .logo-container {
   display: flex;
   align-items: center;
@@ -154,8 +161,6 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  flex: 1;
-  overflow-y: auto;
 }
 
 /* Side Item */
@@ -224,7 +229,6 @@
   content: none !important;
 }
 
-
 .sidebar.collapsed .sidebar-icon {
   width: 20px;
   height: 20px;
@@ -246,10 +250,10 @@
   display: none;
 }
 
-/* Tools Menu */
+/* Tools Menu (giữ nguyên nếu có dùng) */
 .tools-menu {
   position: fixed;
-  left: 270px; /* Dịch ra ngoài mép phải sidebar (260px) thêm 10px */
+  left: 270px;
   top: auto;
   background: #fff;
   border-radius: 8px;
@@ -268,14 +272,14 @@
 .side-item:hover .tools-menu {
   opacity: 1;
   visibility: visible;
-  transform: translateY(-10px); /* Chỉ dịch theo trục Y để giữ vị trí ngang */
+  transform: translateY(-10px);
 }
 
 .tools-menu.show {
   display: flex;
   opacity: 1;
   visibility: visible;
-  transform: translateY(-10px); /* Chỉ dịch theo trục Y */
+  transform: translateY(-10px);
 }
 
 .tools-menu-header {
@@ -315,22 +319,22 @@
   transform: translateY(-2px);
 }
 
-/* History List */
-.history-list {
-  margin-top: 8px;
-  padding-left: 24px;
+/* HISTORY – GIỐNG CHATGPT, KHÔNG CÓ NESTED SCROLL RIÊNG */
+.history-wrapper {
+  width: 100%;
+  margin-top: 6px;
+  padding-right: 2px;
+}
+
+.history-scroll {
+  list-style: none;
+  margin: 0;
+  padding: 0 4px 0 10px;
   border-left: 1px solid #d1d5db;
-  display: none;
-  max-height: 300px;
-  overflow-y: auto;
 }
 
-.history-list.show {
-  display: block;
-}
-
-.history-list .side-item {
-  font-size: 13px;
+.history-scroll .side-item {
+  font-size: 14px;
   color: #444;
   padding: 8px 12px;
   border-radius: 4px;
@@ -346,54 +350,51 @@
   margin-bottom: 2px;
 }
 
-.history-list .side-item:hover {
+.history-scroll .side-item:hover {
   background: #e5e7eb;
   color: #4b5563;
 }
 
-.history-list .side-item.active {
+.history-scroll .side-item.active {
   background: #d1d5db;
   color: #1f2937;
 }
 
-.history-list .session-preview {
+.history-scroll .session-preview {
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Session Menu Dropdown */
-.session-menu {
+.session-menu-box {
   position: absolute;
-  right: 0;
-  top: 100%;
+  right: 8px;
+  top: calc(100% + 4px);
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 25;
-  min-width: 120px;
-  padding: 4px 0;
+  border-radius: 6px;
+  padding: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 50;
 }
 
-.session-menu button {
+.delete-btn-history {
   display: flex;
   align-items: center;
   gap: 6px;
   width: 100%;
-  padding: 6px 12px;
-  text-align: left;
-  font-size: 13px;
-  color: #374151;
-  background: transparent;
+  padding: 6px 10px;
+  color: #dc2626;
+  background: none;
   border: none;
   cursor: pointer;
+  font-size: 14px;
 }
 
-.session-menu button:hover {
-  background: #e5e7eb;
-  color: #4b5563;
+.delete-btn-history:hover {
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
 /* Avatar */
@@ -484,7 +485,6 @@
   color: #4b5563;
 }
 
-
 .sidebar.collapsed .menu-dropdown {
   position: fixed;
   bottom: auto;
@@ -493,7 +493,6 @@
   transform: translateY(-100%);
   z-index: 25;
 }
-
 
 /* Responsive */
 @media (max-width: 920px) {
@@ -518,57 +517,21 @@
 
   .sidebar-dragbars {
     display: flex;
-    align-items: flex-start; /* Căn sát trên */
-    justify-content: flex-end; /* Căn sát phải */
-    right: 10px; /* Khoảng cách 10px từ mép phải */
+    align-items: flex-start;
+    justify-content: flex-end;
+    right: 10px;
   }
 
   .sidebar.open .sidebar-dragbars {
-    display: none; /* Ẩn dragbars khi sidebar mở */
+    display: none;
   }
 
   .sidebar.collapsed .sidebar-dragbars {
-    right: 10px; /* Giữ căn phải khi collapsed */
+    right: 10px;
   }
 
   .collapse-toggle {
     display: none !important;
-  }
-
-  .history-list {
-    display: block !important;
-    max-height: 300px;
-    overflow-y: auto;
-  }
-
-  .tools-menu {
-    position: fixed; /* Dùng fixed để vượt ra ngoài sidebar */
-    left: calc(100vw); /* Vượt ra ngoài mép phải sidebar 10px khi mở */
-    top: calc(100% + 4px);
-    width: auto;
-    min-width: 200px; /* Giảm chiều rộng để tránh tràn */
-    transform: none;
-    z-index: 25;
-    flex-direction: column;
-    display: none;
-  }
-
-  .tools-menu.collapsed {
-    left: calc(72px ); /* Vượt ra ngoài mép phải sidebar 10px khi collapsed */
-  }
-
-  .tools-menu.show {
-    display: flex;
-  }
-
-  .tools-menu-items {
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .tools-menu a {
-    border-radius: 4px;
-    padding: 8px 12px;
   }
 }
 
