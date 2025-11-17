@@ -39,6 +39,8 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const [creditError, setCreditError] = useState("");
   const [profile, setProfile] = useState(null);
   const [showCreditModal, setShowCreditModal] = useState(false);
+  const [creditHistory, setCreditHistory] = useState([]);
+  const [loadingCreditHistory, setLoadingCreditHistory] = useState(false);
   const { sessionId } = useParams();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 920);
   const [openGroups, setOpenGroups] = useState({
@@ -79,6 +81,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
   useEffect(() => {
     fetchCredit();
+    fetchProfile();
   }, [isLoggedIn]);
 
   const toggleSidebar = () => {
@@ -155,6 +158,18 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     window.location.href = "/";
   };
 
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get("/profile");
+      console.log("PROFILE API RESULT:", res.data);
+      setProfile(res.data);
+    } catch (err) {
+      console.error("Không lấy được profile:", err);
+    }
+  };
+
+
+
   const renderNavItem = (Icon, label, onClick) => (
     <button
       onClick={() => {
@@ -230,7 +245,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
       ref={containerRef}
       className={`sidebar ${className} ${isCollapsed ? "collapsed" : ""}`}
     >
-      
+
       <Link to="/" className="side-head flex items-center gap-3 px-2 py-2">
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-md flex-shrink-0">
           <img
@@ -252,7 +267,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         )}
       </Link>
 
-      
+
       <div className="sidebar-main">
         <nav className="side-list">
           <Group
@@ -261,9 +276,9 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             open={openGroups.chat}
             onToggle={() => toggleGroup("chat")}
           >
-            {renderNavItem(FiMessageCircle, "Chat mới", startNewChat)}
-            {renderNavItem(FiBookOpen, "Giải bài tập", showComingSoon)}
-            {renderNavItem(FiFeather, "Viết văn AI", () => {
+            {renderNavItem(FiMessageCircle, "Đoạn chat mới", startNewChat)}
+            {renderNavItem(FiBookOpen, "Hướng dẫn bài tập", showComingSoon)}
+            {renderNavItem(FiFeather, "Học viết văn bằng AI", () => {
               sessionStorage.removeItem("writingHistory");
               sessionStorage.removeItem("writingSessionId");
               window.dispatchEvent(new Event("newWriting"));
@@ -291,7 +306,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             >
               <FiImage className="sidebar-icon w-4 h-4" />
               {!isCollapsed && (
-                <span className="text-base font-normal">Tạo Ảnh AI</span>
+                <span className="text-base font-normal">Sáng tạo ảnh AI</span>
               )}
             </NavLink>
 
@@ -315,8 +330,13 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
           </Group>
 
           <NavLink
-            to="/journalism"
-            onClick={() => {
+            to={isCollapsed ? null : "/journalism"}
+            onClick={(e) => {
+              if (isCollapsed) {
+                e.preventDefault();
+                setIsCollapsed(false);
+                return;
+              }
               if (typeof onToggleSidebar === "function") onToggleSidebar();
             }}
             className={() =>
@@ -331,6 +351,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
               )}
             </div>
           </NavLink>
+
         </nav>
 
 
@@ -433,10 +454,18 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
           <div className="account-section flex flex-col items-center gap-2">
             <div className="account-row flex items-center gap-2 w-full">
               <button
-                onClick={() => setShowMenu(!showMenu)}
+                onClick={() => {
+                  if (isCollapsed) {
+                    setIsCollapsed(false);
+                    setShowMenu(false);
+                  } else {
+                    setShowMenu(prev => !prev);
+                  }
+                }}
                 className={`side-item flex items-center gap-2 account-menu-toggle ${isCollapsed ? "justify-center" : "justify-start"
                   } relative`}
               >
+
                 <div className="avatar">
                   <FiUser className="sidebar-icon" />
                 </div>
@@ -488,22 +517,29 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                         setShowCreditModal(true);
                         setShowMenu(false);
                       }}
-                      className="flex items-center justify-between w-full px-4 py-2"
+                      className="flex items-center w-full px-4 py-2"
                     >
                       <div className="flex items-center gap-2">
                         <FiCreditCard className="w-4 h-4 text-gray-600" />
-                        <span className="text-base font-normal">
-                          Tín dụng cá nhân
-                        </span>
+                        <span className="text-base font-normal">Số dư hiện tại</span>
                       </div>
 
-                      {remainingCredit != null && (
-                        <span className="text-base font-semibold text-purple-600 ml-1">
-                          {remainingCredit}
-                        </span>
-                      )}
+                      <span
+                        className={`ml-auto px-1 text-sm font-semibold tracking-wide 
+                        ${remainingCredit === 0
+                            ? "text-red-500"
+                            : remainingCredit < 100
+                              ? "text-orange-500"
+                              : "text-emerald-600"
+                          }`}
+                      >
+                        {remainingCredit}
+                      </span>
+
                     </button>
                   </li>
+
+
 
                   <li>
                     <button
@@ -533,6 +569,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
           onClose={() => setShowCreditModal(false)}
           onRefresh={() => fetchCredit(true)}
           userId={profile?.userId}
+          profile={profile}
         />
       )}
     </aside>
