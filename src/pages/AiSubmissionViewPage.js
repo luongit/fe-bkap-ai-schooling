@@ -14,19 +14,29 @@ import {
 export default function AiSubmissionViewPage() {
   const { entryId } = useParams();
   const navigate = useNavigate();
+
   const [entry, setEntry] = useState(null);
   const [submissions, setSubmissions] = useState([]);
+  const [manualScore, setManualScore] = useState(null); // 🔥 mới
   const [loading, setLoading] = useState(true);
 
+  /* ------------------------------------------------------------
+     LẤY DỮ LIỆU BÀI THI
+  ------------------------------------------------------------ */
   useEffect(() => {
     if (!entryId) return;
+
     async function fetchData() {
       try {
         const res = await api.get(`/journalism/entries/${entryId}`);
+
         if (res.data.status === "success") {
           setEntry(res.data.entry);
           setSubmissions(res.data.submissions || []);
-        } else toast.error("Không tìm thấy bài thi!");
+          setManualScore(res.data.manualScore || null); // 🔥 nhận điểm giáo viên
+        } else {
+          toast.error("Không tìm thấy bài thi!");
+        }
       } catch (err) {
         console.error(err);
         toast.error("Lỗi khi tải dữ liệu bài thi!");
@@ -34,9 +44,13 @@ export default function AiSubmissionViewPage() {
         setLoading(false);
       }
     }
+
     fetchData();
   }, [entryId]);
 
+  /* ------------------------------------------------------------
+     RENDER FILE (ảnh / video / pdf / ppt)
+  ------------------------------------------------------------ */
   const renderFile = (f) => {
     const type = f?.fileType || "";
 
@@ -96,6 +110,9 @@ export default function AiSubmissionViewPage() {
     );
   };
 
+  /* ------------------------------------------------------------
+     LOADING + LỖI
+  ------------------------------------------------------------ */
   if (loading)
     return (
       <div className="flex justify-center items-center h-[80vh] text-gray-500">
@@ -111,7 +128,7 @@ export default function AiSubmissionViewPage() {
           ⚠️ Không tìm thấy bài thi
         </h2>
         <button
-          onClick={() => navigate("/ai-journalism")}
+          onClick={() => navigate("/journalism")}
           className="border border-gray-300 text-gray-700 px-5 py-2 rounded-md hover:bg-gray-100 transition"
         >
           ← Quay lại danh sách
@@ -119,15 +136,19 @@ export default function AiSubmissionViewPage() {
       </div>
     );
 
+  /* ------------------------------------------------------------
+     UI CHÍNH
+  ------------------------------------------------------------ */
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-5 font-inter text-gray-800">
       <Toaster position="top-right" />
 
       <div className="max-w-4xl mx-auto">
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button
-            onClick={() => navigate("/ai-journalism")}
+            onClick={() => navigate("/journalism")}
             className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -140,13 +161,12 @@ export default function AiSubmissionViewPage() {
           </div>
         </div>
 
-        {/* Main Card */}
+        {/* MAIN CARD */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8 space-y-8">
+
           {/* Tiêu đề */}
           <div className="text-center border-b border-gray-100 pb-5">
-            <h1 className="text-2xl font-semibold text-gray-800">
-              Xem Bài Dự Thi
-            </h1>
+            <h1 className="text-2xl font-semibold text-gray-800">Xem Bài Dự Thi</h1>
             <p className="text-gray-500 text-sm mt-1">
               Nội dung bài viết, tệp đính kèm và kết quả đánh giá
             </p>
@@ -178,13 +198,10 @@ export default function AiSubmissionViewPage() {
             ) : (
               <div className="space-y-4">
                 {submissions.map((f, i) => (
-                  <div
-                    key={f.id || i}
-                    className="bg-gray-50 border border-gray-200 rounded-lg p-4"
-                  >
+                  <div key={i} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                     <div className="flex justify-between items-center text-sm text-gray-600 mb-2 flex-wrap gap-2">
                       <span>
-                        <b>Loại:</b> {f.fileType || "Không rõ"}{" "}
+                        <b>Loại:</b> {f.fileType || "Không rõ"}
                         <span className="text-gray-400 mx-1">•</span>
                         <b>Ngày nộp:</b>{" "}
                         {new Date(f.submittedAt).toLocaleString("vi-VN")}
@@ -205,19 +222,21 @@ export default function AiSubmissionViewPage() {
             )}
           </section>
 
-          {/* Kết quả & Nhận xét */}
+          {/* ------------------------------------------------------------
+              KẾT QUẢ & NHẬN XÉT AI
+          ------------------------------------------------------------ */}
           <section>
             <div className="flex items-center gap-2 mb-3">
               <Award className="w-5 h-5 text-blue-500" />
               <h3 className="text-base font-semibold text-gray-800">
-                Kết quả & Nhận xét
+                Kết quả AI chấm
               </h3>
             </div>
 
             {entry.aiScore ? (
-              <div className="space-y-4">
+              <>
                 <div className="text-center">
-                  <p className="text-sm text-gray-500">Điểm AI đánh giá</p>
+                  <p className="text-sm text-gray-500">Điểm AI</p>
                   <p className="text-4xl font-bold text-blue-600">
                     {entry.aiScore}
                     <span className="text-lg text-gray-400"> / 100</span>
@@ -225,7 +244,7 @@ export default function AiSubmissionViewPage() {
                 </div>
 
                 {entry.aiFeedback && (
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex gap-2 items-start">
                       <MessageSquare className="w-5 h-5 text-blue-500 mt-1" />
                       <p className="italic text-gray-700 leading-relaxed">
@@ -234,11 +253,69 @@ export default function AiSubmissionViewPage() {
                     </div>
                   </div>
                 )}
-              </div>
+              </>
             ) : (
               <p className="text-gray-500 text-sm italic">
-                ⏳ Bài thi của bạn đang chờ được chấm điểm.
+                ⏳ Bài thi chưa được AI chấm.
               </p>
+            )}
+          </section>
+
+          {/* ------------------------------------------------------------
+              KẾT QUẢ GIÁO VIÊN CHẤM (MANUAL SCORE)
+          ------------------------------------------------------------ */}
+          <section>
+            <div className="flex items-center gap-2 mb-3 mt-6">
+              <Award className="w-5 h-5 text-purple-600" />
+              <h3 className="text-base font-semibold text-gray-800">
+                Kết quả giáo viên chấm
+              </h3>
+            </div>
+
+            {!manualScore ? (
+              <p className="text-gray-500 text-sm italic">
+                ⏳ Chưa có giáo viên nào chấm bài này.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {/* Điểm tổng */}
+                <div className="text-center">
+                  <p className="text-sm text-gray-500">Điểm giáo viên</p>
+                  <p className="text-4xl font-bold text-purple-600">
+                    {manualScore.totalScore}
+                    <span className="text-lg text-gray-400"> </span>
+                  </p>
+                </div>
+
+                {/* Feedback */}
+                {manualScore.feedback && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div className="flex gap-2 items-start">
+                      <MessageSquare className="w-5 h-5 text-purple-600 mt-1" />
+                      <p className="italic text-gray-700 leading-relaxed">
+                        “{manualScore.feedback}”
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Criteria JSON */}
+               {/* Criteria JSON */}
+{manualScore.criteria && (
+  <div className="bg-white border border-gray-200 rounded-lg p-4">
+    <h4 className="font-semibold text-gray-700 mb-2">
+      Điểm theo tiêu chí:
+    </h4>
+
+    {Object.entries(manualScore.criteria || {}).map(([k, v]) => (
+      <p key={k} className="text-gray-700">
+        • <b>{k}</b>: {v} điểm
+      </p>
+    ))}
+  </div>
+)}
+
+              </div>
             )}
           </section>
         </div>
