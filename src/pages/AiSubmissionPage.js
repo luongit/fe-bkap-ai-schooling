@@ -4,6 +4,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Image, Video, FileText, Send, BadgeCheck } from "lucide-react";
 import api from "../services/apiToken";
 
+/* ------------------- FILE PREVIEW COMPONENT ------------------- */
 function FilePreview({ file }) {
   const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
   if (!file) return null;
@@ -44,20 +45,25 @@ function FilePreview({ file }) {
   );
 }
 
+/* ------------------- MAIN PAGE ------------------- */
 export default function AiSubmissionPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const contestId = new URLSearchParams(location.search).get("contestId");
+
   const [contest, setContest] = useState(null);
   const [entryId, setEntryId] = useState(null);
+
   const [title, setTitle] = useState("");
   const [article, setArticle] = useState("");
   const [image, setImage] = useState(null);
   const [video, setVideo] = useState(null);
   const [slide, setSlide] = useState(null);
   const [note, setNote] = useState("");
+
   const [loading, setLoading] = useState(false);
 
+  /* ------------------- LOAD CONTEST INFO ------------------- */
   useEffect(() => {
     if (!contestId) return;
     api
@@ -66,14 +72,21 @@ export default function AiSubmissionPage() {
       .catch(() => toast.error("Không tải được thông tin cuộc thi"));
   }, [contestId]);
 
+  /* ------------------- CHECK IF USER ALREADY SUBMITTED ------------------- */
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    if (userId && contestId) {
-      const saved = localStorage.getItem(`entry_${contestId}_${userId}`);
-      if (saved) setEntryId(Number(saved));
-    }
+    if (!contestId) return;
+
+    api
+      .get(`/journalism/entries/my-entry?contest_id=${contestId}`)
+      .then((res) => {
+        if (res.data?.entry) {
+          setEntryId(res.data.entry.id);
+        }
+      })
+      .catch(() => {});
   }, [contestId]);
 
+  /* ------------------- VALIDATE FORM ------------------- */
   const validateForm = () => {
     if (!title.trim()) return toast.error("Vui lòng nhập tiêu đề bài viết!");
     if (!article.trim()) return toast.error("Vui lòng nhập nội dung bài viết!");
@@ -83,7 +96,7 @@ export default function AiSubmissionPage() {
     return true;
   };
 
-  // Xử lý nộp bài
+  /* ------------------- HANDLE SUBMIT ------------------- */
   async function handleSubmit(e) {
     e.preventDefault();
     if (loading) return;
@@ -93,8 +106,10 @@ export default function AiSubmissionPage() {
     try {
       setLoading(true);
       const formData = new FormData();
+
       formData.append("contest_id", contestId);
       if (entryId) formData.append("entry_id", entryId);
+
       formData.append("title", title);
       formData.append("article", article);
       formData.append("note", note);
@@ -107,9 +122,8 @@ export default function AiSubmissionPage() {
       });
 
       toast.success("Nộp bài thành công!");
-      const userId = localStorage.getItem("userId");
-      if (userId && res.data.entry_id) {
-        localStorage.setItem(`entry_${contestId}_${userId}`, res.data.entry_id);
+
+      if (res.data?.entry_id) {
         setEntryId(res.data.entry_id);
       }
 
@@ -119,6 +133,7 @@ export default function AiSubmissionPage() {
       setVideo(null);
       setSlide(null);
       setNote("");
+
     } catch (err) {
       console.error(err);
       toast.error("Lỗi khi nộp bài!");
@@ -126,6 +141,8 @@ export default function AiSubmissionPage() {
       setLoading(false);
     }
   }
+
+  /* ------------------- UPLOAD BOX COMPONENT ------------------- */
   const UploadBox = ({ label, icon: Icon, accept, onChange, file }) => (
     <div className="border-2 border-dashed border-purple-300 hover:border-purple-500 transition-colors rounded-2xl p-4 text-center bg-white/70 shadow-sm">
       <div className="flex flex-col items-center gap-2">
@@ -145,24 +162,24 @@ export default function AiSubmissionPage() {
     </div>
   );
 
+  /* ------------------- RENDER ------------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f8f5ff] via-[#faf7ff] to-white py-10 px-4 font-inter">
       <Toaster position="top-right" />
+
       <div className="max-w-5xl mx-auto mb-8">
         <button
-          onClick={() => navigate("/ai-journalism")}
+          onClick={() => navigate("/journalism")}
           className="text-purple-700 hover:text-fuchsia-600 font-semibold flex items-center gap-1 transition mb-4"
         >
           ← Quay lại trang danh sách cuộc thi
         </button>
 
         <div className="bg-white/80 backdrop-blur-xl border border-purple-100 rounded-3xl shadow-md p-8">
-          {/* Tiêu đề chính */}
           <h1 className="text-3xl font-bold text-blue-700 mb-3 pb-2 border-b-4 border-blue-200 flex items-center gap-2">
             Trang Nộp Bài Thi
           </h1>
 
-          {/* Thông tin cuộc thi */}
           {contest && (
             <div className="flex flex-col sm:flex-row sm:items-center flex-wrap gap-2 text-gray-700 text-sm">
               <span>
@@ -179,10 +196,9 @@ export default function AiSubmissionPage() {
             </div>
           )}
         </div>
-
       </div>
 
-      {/* Nội dung */}
+      {/* Nếu đã nộp bài → hiện trang đã nộp */}
       <div className="max-w-5xl mx-auto">
         {entryId ? (
           <div className="bg-green-50 border border-green-200 p-8 rounded-2xl text-center shadow-sm">
@@ -190,7 +206,7 @@ export default function AiSubmissionPage() {
               🎉 Bạn đã nộp bài thành công!
             </h3>
             <p className="text-gray-600 mb-4">
-              Bài dự thi của bạn đã được lưu lại. Bạn có thể xem lại chi tiết bài thi đã nộp của mình !
+              Bài dự thi của bạn đã được lưu lại. Bạn có thể xem lại chi tiết bài thi đã nộp.
             </p>
             <button
               onClick={() => navigate(`/ai-submission-view/${entryId}`)}
@@ -200,6 +216,7 @@ export default function AiSubmissionPage() {
             </button>
           </div>
         ) : (
+          /* ------------------- FORM NỘP BÀI ------------------- */
           <form
             onSubmit={handleSubmit}
             className="bg-white/80 backdrop-blur-lg border border-gray-100 p-8 rounded-3xl shadow-lg space-y-6"
@@ -207,7 +224,9 @@ export default function AiSubmissionPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-5">
                 <div>
-                  <label className="font-semibold text-gray-700">Tiêu đề <span className="text-red-500">*</span></label>
+                  <label className="font-semibold text-gray-700">
+                    Tiêu đề <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     value={title}
