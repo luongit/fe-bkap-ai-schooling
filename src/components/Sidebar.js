@@ -161,7 +161,9 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const fetchProfile = async () => {
     try {
       const res = await api.get("/profile");
+      if (process.env.NODE_ENV === "development") {
       console.log("PROFILE API RESULT:", res.data);
+    }
       setProfile(res.data);
     } catch (err) {
       console.error("Không lấy được profile:", err);
