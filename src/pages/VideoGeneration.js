@@ -283,30 +283,28 @@ export default function VideoStudioProLayout() {
         {/* Header */}
         <div className="flex items-center justify-between p-3 border-b border-[#DDD]">
           <div className="text-sm font-semibold text-[#3A0CA3] uppercase">
-            🎞️ Danh sách ảnh
+            Danh sách ảnh
           </div>
 
           <button
             onClick={!disableEdit ? handleExport : undefined}
             disabled={disableEdit || loading}
-            className={`px-3 py-1.5 rounded-md font-semibold text-xs flex items-center gap-1 text-white shadow-sm bg-gradient-to-r from-[#3A0CA3] via-[#4361EE] to-[#7209B7] ${
-              disableEdit
+            className={`px-3 py-1.5 rounded-md font-semibold text-xs flex items-center gap-1 text-white shadow-sm bg-gradient-to-r from-[#3A0CA3] via-[#4361EE] to-[#7209B7] ${disableEdit
                 ? "cursor-not-allowed opacity-40"
                 : loading
-                ? "cursor-wait opacity-70"
-                : "hover:scale-[1.03] active:scale-[0.97]"
-            }`}
+                  ? "cursor-wait opacity-70"
+                  : "hover:scale-[1.03] active:scale-[0.97]"
+              }`}
           >
-            <icons.export className="w-3.5 h-3.5" />
-            {loading ? "🎬" : "✨"}
+            {loading ? "Đang tạo video..." : "Tạo video"}
           </button>
+
         </div>
 
         {/* Danh sách Scene */}
         <div
-          className={`flex-1 overflow-y-auto p-3 space-y-4 transition ${
-            disableEdit ? "opacity-60 pointer-events-none" : ""
-          } ${loading ? "opacity-50" : ""}`}
+          className={`flex-1 overflow-y-auto p-3 space-y-4 transition ${disableEdit ? "opacity-60 pointer-events-none" : ""
+            } ${loading ? "opacity-50" : ""}`}
         >
           {slides.length === 0 ? (
             <div className="text-center text-gray-500 text-sm mt-10">
@@ -319,11 +317,10 @@ export default function VideoStudioProLayout() {
             slides.map((s, i) => (
               <div
                 key={s.id}
-                className={`p-2 rounded-lg border cursor-pointer transition ${
-                  i === current
+                className={`p-2 rounded-lg border cursor-pointer transition ${i === current
                     ? "border-[#3A0CA3] bg-[#EDE5FF]"
                     : "border-gray-300 hover:bg-gray-50"
-                }`}
+                  }`}
                 onClick={() => !loading && setCurrent(i)}
               >
                 <div className="flex items-center justify-between">
@@ -333,11 +330,10 @@ export default function VideoStudioProLayout() {
                     alt=""
                   />
                   <label
-                    className={`cursor-pointer ${
-                      disableEdit || loading
+                    className={`cursor-pointer ${disableEdit || loading
                         ? "opacity-40 pointer-events-none"
                         : "bg-[#3A0CA3] hover:bg-[#5023BA]"
-                    } p-1.5 rounded text-white`}
+                      } p-1.5 rounded text-white`}
                     title="Đổi ảnh"
                   >
                     <icons.edit className="w-4 h-4" />
@@ -394,13 +390,12 @@ export default function VideoStudioProLayout() {
       <div className="flex-1 flex flex-col">
         {/* TOP BAR */}
         <div
-          className={`flex justify-between items-center bg-[#F9F8FF] border-b border-gray-200 px-4 py-3 ${
-            disableEdit
+          className={`flex justify-between items-center bg-[#F9F8FF] border-b border-gray-200 px-4 py-3 ${disableEdit
               ? "opacity-60 pointer-events-none"
               : loading
-              ? "opacity-60 pointer-events-none"
-              : ""
-          }`}
+                ? "opacity-60 pointer-events-none"
+                : ""
+            }`}
         >
           <div className="flex items-center gap-4 flex-wrap">
             <label className="flex items-center gap-2 text-sm">
@@ -499,8 +494,8 @@ export default function VideoStudioProLayout() {
                     slide.style["vertical-position"] === "top"
                       ? "15%"
                       : slide.style["vertical-position"] === "center"
-                      ? "50%"
-                      : "90%", // ✅ đẩy vị trí cao hơn chút so với đáy
+                        ? "50%"
+                        : "90%", // ✅ đẩy vị trí cao hơn chút so với đáy
                   transform:
                     slide.style["vertical-position"] === "bottom"
                       ? "translateY(-100%)" // ✅ nếu ở đáy thì neo phần đầu khối vào top (đẩy toàn bộ chữ lên trên)
@@ -523,8 +518,8 @@ export default function VideoStudioProLayout() {
                       slide.style["horizontal-position"] === "left"
                         ? "left"
                         : slide.style["horizontal-position"] === "right"
-                        ? "right"
-                        : "center",
+                          ? "right"
+                          : "center",
                   }}
                 >
                   {slide.text}
@@ -552,7 +547,7 @@ export default function VideoStudioProLayout() {
                     {/* ✅ Header: Video thành công + Nút tải xuống ngang hàng */}
                     <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-5">
                       <div className="flex items-center gap-2 text-lg font-semibold bg-gradient-to-r from-[#3A0CA3] to-[#7209B7] bg-clip-text text-transparent">
-                        
+
                         <span>Video đã tạo thành công!</span>
                       </div>
 
@@ -598,17 +593,14 @@ export default function VideoStudioProLayout() {
         </main>
 
         <footer
-          className={`relative border-t border-gray-200 bg-[#F9F8FF] ${
-            slides.length === 0
+          className={`relative border-t border-gray-200 bg-[#F9F8FF] ${slides.length === 0
               ? "flex items-center justify-start"
               : "flex flex-wrap items-start justify-start"
-          } gap-4 px-4 ${
-            slides.length === 0
+            } gap-4 px-4 ${slides.length === 0
               ? "py-[10px] overflow-hidden"
               : "py-4 overflow-y-auto"
-          } max-h-[240px] scroll-smooth ${
-            loading ? "pointer-events-none opacity-60" : ""
-          }`}
+            } max-h-[240px] scroll-smooth ${loading ? "pointer-events-none opacity-60" : ""
+            }`}
         >
           {slides.length === 0 ? (
             // 🟣 Khi chưa có ảnh
@@ -616,11 +608,10 @@ export default function VideoStudioProLayout() {
               {/* Nút thêm ảnh — cách trái 15px, căn giữa chiều cao */}
               <label
                 className={`cursor-pointer w-24 h-24 border-2 border-dashed border-[#C7B6FF] rounded-xl flex items-center justify-center 
-        text-[#3A0CA3] transition-all shadow-sm flex-shrink-0 ml-[15px] ${
-          loading
-            ? "opacity-40 pointer-events-none"
-            : "hover:border-[#3A0CA3] hover:text-white hover:bg-[#3A0CA3]/90"
-        }`}
+        text-[#3A0CA3] transition-all shadow-sm flex-shrink-0 ml-[15px] ${loading
+                    ? "opacity-40 pointer-events-none"
+                    : "hover:border-[#3A0CA3] hover:text-white hover:bg-[#3A0CA3]/90"
+                  }`}
               >
                 <icons.plus className="w-8 h-8" />
                 <input
@@ -651,21 +642,19 @@ export default function VideoStudioProLayout() {
               {slides.map((s, i) => (
                 <div
                   key={s.id}
-                  className={`relative cursor-pointer flex flex-col items-center text-xs transition-all ${
-                    i === current
+                  className={`relative cursor-pointer flex flex-col items-center text-xs transition-all ${i === current
                       ? "opacity-100 scale-105"
                       : "opacity-80 hover:opacity-90 hover:scale-105"
-                  }`}
+                    }`}
                   onClick={() => !loading && setCurrent(i)}
                 >
                   <img
                     src={s.imagePreview}
                     alt=""
-                    className={`w-24 h-24 object-cover rounded-xl border shadow-sm ${
-                      i === current
+                    className={`w-24 h-24 object-cover rounded-xl border shadow-sm ${i === current
                         ? "border-[#3A0CA3] ring-2 ring-[#B197FC]/60"
                         : "border-gray-300"
-                    }`}
+                      }`}
                   />
                   <button
                     onClick={(e) => {
@@ -687,11 +676,10 @@ export default function VideoStudioProLayout() {
               {/* ➕ Nút thêm ảnh cuối danh sách */}
               <label
                 className={`cursor-pointer w-24 h-24 border-2 border-dashed border-[#C7B6FF] rounded-xl 
-        flex items-center justify-center text-[#3A0CA3] transition-all shadow-sm flex-shrink-0 ${
-          loading
-            ? "opacity-40 pointer-events-none"
-            : "hover:border-[#3A0CA3] hover:text-white hover:bg-[#3A0CA3]/90"
-        }`}
+        flex items-center justify-center text-[#3A0CA3] transition-all shadow-sm flex-shrink-0 ${loading
+                    ? "opacity-40 pointer-events-none"
+                    : "hover:border-[#3A0CA3] hover:text-white hover:bg-[#3A0CA3]/90"
+                  }`}
               >
                 <icons.plus className="w-8 h-8" />
                 <input
