@@ -39,7 +39,7 @@ api.interceptors.response.use(
 
       const refreshToken = localStorage.getItem("refreshToken");
       if (!refreshToken) {
-        toast.warning("⚠️ Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        toast.warning("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
         localStorage.clear();
         window.location.href = "/auth/login";
         return Promise.reject(error);
@@ -60,7 +60,7 @@ api.interceptors.response.use(
 
           // Gắn token mới vào request cũ và gửi lại
           originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
-          toast.info("🔄 Phiên đăng nhập đã được làm mới tự động vui lòng tải lại trang");
+          toast.info("Phiên đăng nhập đã được làm mới tự động vui lòng tải lại trang");
           return api(originalRequest);
         } else {
           throw new Error("Không nhận được token mới từ server");

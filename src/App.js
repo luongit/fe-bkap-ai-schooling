@@ -18,6 +18,7 @@ import AiJournalismPage from "./pages/AiJournalismPage";
 import AiSubmissionPage from "./pages/AiSubmissionPage";
 import AiSubmissionViewPage from "./pages/AiSubmissionViewPage";
 import AiJournalismCreatePage from "./pages/AiJournalismCreatePage";
+import AiJournalismEditPage from "./pages/AiJournalismEditPage";
 import Error403Page from "./pages/Error403Page";
 import RoleGuard from "./components/RoleGuard";
 import VoiceReportPage from "./pages/voice_ai/VoiceReportPage";
@@ -76,8 +77,8 @@ function App() {
                 element={<RoleGuard allowRoles={["SYSTEM_ADMIN", "ADMIN", "TEACHER"]} />}
               >
                 <Route path="/ai-journalism/create" element={<AiJournalismCreatePage />} />
+                <Route path="/ai-journalism/edit/:contestId" element={<AiJournalismEditPage />} />
               </Route>
-
               <Route path="/" element={<Home />} />
               <Route path="/403" element={<Error403Page />} />
 

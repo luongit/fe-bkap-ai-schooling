@@ -12,6 +12,8 @@ import {
   ExternalLink,
   ArrowRight,
   Hash,
+  Edit,
+  Delete,
   BadgeCheck,
   User as UserIcon,
 } from "lucide-react";
@@ -329,6 +331,9 @@ export default function AiJournalismPage() {
       }
     };
 
+
+
+
     // chỉ hiện cho role giáo viên/admin
     if (!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) return null;
 
@@ -508,6 +513,24 @@ export default function AiJournalismPage() {
     };
     return map[key];
   };
+
+  // hàm xóa cuộc thi
+  async function handleDeleteContest(contestId) {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa cuộc thi này không?")) return;
+    try {
+      await api.delete(`/journalism/contests/${contestId}`);
+      toast.success("Cuộc thi đã được xóa!");
+      setContests((prev) => prev.filter((c) => c.id !== contestId));
+    } catch (err) {
+      console.error("Lỗi khi xóa cuộc thi:", err);
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Không thể xóa cuộc thi!";
+      toast.error(msg);
+    }
+  }
+
 
   const filtered = useMemo(() => {
     let arr = contests || [];
@@ -814,15 +837,43 @@ export default function AiJournalismPage() {
                       </div>
                     </div>
 
-                    {/* footer */}
-                    <div className="items-center p-6 px-5 py-4 border-t bg-gray-50 flex justify-end">
-                      <button
-                        onClick={() => openContest(c)}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap border border-input bg-background shadow-sm hover:bg-gray-100 h-8 rounded-md px-3 text-xs"
-                      >
-                        Xem chi tiết <ExternalLink className="ml-1 h-3 w-3" />
-                      </button>
+
+
+                    <div className="items-center p-6 px-5 py-4 border-t bg-gray-50 flex justify-start gap-2">
+                      <div className="ml-auto flex gap-2">
+                        {["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user?.role) && (
+                          <button
+                            onClick={() => handleDeleteContest(c.id)}
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
+                            border border-red-500 text-red-500 hover:bg-red-100 h-8 rounded-md px-3 text-xs"
+                          >
+                            Xóa cuộc thi <Delete className="ml-1 h-3 w-3" />
+                          </button>
+                        )}
+                        {user && (["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user.role) || user.userId === c.createdBy?.id) && (
+                          <button
+                            onClick={() => navigate(`/ai-journalism/edit/${c.id}`)}
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
+                            border border-input bg-background shadow-sm hover:bg-gray-100 
+                            h-8 rounded-md px-3 text-xs"
+                          >
+                            Sửa cuộc thi <Edit className="ml-1 h-3 w-3" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => openContest(c)}
+                          className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
+                        border border-input bg-background shadow-sm hover:bg-gray-100 
+                        h-8 rounded-md px-3 text-xs"
+                        >
+                          Xem chi tiết <ExternalLink className="ml-1 h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
+
+
+
+
                   </div>
                 ))
               )}
