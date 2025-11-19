@@ -315,6 +315,9 @@ export default function AiJournalismPage() {
       0
     );
 
+    const maxTotal = totalScore;      // điểm tối đa cuộc thi
+    const overLimit = total > maxTotal;
+
     const handleSubmit = async () => {
       try {
         await api.post(`/journalism/entries/${entry.id}/grade-manual`, {
@@ -384,25 +387,35 @@ export default function AiJournalismPage() {
                   <input
                     type="number"
                     min="0"
-                    max={r.weight || undefined}
+                    max={r.weight}
                     step="0.5"
                     className="border rounded px-2 py-1 w-20 text-right"
-                    onChange={(e) =>
-                      setCriteria({ ...criteria, [r.criterion]: e.target.value })
-                    }
+                    value={criteria[r.criterion] || ""}
+                    onChange={(e) => {
+                      let value = Number(e.target.value || 0);
+
+                      // không cho vượt điểm tối đa của tiêu chí
+                      if (value > (r.weight || 0)) value = r.weight;
+                      if (value < 0) value = 0;
+                      setCriteria({ ...criteria, [r.criterion]: value });
+                    }}
+
                   />
                 </div>
               ))}
 
               {/* Tổng điểm */}
-              <div className="mt-4 text-right font-semibold text-purple-700">
-                Tổng điểm hiện tại:{" "}
-                <span className="text-fuchsia-600 text-lg">{total}</span>
-                {typeof totalScore === "number" && (
-                  <span className="text-gray-500 text-sm ml-1">/ {totalScore}</span>
+              <div className="mt-4 text-right font-semibold">
+                Tổng điểm hiện tại:
+                <span className="text-fuchsia-600 text-lg ml-1">{total}</span>
+                <span className="text-gray-500 text-sm ml-1">/ {maxTotal}</span>
+
+                {overLimit && (
+                  <p className="text-red-600 font-semibold mt-1">
+                    ❗ Tổng điểm vượt quá điểm tối đa của cuộc thi!
+                  </p>
                 )}
               </div>
-
               <textarea
                 placeholder="Nhận xét của giáo viên..."
                 className="border rounded-lg w-full p-2 mt-3"
@@ -413,7 +426,11 @@ export default function AiJournalismPage() {
               <div className="text-right mt-4">
                 <button
                   onClick={handleSubmit}
-                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
+                  disabled={overLimit}
+                  className={`px-4 py-2 rounded-lg transition ${overLimit
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-purple-600 text-white hover:bg-purple-700"
+                    }`}
                 >
                   Gửi điểm
                 </button>
@@ -1045,13 +1062,13 @@ export default function AiJournalismPage() {
                           </div>
                         ) : (
                           <div className="flex gap-2">
-                            <button
+                            {/* <button
                               onClick={() => handleGrade(e.id)}
                               disabled={grading}
                               className="bg-gradient-to-r from-emerald-500 to-green-400 text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-60"
                             >
                               {grading ? "🤖 AI đang chấm..." : "Chấm điểm bằng AI"}
-                            </button>
+                            </button> */}
                             <ManualScoreButton
                               entry={e}
                               rubrics={rubrics}
