@@ -22,6 +22,7 @@ import Error403Page from "./pages/Error403Page";
 import RoleGuard from "./components/RoleGuard";
 import VoiceReportPage from "./pages/voice_ai/VoiceReportPage";
 import VoiceChatGPT5 from "./pages/voice_ai/VoiceChatGPT5";
+import AiSubmissionEditPage from "./pages/AiSubmissionEditPage";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -96,6 +97,8 @@ function App() {
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/voice-chat" element={<VoiceChatGPT5 />} />
               <Route path="/voice-report" element={<VoiceReportPage />} />
+              <Route path="/ai-submission-edit/:entryId" element={<AiSubmissionEditPage />} />
+
 
               <Route
                 path="*"
