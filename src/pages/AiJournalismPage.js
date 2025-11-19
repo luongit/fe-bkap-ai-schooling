@@ -12,8 +12,6 @@ import {
   ExternalLink,
   ArrowRight,
   Hash,
-  Edit,
-  Delete,
   BadgeCheck,
   User as UserIcon,
 } from "lucide-react";
@@ -331,9 +329,6 @@ export default function AiJournalismPage() {
       }
     };
 
-
-
-
     // chỉ hiện cho role giáo viên/admin
     if (!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) return null;
 
@@ -434,49 +429,47 @@ export default function AiJournalismPage() {
 
 
   function RubricTable({ items }) {
-    if (!items?.length)
-      return (
-        <p className="text-gray-500 italic">
-          Chưa cấu hình tiêu chí cho cuộc thi này.
-        </p>
-      );
-    const totalWeight = items.reduce(
-      (a, b) => a + Number(b.weight || 0),
-      0
-    );
+    if (!items?.length) return <p>Chưa có tiêu chí.</p>;
+
+    // Tổng điểm tối đa = tổng weight
+    const total = items.reduce((a, b) => a + Number(b.weight || 0), 0);
+
     return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
-          <thead className="bg-purple-50 text-purple-700">
-            <tr>
-              <th className="px-4 py-2 text-left">Tiêu chí</th>
-              <th className="px-4 py-2 text-left">Mô tả</th>
-              <th className="px-4 py-2 text-center">Trọng số</th>
-              <th className="px-4 py-2 text-center">Điểm tối đa</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((r) => (
-              <tr key={r.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-2">{r.criterion}</td>
-                <td className="px-4 py-2 text-gray-600">{r.description}</td>
-                <td className="px-4 py-2 text-center font-semibold">
-                  {Math.round(Number(r.weight || 0) * 100)}%
-                </td>
-                <td className="px-4 py-2 text-center">{r.maxScore ?? 10}</td>
+      <table className="min-w-full border">
+        <thead className="bg-purple-50">
+          <tr>
+            <th>Tiêu chí</th>
+            <th>Mô tả</th>
+            <th>Trọng số</th>
+            <th>Điểm tối đa</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((r) => {
+            const percent = Math.round((r.weight / total) * 100);
+
+            return (
+              <tr key={r.id}>
+                <td>{r.criterion}</td>
+                <td>{r.description}</td>
+
+                {/* Trọng số % */}
+                <td className="text-center font-semibold">{percent}%</td>
+
+                {/* Điểm tối đa = weight */}
+                <td className="text-center">{r.weight}</td>
               </tr>
-            ))}
-            <tr className="bg-gray-50 border-t">
-              <td className="px-4 py-2 font-medium">Tổng</td>
-              <td />
-              <td className="px-4 py-2 text-center font-bold">
-                {Math.round(totalWeight * 100)}%
-              </td>
-              <td />
-            </tr>
-          </tbody>
-        </table>
-      </div>
+            );
+          })}
+
+          <tr className="bg-gray-100 font-bold">
+            <td>Tổng</td>
+            <td></td>
+            <td className="text-center">100%</td>
+            <td className="text-center">{total}</td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
 
@@ -513,24 +506,6 @@ export default function AiJournalismPage() {
     };
     return map[key];
   };
-
-  // hàm xóa cuộc thi
-  async function handleDeleteContest(contestId) {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa cuộc thi này không?")) return;
-    try {
-      await api.delete(`/journalism/contests/${contestId}`);
-      toast.success("Cuộc thi đã được xóa!");
-      setContests((prev) => prev.filter((c) => c.id !== contestId));
-    } catch (err) {
-      console.error("Lỗi khi xóa cuộc thi:", err);
-      const msg =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Không thể xóa cuộc thi!";
-      toast.error(msg);
-    }
-  }
-
 
   const filtered = useMemo(() => {
     let arr = contests || [];
@@ -837,43 +812,15 @@ export default function AiJournalismPage() {
                       </div>
                     </div>
 
-
-
-                    <div className="items-center p-6 px-5 py-4 border-t bg-gray-50 flex justify-start gap-2">
-                      <div className="ml-auto flex gap-2">
-                        {["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user?.role) && (
-                          <button
-                            onClick={() => handleDeleteContest(c.id)}
-                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
-                            border border-red-500 text-red-500 hover:bg-red-100 h-8 rounded-md px-3 text-xs"
-                          >
-                            Xóa cuộc thi <Delete className="ml-1 h-3 w-3" />
-                          </button>
-                        )}
-                        {user && (["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user.role) || user.userId === c.createdBy?.id) && (
-                          <button
-                            onClick={() => navigate(`/ai-journalism/edit/${c.id}`)}
-                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
-                            border border-input bg-background shadow-sm hover:bg-gray-100 
-                            h-8 rounded-md px-3 text-xs"
-                          >
-                            Sửa cuộc thi <Edit className="ml-1 h-3 w-3" />
-                          </button>
-                        )}
-                        <button
-                          onClick={() => openContest(c)}
-                          className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
-                        border border-input bg-background shadow-sm hover:bg-gray-100 
-                        h-8 rounded-md px-3 text-xs"
-                        >
-                          Xem chi tiết <ExternalLink className="ml-1 h-3 w-3" />
-                        </button>
-                      </div>
+                    {/* footer */}
+                    <div className="items-center p-6 px-5 py-4 border-t bg-gray-50 flex justify-end">
+                      <button
+                        onClick={() => openContest(c)}
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap border border-input bg-background shadow-sm hover:bg-gray-100 h-8 rounded-md px-3 text-xs"
+                      >
+                        Xem chi tiết <ExternalLink className="ml-1 h-3 w-3" />
+                      </button>
                     </div>
-
-
-
-
                   </div>
                 ))
               )}
@@ -1064,12 +1011,7 @@ export default function AiJournalismPage() {
       {/* TAB: Bài đã nộp */}
       {activeTab === "my" && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mt-6">
-          <h3 className="text-xl font-semibold mb-4">
-            {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)
-              ? "📚 Tất cả bài dự thi"
-              : "📜 Bài đã nộp của bạn"}
-          </h3>
-
+          <h3 className="text-xl font-semibold mb-4">📜 Bài đã nộp của bạn</h3>
           {entries.length === 0 ? (
             <p className="text-gray-500">
               Bạn chưa có bài dự thi nào. Vào thanh <b>Nộp bài</b> để gửi bài dự thi nhé.
@@ -1078,47 +1020,22 @@ export default function AiJournalismPage() {
             <div className="space-y-4">
               {entries.map((e) => {
                 const criteria = safeParseCriteria(e.aiCriteria);
-
                 return (
                   <div key={e.id} className="border border-gray-200 rounded-xl p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="font-semibold text-gray-900">🧾 {e.title}</p>
-
-                        {/* Preview nội dung */}
                         <p className="text-gray-600 text-sm whitespace-pre-wrap mt-1">
                           {e.article?.length > 160
                             ? e.article.substring(0, 160) + "..."
                             : e.article}
                         </p>
-
                         <p className="text-xs text-gray-400 mt-1">
                           Nộp lúc: {formatDate(e.createdAt)}
                         </p>
-
-                        {/* Nút xem bài + sửa bài */}
-                        <div className="flex gap-2 mt-3">
-                          <button
-                            onClick={() => navigate(`/ai-submission-view/${e.id}`)}
-                            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700 transition"
-                          >
-                            👁 Xem bài đã nộp
-                          </button>
-
-                          {user?.role === "STUDENT" && (
-                            <button
-                              onClick={() => navigate(`/ai-submission-edit/${e.id}`)}
-                              className="bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-yellow-600 transition"
-                            >
-                              ✏️ Chỉnh sửa bài
-                            </button>
-                          )}
-
-                        </div>
                       </div>
 
                       <div className="min-w-[180px] text-right">
-                        {/* Điểm AI */}
                         {e.aiScore ? (
                           <div className="inline-block bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-left">
                             <div className="text-xs text-gray-500">Điểm AI</div>
@@ -1128,20 +1045,23 @@ export default function AiJournalismPage() {
                           </div>
                         ) : (
                           <div className="flex gap-2">
-
-
-                            {/* Nút chấm thủ công */}
+                            <button
+                              onClick={() => handleGrade(e.id)}
+                              disabled={grading}
+                              className="bg-gradient-to-r from-emerald-500 to-green-400 text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-60"
+                            >
+                              {grading ? "🤖 AI đang chấm..." : "Chấm điểm bằng AI"}
+                            </button>
                             <ManualScoreButton
                               entry={e}
                               rubrics={rubrics}
-                              totalScore={activeContest?.totalScore}
+                              totalScore={activeContest?.totalScore} // 👈 thêm dòng này
                             />
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Chi tiết tiêu chí AI */}
                     {criteria && (
                       <div className="bg-gray-50 rounded-lg p-3 mt-3">
                         <table className="w-full text-sm mb-2 border border-gray-200 rounded-lg">
@@ -1162,7 +1082,6 @@ export default function AiJournalismPage() {
                   </div>
                 );
               })}
-
             </div>
           )}
         </div>
@@ -1180,7 +1099,63 @@ export default function AiJournalismPage() {
         </div>
       )}
 
+      {/* MODAL KẾT QUẢ AI */}
+      {showModal && feedback && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-6 w-[90%] max-w-md relative animate-fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold"
+            >
+              ✕
+            </button>
 
+            <h3 className="text-xl font-semibold mb-3 text-purple-700 text-center">
+              🎯 Kết quả chấm điểm
+            </h3>
+
+            <p className="text-4xl font-extrabold text-fuchsia-600 mb-4 text-center">
+              {feedback.score}
+            </p>
+
+            {feedback.criteria && (
+              <table className="w-full text-sm mb-4 border border-gray-200 rounded-lg">
+                <tbody>
+                  {Object.entries(feedback.criteria).map(([key, value]) => (
+                    <tr key={key} className="border-t border-gray-100">
+                      <td className="py-1 px-2 text-left text-gray-700">{key}</td>
+                      <td className="py-1 px-2 text-right font-semibold">{value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            <p className="text-gray-600 text-sm italic mb-2 text-center">
+              {feedback.feedback}
+            </p>
+
+            <p className="text-gray-500 text-xs text-center">
+              💰Credit còn lại: {feedback.remainingCredit}
+            </p>
+
+            <div className="text-center mt-4">
+              <button
+                onClick={() => setShowModal(false)}
+                className="bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white px-5 py-2 rounded-lg font-semibold hover:opacity-90 transition-all"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
