@@ -162,8 +162,8 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     try {
       const res = await api.get("/profile");
       if (process.env.NODE_ENV === "development") {
-      console.log("PROFILE API RESULT:", res.data);
-    }
+        console.log("PROFILE API RESULT:", res.data);
+      }
       setProfile(res.data);
     } catch (err) {
       console.error("Không lấy được profile:", err);
@@ -329,6 +329,23 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                 <span className="text-base font-normal">Tạo Video</span>
               )}
             </NavLink>
+
+            <NavLink
+              to="/library"
+              onClick={() => {
+                if (typeof onToggleSidebar === "function") onToggleSidebar();
+              }}
+              className={({ isActive }) =>
+                `side-item w-full flex items-center gap-2 px-2 py-1.5 ${isActive ? "bg-gray-200 text-gray-900 font-semibold" : ""
+                }`
+              }
+            >
+              <FiImage className="sidebar-icon w-4 h-4" />
+              {!isCollapsed && (
+                <span className="text-base font-normal">Thư viện của tôi</span>
+              )}
+            </NavLink>
+
           </Group>
 
           <NavLink
