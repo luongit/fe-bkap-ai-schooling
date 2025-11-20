@@ -243,17 +243,11 @@ function AiImageLibrary() {
                     {/* TOP BAR */}
                     <div className="absolute top-0 left-0 w-full h-16 bg-white border-b flex items-center justify-between px-6 z-50">
 
-                        <button
-                            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-200 transition"
-                            onClick={() => setPreviewImage(null)}
-                        >
-                            <FiX />
-
-                        </button>
+                       
 
 
                         <p className="text-sm text-gray-600 max-w-[50%] truncate">
-                            {cleanPrompt(previewImage.prompt)}
+                           Image
                         </p>
 
                         <button
@@ -269,12 +263,17 @@ function AiImageLibrary() {
                     </div>
 
                     {/* MAIN IMAGE */}
-                    <div className="flex-1 flex items-center justify-center pt-20 pb-10 bg-white">
-                        <img
-                            src={previewImage.imageUrl}
-                            className="max-w-[90%] max-h-[90%] object-contain rounded-lg"
-                        />
-                    </div>
+                 <div className="flex-1 flex flex-col items-center justify-center pt-20 pb-10 bg-white">
+    <img
+        src={previewImage.imageUrl}
+        className="max-w-[90%] max-h-[90%] object-contain rounded-lg"
+    />
+
+    <p className="mt-3 text-gray-600 text-sm text-center">
+        {cleanPrompt(previewImage.prompt)}
+    </p>
+</div>
+
 
                     {/* RIGHT SIDEBAR (CENTERED THUMBNAILS) */}
                    <div className="w-28 border-l bg-white flex flex-col">
