@@ -85,10 +85,22 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   }, [isLoggedIn]);
 
   const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
+    setIsCollapsed((prev) => {
+      const newState = !prev;
+
+      if (newState) {
+        document.body.classList.add("sidebar-collapsed");
+      } else {
+        document.body.classList.remove("sidebar-collapsed");
+      }
+
+      return newState;
+    });
+
     setShowMenu(false);
     setOpenMenuId(null);
   };
+
 
   useEffect(() => {
     const resize = () => setIsMobile(window.innerWidth <= 920);
