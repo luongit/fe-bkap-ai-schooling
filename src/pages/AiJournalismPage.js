@@ -201,7 +201,8 @@ export default function AiJournalismPage() {
     try {
       if (["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) {
         // gọi API cho giáo viên
-        const res1 = await api.get(`/journalism/entries/contest/${contest.id}`);
+       const res1 = await api.get(`/journalism/entries/teacher-view/${contest.id}`);
+
         setEntries(res1.data || []);
       } else if (user?.studentId) {
         // học sinh chỉ xem bài của mình
@@ -1025,84 +1026,128 @@ export default function AiJournalismPage() {
         </div>
       )}
 
-      {/* TAB: Bài đã nộp */}
       {activeTab === "my" && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mt-6">
-          <h3 className="text-xl font-semibold mb-4">📜 Bài đã nộp của bạn</h3>
-          {entries.length === 0 ? (
-            <p className="text-gray-500">
-              Bạn chưa có bài dự thi nào. Vào thanh <b>Nộp bài</b> để gửi bài dự thi nhé.
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {entries.map((e) => {
-                const criteria = safeParseCriteria(e.aiCriteria);
-                return (
-                  <div key={e.id} className="border border-gray-200 rounded-xl p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-gray-900">🧾 {e.title}</p>
-                        <p className="text-gray-600 text-sm whitespace-pre-wrap mt-1">
-                          {e.article?.length > 160
-                            ? e.article.substring(0, 160) + "..."
-                            : e.article}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          Nộp lúc: {formatDate(e.createdAt)}
-                        </p>
-                      </div>
+  <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mt-6">
+    <h3 className="text-xl font-semibold mb-4">
+      {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)
+        ? "📚 Tất cả bài dự thi"
+        : "📜 Bài đã nộp của bạn"}
+    </h3>
 
-                      <div className="min-w-[180px] text-right">
-                        {e.aiScore ? (
-                          <div className="inline-block bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-left">
-                            <div className="text-xs text-gray-500">Điểm AI</div>
-                            <div className="text-2xl font-extrabold text-fuchsia-600">
-                              {e.aiScore}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex gap-2">
-                            {/* <button
-                              onClick={() => handleGrade(e.id)}
-                              disabled={grading}
-                              className="bg-gradient-to-r from-emerald-500 to-green-400 text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-60"
-                            >
-                              {grading ? "🤖 AI đang chấm..." : "Chấm điểm bằng AI"}
-                            </button> */}
-                            <ManualScoreButton
-                              entry={e}
-                              rubrics={rubrics}
-                              totalScore={activeContest?.totalScore} // 👈 thêm dòng này
-                            />
-                          </div>
-                        )}
+    {/* 🟣 TRƯỜNG HỢP STUDENT */}
+    {!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
+      <div>
+        {entries.length === 0 ? (
+          <p className="text-gray-500">
+            Bạn chưa có bài dự thi nào. Vui lòng nhấn <b>Nộp bài</b> để gửi bài.
+          </p>
+        ) : (
+          entries.map((e) => {
+            const criteria = safeParseCriteria(e.aiCriteria);
+
+            return (
+              <div key={e.id} className="border border-gray-200 rounded-xl p-4 mb-4">
+                <p className="font-semibold text-gray-900">🧾 {e.title}</p>
+
+                <p className="text-gray-600 text-sm whitespace-pre-wrap mt-1">
+                  {e.article?.length > 160
+                    ? e.article.substring(0, 160) + "..."
+                    : e.article}
+                </p>
+
+                <p className="text-xs text-gray-400 mt-1">
+                  Nộp lúc: {formatDate(e.createdAt)}
+                </p>
+
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => navigate(`/ai-submission-view/${e.id}`)}
+                    className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700"
+                  >
+                    👁 Xem bài đã nộp
+                  </button>
+
+                  {/* 🔥 GIỮ LẠI NÚT CHỈNH SỬA CHO STUDENT */}
+                  <button
+                    onClick={() => navigate(`/ai-submission-edit/${e.id}`)}
+                    className="bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-yellow-600"
+                  >
+                    ✏️ Chỉnh sửa bài
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    )}
+
+    {/* 🟡 TRƯỜNG HỢP TEACHER — NHÓM THEO LỚP */}
+    {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
+      <div>
+        {entries.length === 0 ? (
+          <p className="text-gray-500">Chưa có bài dự thi nào.</p>
+        ) : (
+          (() => {
+            const classGroups = {};
+
+            entries.forEach((e) => {
+              const cls = e.className || "Chưa rõ lớp";
+              if (!classGroups[cls]) classGroups[cls] = [];
+              classGroups[cls].push(e);
+            });
+
+            return Object.keys(classGroups).map((className) => (
+              <div key={className} className="border rounded-xl p-4 mb-6 bg-white">
+                <h3 className="text-lg font-bold text-purple-700 mb-3">
+                  📘 {className}
+                </h3>
+
+                {classGroups[className].map((e) => {
+                  const criteria = safeParseCriteria(e.aiCriteria);
+
+                  return (
+                    <div
+                      key={e.id}
+                      className="border border-gray-200 rounded-lg p-4 mb-3 bg-gray-50"
+                    >
+                      <p className="mb-2">
+                        👤 <b>{e.studentName}</b> — {e.code}
+                      </p>
+
+                      <p className="font-semibold text-gray-900">🧾 {e.title}</p>
+
+                      <p className="text-gray-600 text-sm mt-1">
+                        {e.article.slice(0, 140)}...
+                      </p>
+
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => navigate(`/ai-submission-view/${e.id}`)}
+                          className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700"
+                        >
+                          👁 Xem bài đã nộp
+                        </button>
+
+                        <ManualScoreButton
+                          entry={e}
+                          rubrics={rubrics}
+                          totalScore={activeContest?.totalScore}
+                        />
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+            ));
+          })()
+        )}
+      </div>
+    )}
+  </div>
+)}
 
-                    {criteria && (
-                      <div className="bg-gray-50 rounded-lg p-3 mt-3">
-                        <table className="w-full text-sm mb-2 border border-gray-200 rounded-lg">
-                          <tbody>
-                            {Object.entries(criteria).map(([k, v]) => (
-                              <tr key={k} className="border-t border-gray-100">
-                                <td className="py-1 px-2 text-left text-gray-700">{k}</td>
-                                <td className="py-1 px-2 text-right font-medium">{v}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        {e.aiFeedback && (
-                          <p className="italic text-gray-600 text-sm">{e.aiFeedback}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+
 
       {/* TAB: Rubric */}
       {activeTab === "rubric" && (
