@@ -12,11 +12,12 @@ import {
   ExternalLink,
   ArrowRight,
   Hash,
+  Edit,
+  Delete,
   BadgeCheck,
   User as UserIcon,
-  FileText,        // THÊM DÒNG NÀY
+   FileText,        // THÊM DÒNG NÀY
   Eye,             // THÊM DÒNG NÀY
-  Edit,            // THÊM DÒNG NÀY
   PenTool,         // (tùy chọn thêm nếu bạn muốn dùng icon bút đẹp hơn)
   Scale,
 } from "lucide-react";
@@ -205,11 +206,10 @@ export default function AiJournalismPage() {
 
     try {
       if (["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) {
-        // gọi API cho giáo viên
-       const res1 = await api.get(`/journalism/entries/teacher-view/${contest.id}`);
-
-        setEntries(res1.data || []);
-      } else if (user?.studentId) {
+  const res1 = await api.get(`/journalism/entries/teacher-view/${contest.id}`);
+  setEntries(res1.data || []);
+}
+ else if (user?.studentId) {
         // học sinh chỉ xem bài của mình
         const res1 = await api.get(`/journalism/entries/student/${user.studentId}`);
         const filtered = (res1.data || []).filter(
@@ -323,7 +323,6 @@ export default function AiJournalismPage() {
 
     const maxTotal = totalScore;      // điểm tối đa cuộc thi
     const overLimit = total > maxTotal;
-
     const handleSubmit = async () => {
       try {
         await api.post(`/journalism/entries/${entry.id}/grade-manual`, {
@@ -337,6 +336,9 @@ export default function AiJournalismPage() {
         toast.error("Chấm điểm thất bại!");
       }
     };
+
+
+
 
     // chỉ hiện cho role giáo viên/admin
     if (!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) return null;
@@ -352,154 +354,96 @@ export default function AiJournalismPage() {
 
         {open && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
             onClick={() => setOpen(false)}
           >
             <div
-              className="modal-wide bg-white rounded-2xl shadow-2xl p-6 relative animate-fadeIn max-w-[1800px] max-h-[90vh] overflow-auto"
+              className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-lg"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Nút đóng */}
-              <button
-                onClick={() => setOpen(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
-              >
-                ✕
-              </button>
-
-              <h3 className="text-2xl font-bold mb-6 text-center w-full text-purple-700">
+              <h3 className="text-lg font-semibold mb-4 text-purple-700">
                 ✍️ Chấm bài thủ công
               </h3>
 
-              {/* MAIN 2-COLUMN LAYOUT */}
-              <div className="grid grid-cols-12 gap-6">
-
-                {/* LEFT: PREVIEW – CHIẾM 9/12 (≈ 75%) */}
-                <div className="col-span-9 border rounded-2xl p-4 bg-gray-50 max-h-[78vh] overflow-y-auto">
-                  <h4 className="text-md font-semibold mb-3">📎 Tệp bài nộp</h4>
-
-                  {files.length === 0 && (
-                    <p className="text-gray-500 italic">Không có tệp nào.</p>
-                  )}
-
-                  {files.map((f) => {
-                    const url = f.fileUrl;
-                    const name = f.fileName || url.split("/").pop();
-                    const ext = name.split(".").pop().toLowerCase();
-
-                    return (
-                      <div key={f.id} className="mb-6">
-                        <p className="font-medium mb-2 truncate">{name}</p>
-
-                        {/* IMAGE */}
-                        {["jpg", "jpeg", "png", "gif", "webp"].includes(ext) && (
-                          <img
-                            src={url}
-                            className="w-full rounded-xl border max-h-[700px] object-contain"
-                          />
-                        )}
-
-                        {/* VIDEO */}
-                        {["mp4", "mov", "avi", "mkv"].includes(ext) && (
-                          <video
-                            controls
-                            className="w-full rounded-xl border bg-black max-h-[700px]"
-                          >
-                            <source src={url} />
-                          </video>
-                        )}
-
-                        {/* PDF */}
-                        {ext === "pdf" && (
-                          <iframe
-                            src={url}
-                            className="w-full h-[720px] rounded-xl border"
-                          ></iframe>
-                        )}
-
-                        {/* OTHER */}
-                        {!["jpg", "jpeg", "png", "gif", "webp", "mp4", "mov", "avi", "mkv", "pdf"]
-                          .includes(ext) && (
-                            <a
-                              href={url}
-                              target="_blank"
-                              className="text-purple-600 underline text-sm"
-                            >
-                              ➜ Tải file
-                            </a>
-                          )}
-                      </div>
-                    );
-                  })}
+              {files.length > 0 && (
+                <div className="mb-4">
+                  <p className="font-semibold text-gray-700 mb-2">📎 Tệp bài nộp:</p>
+                  <ul className="space-y-1">
+                    {files.map((f) => (
+                      <li key={f.id} className="flex items-center justify-between text-sm border-b py-1">
+                        <span className="truncate w-2/3 text-gray-800">
+                          {f.fileName || f.fileUrl?.split("/").pop() || "Không có tên file"}
+                        </span>
+                        <a
+                          href={f.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-600 hover:underline font-medium"
+                        >
+                          📂 Mở
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
+              )}
 
-                {/* RIGHT: SCORE FORM – CHIẾM 3/12 (≈ 25%) */}
-                <div className="col-span-3 border rounded-2xl p-4 bg-white max-h-[78vh] overflow-y-auto">
-                  <h4 className="text-md font-semibold mb-4">📝 Chấm điểm</h4>
 
-                  {rubrics.map((r) => (
-                    <div key={r.id} className="mb-4">
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="text-gray-700 font-medium">
-                          {r.criterion}
-                        </label>
-                        <span className="text-gray-500 text-sm font-semibold">/ {r.weight}</span>
-                      </div>
+              {rubrics.map((r) => (
+                <div key={r.id} className="flex items-center justify-between mb-2">
+                  <label className="text-gray-700">{r.criterion}</label>
+                  <input
+                    type="number"
+                    min="0"
+max={r.weight}                    step="0.5"
+                    className="border rounded px-2 py-1 w-20 text-right"
+                     value={criteria[r.criterion] || ""}
+                    onChange={(e) => {
+                      let value = Number(e.target.value || 0);
 
-                      <input
-                        type="number"
-                        min="0"
-                        max={r.weight}
-                        step="0.5"
-                        className="border rounded-xl px-3 py-2 w-full text-right"
-                        value={criteria[r.criterion] || ""}
-                        onChange={(e) => {
-                          let v = Number(e.target.value || 0);
-                          if (v > r.weight) v = r.weight;
-                          if (v < 0) v = 0;
-                          setCriteria({ ...criteria, [r.criterion]: v });
-                        }}
-                      />
-                    </div>
-                  ))}
-
-                  {/* Tổng điểm */}
-                  <div className="text-right mt-4 mb-2">
-                    <span className="font-semibold text-gray-700">Tổng điểm:</span>{" "}
-                    <span className="text-2xl font-bold text-fuchsia-600">{total}</span>
-                    <span className="text-gray-500"> / {maxTotal}</span>
-                  </div>
-
-                  {overLimit && (
-                    <p className="text-red-600 font-semibold mb-2">
-                      ❗ Vượt quá điểm tối đa!
-                    </p>
-                  )}
-
-                  <textarea
-                    placeholder="Nhận xét của giáo viên..."
-                    className="border rounded-xl w-full p-3 mt-4 h-32"
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                  ></textarea>
-
-                  <button
-                    onClick={handleSubmit}
-                    disabled={overLimit}
-                    className={`w-full mt-4 py-3 rounded-xl text-white font-bold transition ${overLimit
-                      ? "bg-gray-300 cursor-not-allowed"
-                      : "bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:opacity-90"
-                      }`}
-                  >
-                    Gửi điểm
-                  </button>
+                      // không cho vượt điểm tối đa của tiêu chí
+                      if (value > (r.weight || 0)) value = r.weight;
+                      if (value < 0) value = 0;
+                      setCriteria({ ...criteria, [r.criterion]: value });
+                    }}
+                  />
                 </div>
+              ))}
+
+              {/* Tổng điểm */}
+                 <div className="mt-4 text-right font-semibold">
+                Tổng điểm hiện tại:
+                <span className="text-fuchsia-600 text-lg ml-1">{total}</span>
+                <span className="text-gray-500 text-sm ml-1">/ {maxTotal}</span>
+
+                {overLimit && (
+                  <p className="text-red-600 font-semibold mt-1">
+                    ❗ Tổng điểm vượt quá điểm tối đa của cuộc thi!
+                  </p>
+                )}
               </div>
-            </div >
-          </div >
-        )
-        }
 
+              <textarea
+                placeholder="Nhận xét của giáo viên..."
+                className="border rounded-lg w-full p-2 mt-3"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+              ></textarea>
+
+              <div className="text-right mt-4">
+                <button
+                  onClick={handleSubmit}
+  disabled={overLimit}
+                  className={`px-4 py-2 rounded-lg transition ${overLimit
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-purple-600 text-white hover:bg-purple-700"
+                    }`}                >
+                  Gửi điểm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     );
   }
@@ -512,9 +456,8 @@ export default function AiJournalismPage() {
 
     // Tổng điểm tối đa = tổng weight
     const total = items.reduce((a, b) => a + Number(b.weight || 0), 0);
-
     return (
-      <table className="min-w-full border">
+       <table className="min-w-full border">
         <thead className="bg-purple-50">
           <tr>
             <th>Tiêu chí</th>
@@ -529,8 +472,8 @@ export default function AiJournalismPage() {
 
             return (
               <tr key={r.id}>
-                <td className="text-center font-semibold">{r.criterion}</td>
-                <td className="text-center font-semibold">{r.description}</td>
+                <td>{r.criterion}</td>
+                <td>{r.description}</td>
 
                 {/* Trọng số % */}
                 <td className="text-center font-semibold">{percent}%</td>
@@ -538,7 +481,7 @@ export default function AiJournalismPage() {
                 {/* Điểm tối đa = weight */}
                 <td className="text-center">{r.weight}</td>
               </tr>
-            );
+           );
           })}
 
           <tr className="bg-gray-100 font-bold">
@@ -585,6 +528,24 @@ export default function AiJournalismPage() {
     };
     return map[key];
   };
+
+  // hàm xóa cuộc thi
+  async function handleDeleteContest(contestId) {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa cuộc thi này không?")) return;
+    try {
+      await api.delete(`/journalism/contests/${contestId}`);
+      toast.success("Cuộc thi đã được xóa!");
+      setContests((prev) => prev.filter((c) => c.id !== contestId));
+    } catch (err) {
+      console.error("Lỗi khi xóa cuộc thi:", err);
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Không thể xóa cuộc thi!";
+      toast.error(msg);
+    }
+  }
+
 
   const filtered = useMemo(() => {
     let arr = contests || [];
@@ -891,15 +852,43 @@ export default function AiJournalismPage() {
                       </div>
                     </div>
 
-                    {/* footer */}
-                    <div className="items-center p-6 px-5 py-4 border-t bg-gray-50 flex justify-end">
-                      <button
-                        onClick={() => openContest(c)}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap border border-input bg-background shadow-sm hover:bg-gray-100 h-8 rounded-md px-3 text-xs"
-                      >
-                        Xem chi tiết <ExternalLink className="ml-1 h-3 w-3" />
-                      </button>
+
+
+                    <div className="items-center p-6 px-5 py-4 border-t bg-gray-50 flex justify-start gap-2">
+                      <div className="ml-auto flex gap-2">
+                        {["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user?.role) && (
+                          <button
+                            onClick={() => handleDeleteContest(c.id)}
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
+                            border border-red-500 text-red-500 hover:bg-red-100 h-8 rounded-md px-3 text-xs"
+                          >
+                            Xóa cuộc thi <Delete className="ml-1 h-3 w-3" />
+                          </button>
+                        )}
+                        {user && (["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user.role) || user.userId === c.createdBy?.id) && (
+                          <button
+                            onClick={() => navigate(`/ai-journalism/edit/${c.id}`)}
+                            className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
+                            border border-input bg-background shadow-sm hover:bg-gray-100 
+                            h-8 rounded-md px-3 text-xs"
+                          >
+                            Sửa cuộc thi <Edit className="ml-1 h-3 w-3" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => openContest(c)}
+                          className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
+                        border border-input bg-background shadow-sm hover:bg-gray-100 
+                        h-8 rounded-md px-3 text-xs"
+                        >
+                          Xem chi tiết <ExternalLink className="ml-1 h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
+
+
+
+
                   </div>
                 ))
               )}
@@ -1040,7 +1029,7 @@ export default function AiJournalismPage() {
         )}
       </div>
 
-      {/* Tabs */}
+       {/* Tabs */}
       <div className="bg-white border border-gray-200 rounded-2xl p-2 flex gap-2 mb-6">
         {[
           { key: "submit", label: "✍️ Nộp bài" },
