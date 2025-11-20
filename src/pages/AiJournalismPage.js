@@ -14,6 +14,11 @@ import {
   Hash,
   BadgeCheck,
   User as UserIcon,
+  FileText,        // THÊM DÒNG NÀY
+  Eye,             // THÊM DÒNG NÀY
+  Edit,            // THÊM DÒNG NÀY
+  PenTool,         // (tùy chọn thêm nếu bạn muốn dùng icon bút đẹp hơn)
+  Scale,
 } from "lucide-react";
 import api from "../services/apiToken"; // axios instance có refresh token
 
@@ -1027,125 +1032,175 @@ export default function AiJournalismPage() {
       )}
 
       {activeTab === "my" && (
-  <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mt-6">
-    <h3 className="text-xl font-semibold mb-4">
-      {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)
-        ? "📚 Tất cả bài dự thi"
-        : "📜 Bài đã nộp của bạn"}
-    </h3>
-
-    {/* 🟣 TRƯỜNG HỢP STUDENT */}
-    {!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
-      <div>
-        {entries.length === 0 ? (
-          <p className="text-gray-500">
-            Bạn chưa có bài dự thi nào. Vui lòng nhấn <b>Nộp bài</b> để gửi bài.
-          </p>
+  <div className="space-y-8">
+    {/* Tiêu đề + số lượng bài */}
+    <div className="flex items-center justify-between">
+      <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+        {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) ? (
+          <>
+            <Users className="w-8 h-8 text-[#0ea5e9]" />
+            Tất cả bài dự thi
+          </>
         ) : (
-          entries.map((e) => {
-            const criteria = safeParseCriteria(e.aiCriteria);
+          <>
+            <FileText className="w-8 h-8 text-[#0ea5e9]" />
+            Bài dự thi của bạn
+          </>
+        )}
+      </h3>
+      {entries.length > 0 && (
+        <div className="px-5 py-2.5 bg-gradient-to-r from-[#0ea5e9]/10 to-[#38bdf8]/10 text-[#0ea5e9] rounded-full font-semibold text-sm border border-[#0ea5e9]/20">
+          {entries.length} bài nộp
+        </div>
+      )}
+    </div>
 
-            return (
-              <div key={e.id} className="border border-gray-200 rounded-xl p-4 mb-4">
-                <p className="font-semibold text-gray-900">🧾 {e.title}</p>
+    {/* Student View */}
+    {!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
+      <div className="grid gap-6">
+        {entries.length === 0 ? (
+          <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-2 border-dashed border-gray-300">
+            <FileText className="w-20 h-20 text-gray-400 mx-auto mb-5" />
+            <p className="text-xl font-medium text-gray-600">Bạn chưa nộp bài nào</p>
+            <p className="text-gray-500 mt-2">
+              Hãy chuyển sang tab <strong className="text-[#0ea5e9]">Nộp bài</strong> để bắt đầu viết!
+            </p>
+          </div>
+        ) : (
+          entries.map((entry) => (
+            <div
+              key={entry.id}
+              className="group bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-[#0ea5e9]/30 transition-all duration-300 overflow-hidden"
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h4 className="text-xl font-bold text-gray-900 group-hover:text-[#0ea5e9] transition">
+                      {entry.title}
+                    </h4>
+                    <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                      <CalendarIcon className="w-4 h-4" />
+                      Nộp ngày {new Date(entry.createdAt).toLocaleDateString("vi-VN")}
+                    </p>
+                  </div>
+                  {entry.aiScore !== undefined && (
+                    <div className="text-right">
+                      <div className="text-4xl font-extrabold bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] bg-clip-text text-transparent">
+                        {entry.aiScore}
+                      </div>
+                      <p className="text-xs text-gray-500">Điểm AI</p>
+                    </div>
+                  )}
+                </div>
 
-                <p className="text-gray-600 text-sm whitespace-pre-wrap mt-1">
-                  {e.article?.length > 160
-                    ? e.article.substring(0, 160) + "..."
-                    : e.article}
+                <p className="text-gray-700 line-clamp-3 leading-relaxed mb-6">
+                  {entry.article}
                 </p>
 
-                <p className="text-xs text-gray-400 mt-1">
-                  Nộp lúc: {formatDate(e.createdAt)}
-                </p>
-
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-4">
                   <button
-                    onClick={() => navigate(`/ai-submission-view/${e.id}`)}
-                    className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700"
+                    onClick={() => navigate(`/ai-submission-view/${entry.id}`)}
+                    className="flex-1 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
                   >
-                    👁 Xem bài đã nộp
+                    <Eye className="w-5 h-5" />
+                    Xem chi tiết
                   </button>
-
-                  {/* 🔥 GIỮ LẠI NÚT CHỈNH SỬA CHO STUDENT */}
                   <button
-                    onClick={() => navigate(`/ai-submission-edit/${e.id}`)}
-                    className="bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-yellow-600"
+                    onClick={() => navigate(`/ai-submission-edit/${entry.id}`)}
+                    className="flex-1 flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
                   >
-                    ✏️ Chỉnh sửa bài
+                    <Edit className="w-5 h-5" />
+                    Chỉnh sửa
                   </button>
                 </div>
               </div>
-            );
-          })
+            </div>
+          ))
         )}
       </div>
     )}
 
-    {/* 🟡 TRƯỜNG HỢP TEACHER — NHÓM THEO LỚP */}
+    {/* Teacher / Admin View - Nhóm theo lớp */}
     {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
-      <div>
+      <div className="space-y-10">
         {entries.length === 0 ? (
-          <p className="text-gray-500">Chưa có bài dự thi nào.</p>
+          <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-2 border-dashed border-gray-300">
+            <Users className="w-20 h-20 text-gray-400 mx-auto mb-5" />
+            <p className="text-xl font-medium text-gray-600">Chưa có bài nộp nào</p>
+          </div>
         ) : (
-          (() => {
-            const classGroups = {};
-
-            entries.forEach((e) => {
-              const cls = e.className || "Chưa rõ lớp";
-              if (!classGroups[cls]) classGroups[cls] = [];
-              classGroups[cls].push(e);
-            });
-
-            return Object.keys(classGroups).map((className) => (
-              <div key={className} className="border rounded-xl p-4 mb-6 bg-white">
-                <h3 className="text-lg font-bold text-purple-700 mb-3">
-                  📘 {className}
+          Object.entries(
+            entries.reduce((acc, e) => {
+              const className = e.className || "Chưa rõ lớp";
+              if (!acc[className]) acc[className] = [];
+              acc[className].push(e);
+              return acc;
+            }, {})
+          ).map(([className, students]) => (
+            <div
+              key={className}
+              className="bg-white rounded-3xl shadow-lg border border-gray-200 overflow-hidden"
+            >
+              {/* Header lớp */}
+              <div className="bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white px-8 py-5">
+                <h3 className="text-xl font-bold flex items-center gap-3">
+                  <Users className="w-7 h-7" />
+                  {className}
+                  <span className="ml-auto text-sm font-normal opacity-90">
+                    {students.length} học sinh
+                  </span>
                 </h3>
-
-                {classGroups[className].map((e) => {
-                  const criteria = safeParseCriteria(e.aiCriteria);
-
-                  return (
-                    <div
-                      key={e.id}
-                      className="border border-gray-200 rounded-lg p-4 mb-3 bg-gray-50"
-                    >
-                      <p className="mb-2">
-                        👤 <b>{e.studentName}</b> — {e.code}
-                      </p>
-
-                      <p className="font-semibold text-gray-900">🧾 {e.title}</p>
-
-                      <p className="text-gray-600 text-sm mt-1">
-                        {e.article.slice(0, 140)}...
-                      </p>
-
-                      <div className="flex gap-2 mt-3">
-                        <button
-                          onClick={() => navigate(`/ai-submission-view/${e.id}`)}
-                          className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-blue-700"
-                        >
-                          👁 Xem bài đã nộp
-                        </button>
-
-                        <ManualScoreButton
-                          entry={e}
-                          rubrics={rubrics}
-                          totalScore={activeContest?.totalScore}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
-            ));
-          })()
+
+              {/* Danh sách học sinh */}
+              <div className="p-6 space-y-5">
+                {students.map((e) => (
+                  <div
+                    key={e.id}
+                    className="flex items-center gap-6 p-6 bg-gray-50/70 rounded-2xl hover:bg-gray-100 hover:shadow-md transition-all duration-300 group"
+                  >
+                    {/* Avatar */}
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#38bdf8] text-white flex items-center justify-center text-2xl font-bold shadow-lg flex-shrink-0">
+                      {e.studentName?.[0] || "?"}
+                    </div>
+
+                    {/* Nội dung */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 text-lg truncate">
+                        {e.studentName} <span className="text-gray-500 font-normal">— {e.code}</span>
+                      </p>
+                      <p className="font-semibold text-gray-800 mt-1">{e.title}</p>
+                      <p className="text-sm text-gray-600 line-clamp-2 mt-2">
+                        {e.article}
+                      </p>
+                    </div>
+
+                    {/* Nút hành động */}
+                    <div className="flex gap-3 flex-shrink-0">
+                      <button
+                        onClick={() => navigate(`/ai-submission-view/${e.id}`)}
+                        className="px-6 py-3 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white rounded-xl font-medium hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+                      >
+                        <Eye className="w-5 h-5" />
+                        Xem
+                      </button>
+                      <ManualScoreButton
+                        entry={e}
+                        rubrics={rubrics}
+                        totalScore={activeContest?.totalScore}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
         )}
       </div>
     )}
   </div>
 )}
+
 
 
 
