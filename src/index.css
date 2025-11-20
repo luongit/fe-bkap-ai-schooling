@@ -11,3 +11,23 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Khi sidebar mở (bình thường rộng 280px) */
+.modal-wide {
+  margin-left: 280px;
+  width: calc(100vw - 280px);
+}
+
+/* Khi sidebar thu nhỏ (khoảng 70px) */
+body.sidebar-collapsed .modal-wide {
+  margin-left: 70px;
+  width: calc(100vw - 70px);
+}
+
+/* Mobile hoặc tablet < 1024px → full width */
+@media (max-width: 1024px) {
+  .modal-wide {
+    margin-left: 0 !important;
+    width: 100vw !important;
+  }
+}

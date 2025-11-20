@@ -347,98 +347,154 @@ export default function AiJournalismPage() {
 
         {open && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           >
             <div
-              className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-lg"
+              className="modal-wide bg-white rounded-2xl shadow-2xl p-6 relative animate-fadeIn max-w-[1800px] max-h-[90vh] overflow-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-semibold mb-4 text-purple-700">
+              {/* Nút đóng */}
+              <button
+                onClick={() => setOpen(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
+              >
+                ✕
+              </button>
+
+              <h3 className="text-2xl font-bold mb-6 text-center w-full text-purple-700">
                 ✍️ Chấm bài thủ công
               </h3>
 
-              {files.length > 0 && (
-                <div className="mb-4">
-                  <p className="font-semibold text-gray-700 mb-2">📎 Tệp bài nộp:</p>
-                  <ul className="space-y-1">
-                    {files.map((f) => (
-                      <li key={f.id} className="flex items-center justify-between text-sm border-b py-1">
-                        <span className="truncate w-2/3 text-gray-800">
-                          {f.fileName || f.fileUrl?.split("/").pop() || "Không có tên file"}
-                        </span>
-                        <a
-                          href={f.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-purple-600 hover:underline font-medium"
-                        >
-                          📂 Mở
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+              {/* MAIN 2-COLUMN LAYOUT */}
+              <div className="grid grid-cols-12 gap-6">
+
+                {/* LEFT: PREVIEW – CHIẾM 9/12 (≈ 75%) */}
+                <div className="col-span-9 border rounded-2xl p-4 bg-gray-50 max-h-[78vh] overflow-y-auto">
+                  <h4 className="text-md font-semibold mb-3">📎 Tệp bài nộp</h4>
+
+                  {files.length === 0 && (
+                    <p className="text-gray-500 italic">Không có tệp nào.</p>
+                  )}
+
+                  {files.map((f) => {
+                    const url = f.fileUrl;
+                    const name = f.fileName || url.split("/").pop();
+                    const ext = name.split(".").pop().toLowerCase();
+
+                    return (
+                      <div key={f.id} className="mb-6">
+                        <p className="font-medium mb-2 truncate">{name}</p>
+
+                        {/* IMAGE */}
+                        {["jpg", "jpeg", "png", "gif", "webp"].includes(ext) && (
+                          <img
+                            src={url}
+                            className="w-full rounded-xl border max-h-[700px] object-contain"
+                          />
+                        )}
+
+                        {/* VIDEO */}
+                        {["mp4", "mov", "avi", "mkv"].includes(ext) && (
+                          <video
+                            controls
+                            className="w-full rounded-xl border bg-black max-h-[700px]"
+                          >
+                            <source src={url} />
+                          </video>
+                        )}
+
+                        {/* PDF */}
+                        {ext === "pdf" && (
+                          <iframe
+                            src={url}
+                            className="w-full h-[720px] rounded-xl border"
+                          ></iframe>
+                        )}
+
+                        {/* OTHER */}
+                        {!["jpg", "jpeg", "png", "gif", "webp", "mp4", "mov", "avi", "mkv", "pdf"]
+                          .includes(ext) && (
+                            <a
+                              href={url}
+                              target="_blank"
+                              className="text-purple-600 underline text-sm"
+                            >
+                              ➜ Tải file
+                            </a>
+                          )}
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
 
+                {/* RIGHT: SCORE FORM – CHIẾM 3/12 (≈ 25%) */}
+                <div className="col-span-3 border rounded-2xl p-4 bg-white max-h-[78vh] overflow-y-auto">
+                  <h4 className="text-md font-semibold mb-4">📝 Chấm điểm</h4>
 
-              {rubrics.map((r) => (
-                <div key={r.id} className="flex items-center justify-between mb-2">
-                  <label className="text-gray-700">{r.criterion}</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max={r.weight}
-                    step="0.5"
-                    className="border rounded px-2 py-1 w-20 text-right"
-                    value={criteria[r.criterion] || ""}
-                    onChange={(e) => {
-                      let value = Number(e.target.value || 0);
+                  {rubrics.map((r) => (
+                    <div key={r.id} className="mb-4">
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-gray-700 font-medium">
+                          {r.criterion}
+                        </label>
+                        <span className="text-gray-500 text-sm font-semibold">/ {r.weight}</span>
+                      </div>
 
-                      // không cho vượt điểm tối đa của tiêu chí
-                      if (value > (r.weight || 0)) value = r.weight;
-                      if (value < 0) value = 0;
-                      setCriteria({ ...criteria, [r.criterion]: value });
-                    }}
+                      <input
+                        type="number"
+                        min="0"
+                        max={r.weight}
+                        step="0.5"
+                        className="border rounded-xl px-3 py-2 w-full text-right"
+                        value={criteria[r.criterion] || ""}
+                        onChange={(e) => {
+                          let v = Number(e.target.value || 0);
+                          if (v > r.weight) v = r.weight;
+                          if (v < 0) v = 0;
+                          setCriteria({ ...criteria, [r.criterion]: v });
+                        }}
+                      />
+                    </div>
+                  ))}
 
-                  />
+                  {/* Tổng điểm */}
+                  <div className="text-right mt-4 mb-2">
+                    <span className="font-semibold text-gray-700">Tổng điểm:</span>{" "}
+                    <span className="text-2xl font-bold text-fuchsia-600">{total}</span>
+                    <span className="text-gray-500"> / {maxTotal}</span>
+                  </div>
+
+                  {overLimit && (
+                    <p className="text-red-600 font-semibold mb-2">
+                      ❗ Vượt quá điểm tối đa!
+                    </p>
+                  )}
+
+                  <textarea
+                    placeholder="Nhận xét của giáo viên..."
+                    className="border rounded-xl w-full p-3 mt-4 h-32"
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                  ></textarea>
+
+                  <button
+                    onClick={handleSubmit}
+                    disabled={overLimit}
+                    className={`w-full mt-4 py-3 rounded-xl text-white font-bold transition ${overLimit
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:opacity-90"
+                      }`}
+                  >
+                    Gửi điểm
+                  </button>
                 </div>
-              ))}
-
-              {/* Tổng điểm */}
-              <div className="mt-4 text-right font-semibold">
-                Tổng điểm hiện tại:
-                <span className="text-fuchsia-600 text-lg ml-1">{total}</span>
-                <span className="text-gray-500 text-sm ml-1">/ {maxTotal}</span>
-
-                {overLimit && (
-                  <p className="text-red-600 font-semibold mt-1">
-                    ❗ Tổng điểm vượt quá điểm tối đa của cuộc thi!
-                  </p>
-                )}
               </div>
-              <textarea
-                placeholder="Nhận xét của giáo viên..."
-                className="border rounded-lg w-full p-2 mt-3"
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-              ></textarea>
+            </div >
+          </div >
+        )
+        }
 
-              <div className="text-right mt-4">
-                <button
-                  onClick={handleSubmit}
-                  disabled={overLimit}
-                  className={`px-4 py-2 rounded-lg transition ${overLimit
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-purple-600 text-white hover:bg-purple-700"
-                    }`}
-                >
-                  Gửi điểm
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </>
     );
   }
@@ -468,8 +524,8 @@ export default function AiJournalismPage() {
 
             return (
               <tr key={r.id}>
-                <td>{r.criterion}</td>
-                <td>{r.description}</td>
+                <td className="text-center font-semibold">{r.criterion}</td>
+                <td className="text-center font-semibold">{r.description}</td>
 
                 {/* Trọng số % */}
                 <td className="text-center font-semibold">{percent}%</td>
