@@ -172,8 +172,8 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
   const fetchProfile = async () => {
     try {
-      const res = await api.get("/profile");
       if (process.env.NODE_ENV === "production") return;
+      const res = await api.get("/profile");
       if (process.env.NODE_ENV === "development") {
       }
       setProfile(res.data);
@@ -463,9 +463,19 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
         {!isLoggedIn ? (
           <>
-            {renderNavItem(FiLogIn, "Đăng nhập", () =>
-              navigate("/auth/login")
-            )}
+            <a
+              href="https://bkapai.vn/auth/login"
+              className={`side-item w-full flex items-center gap-2 ${isCollapsed ? "justify-center" : ""
+                }`}
+              onClick={() => {
+                if (typeof onToggleSidebar === "function") onToggleSidebar();
+              }}
+            >
+              <FiLogIn className="sidebar-icon w-4 h-4" />
+              {!isCollapsed && (
+                <span className="text-base font-normal">Đăng Nhập</span>
+              )}
+            </a>
 
             <a
               href="https://bkapai.vn/register"
