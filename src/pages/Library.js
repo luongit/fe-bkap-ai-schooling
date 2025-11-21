@@ -427,9 +427,6 @@ className="fixed inset-0 z-50 flex bg-white backdrop-blur-sm"
   </div>
 )}
 
-
-
-
       {/* PREVIEW IMAGE – GIỮ NGUYÊN 100% NHƯ FILE CŨ CỦA BẠN */}
       {previewImage && (
         <div className="fixed inset-0 bg-white z-50 flex">
