@@ -1258,20 +1258,34 @@ setEntries(prev =>
                       </p>
 
                       <div className="flex gap-4">
-                        <button
+                       <button
   onClick={async () => {
-    setViewEntry(entry);                  
-    setShowEntryModal(true);             
+    // Dùng dữ liệu có sẵn từ list trước cho chắc
+    setViewEntry(entry);
+    setShowEntryModal(true);
     setActivePreviewTab("content");
 
-    const res = await api.get(`/journalism/entries/${entry.id}/submissions`);
-    setPreviewFiles(res.data || []);
+    try {
+      // Load chi tiết và MERGE, không ghi đè mất studentName / code / className
+      const fresh = await api.get(`/journalism/entries/${entry.id}`);
+      setViewEntry((prev) => ({
+        ...prev,
+        ...fresh.data,
+      }));
+
+      const res = await api.get(`/journalism/entries/${entry.id}/submissions`);
+      setPreviewFiles(res.data || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Không tải được chi tiết, đang hiển thị dữ liệu tạm.");
+    }
   }}
   className="flex-1 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
 >
   <Eye className="w-5 h-5" />
   Xem chi tiết
 </button>
+
 
                         <button
                           onClick={() => navigate(`/ai-submission-edit/${entry.id}`)}
@@ -1362,14 +1376,25 @@ setEntries(prev =>
                             {/* Nút xem bài */}
                            <button
   onClick={async () => {
-  setViewEntry(e);
-  setShowEntryModal(true);
-  setActivePreviewTab("content");
+    // Dùng dữ liệu sẵn có trong list trước
+    setViewEntry(e);
+    setShowEntryModal(true);
+    setActivePreviewTab("content");
 
-  const res = await api.get(`/journalism/entries/${e.id}/submissions`);
-  setPreviewFiles(res.data || []);
-}}
+    try {
+      const fresh = await api.get(`/journalism/entries/${e.id}`);
+      setViewEntry((prev) => ({
+        ...prev,
+        ...fresh.data,
+      }));
 
+      const res = await api.get(`/journalism/entries/${e.id}/submissions`);
+      setPreviewFiles(res.data || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Không tải được chi tiết, đang hiển thị dữ liệu tạm.");
+    }
+  }}
   className="px-6 py-3 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] 
              text-white rounded-xl font-medium hover:shadow-xl 
              transition-all duration-200 flex items-center gap-2"
@@ -1377,6 +1402,7 @@ setEntries(prev =>
   <Eye className="w-5 h-5" />
   Xem
 </button>
+
 
 
                             {/* Nếu chưa có điểm GV → mới hiện nút chấm */}
@@ -1488,10 +1514,14 @@ setEntries(prev =>
         <div className="p-8 pb-6">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-              {viewEntry.studentName.charAt(0)}
+             {(viewEntry.studentName || viewEntry.student?.fullName || "H").charAt(0)}
+
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900">{viewEntry.studentName}</h3>
+              <h3 className="text-xl font-bold text-gray-900">
+  {viewEntry.studentName || viewEntry.student?.fullName || "Không rõ tên"}
+</h3>
+
               <p className="text-sm text-gray-600">Học sinh</p>
             </div>
           </div>
@@ -1501,11 +1531,15 @@ setEntries(prev =>
               <>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Mã HS:</span>
-                  <span className="font-semibold">{viewEntry.code}</span>
+                  <span className="font-semibold">
+  {viewEntry.code || viewEntry.student?.code || "—"}
+</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Lớp:</span>
-                  <span className="font-semibold">{viewEntry.className}</span>
+                  <span className="font-semibold">
+  {viewEntry.className || viewEntry.student?.className || "—"}
+</span>
                 </div>
               </>
             )}
