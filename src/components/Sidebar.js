@@ -174,7 +174,6 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     try {
       const res = await api.get("/profile");
       if (process.env.NODE_ENV === "development") {
-        console.log("PROFILE API RESULT:", res.data);
       }
       setProfile(res.data);
     } catch (err) {

@@ -12,12 +12,12 @@ import {
   ExternalLink,
   ArrowRight,
   Hash,
-  Edit,
   Delete,
   BadgeCheck,
   User as UserIcon,
-   FileText,        // THÊM DÒNG NÀY
+  FileText,        // THÊM DÒNG NÀY
   Eye,             // THÊM DÒNG NÀY
+  Edit,            // THÊM DÒNG NÀY
   PenTool,         // (tùy chọn thêm nếu bạn muốn dùng icon bút đẹp hơn)
   Scale,
 } from "lucide-react";
@@ -206,10 +206,33 @@ export default function AiJournalismPage() {
 
     try {
       if (["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) {
-  const res1 = await api.get(`/journalism/entries/teacher-view/${contest.id}`);
-  setEntries(res1.data || []);
-}
- else if (user?.studentId) {
+        // gọi API cho giáo viên
+        const res1 = await api.get(`/journalism/entries/teacher-view/${contest.id}`);
+
+
+        const mapped = (res1.data || []).map(item => {
+          let manualScoreObj = null;
+
+          if (typeof item.manualScore === "number") {
+            // backend trả ra điểm dạng số → convert thành object
+            manualScoreObj = { totalScore: item.manualScore };
+          } else if (typeof item.manualScore === "object" && item.manualScore !== null) {
+            // backend trả object đầy đủ
+            manualScoreObj = {
+              totalScore: item.manualScore.totalScore,
+              feedback: item.manualScore.feedback,
+              criteria: item.manualScore.criteria,
+            };
+          }
+
+          return {
+            ...item,
+            manualScore: manualScoreObj
+          };
+        });
+
+        setEntries(mapped);
+      } else if (user?.studentId) {
         // học sinh chỉ xem bài của mình
         const res1 = await api.get(`/journalism/entries/student/${user.studentId}`);
         const filtered = (res1.data || []).filter(
@@ -354,96 +377,150 @@ export default function AiJournalismPage() {
 
         {open && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           >
             <div
-              className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-lg"
+              className="modal-wide bg-white rounded-2xl shadow-2xl p-6 relative animate-fadeIn max-w-[1800px] max-h-[90vh] overflow-auto"
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-semibold mb-4 text-purple-700">
+              {/* Nút đóng */}
+              <button
+                onClick={() => setOpen(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
+              >
+                ✕
+              </button>
+
+              <h3 className="text-2xl font-bold mb-6 text-center w-full text-purple-700">
                 ✍️ Chấm bài thủ công
               </h3>
+              <div className="grid grid-cols-12 gap-6">
 
-              {files.length > 0 && (
-                <div className="mb-4">
-                  <p className="font-semibold text-gray-700 mb-2">📎 Tệp bài nộp:</p>
-                  <ul className="space-y-1">
-                    {files.map((f) => (
-                      <li key={f.id} className="flex items-center justify-between text-sm border-b py-1">
-                        <span className="truncate w-2/3 text-gray-800">
-                          {f.fileName || f.fileUrl?.split("/").pop() || "Không có tên file"}
-                        </span>
-                        <a
-                          href={f.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-purple-600 hover:underline font-medium"
-                        >
-                          📂 Mở
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                {/* LEFT: PREVIEW – CHIẾM 9/12 (≈ 75%) */}
+                <div className="col-span-9 border rounded-2xl p-4 bg-gray-50 max-h-[78vh] overflow-y-auto">
+                  <h4 className="text-md font-semibold mb-3">📎 Tệp bài nộp</h4>
+
+                  {files.length === 0 && (
+                    <p className="text-gray-500 italic">Không có tệp nào.</p>
+                  )}
+
+
+                  {files.map((f) => {
+                    const url = f.fileUrl;
+                    const name = f.fileName || url.split("/").pop();
+                    const ext = name.split(".").pop().toLowerCase();
+
+                    return (
+                      <div key={f.id} className="mb-6">
+                        <p className="font-medium mb-2 truncate">{name}</p>
+
+                        {/* IMAGE */}
+                        {["jpg", "jpeg", "png", "gif", "webp"].includes(ext) && (
+                          <img
+                            src={url}
+                            className="w-full rounded-xl border max-h-[700px] object-contain"
+                          />
+                        )}
+
+                        {/* VIDEO */}
+                        {["mp4", "mov", "avi", "mkv"].includes(ext) && (
+                          <video
+                            controls
+                            className="w-full rounded-xl border bg-black max-h-[700px]"
+                          >
+                            <source src={url} />
+                          </video>
+                        )}
+
+                        {/* PDF */}
+                        {ext === "pdf" && (
+                          <iframe
+                            src={url}
+                            className="w-full h-[720px] rounded-xl border"
+                          ></iframe>
+                        )}
+
+                        {/* OTHER */}
+                        {!["jpg", "jpeg", "png", "gif", "webp", "mp4", "mov", "avi", "mkv", "pdf"]
+                          .includes(ext) && (
+                            <a
+                              href={url}
+                              target="_blank"
+                              className="text-purple-600 underline text-sm"
+                            >
+                              ➜ Tải file
+                            </a>
+                          )}
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
 
+                <div className="col-span-3 border rounded-2xl p-4 bg-white max-h-[78vh] overflow-y-auto">
+                  <h4 className="text-md font-semibold mb-4">📝 Chấm điểm</h4>
 
-              {rubrics.map((r) => (
-                <div key={r.id} className="flex items-center justify-between mb-2">
-                  <label className="text-gray-700">{r.criterion}</label>
-                  <input
-                    type="number"
-                    min="0"
-max={r.weight}                    step="0.5"
-                    className="border rounded px-2 py-1 w-20 text-right"
-                     value={criteria[r.criterion] || ""}
-                    onChange={(e) => {
-                      let value = Number(e.target.value || 0);
+                  {rubrics.map((r) => (
+                    <div key={r.id} className="mb-4">
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-gray-700 font-medium">
+                          {r.criterion}
+                        </label>
+                        <span className="text-gray-500 text-sm font-semibold">/ {r.weight}</span>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        max={r.weight}
+                        step="0.5"
+                        className="border rounded-xl px-3 py-2 w-full text-right"
+                        value={criteria[r.criterion] || ""}
+                        onChange={(e) => {
+                          let v = Number(e.target.value || 0);
+                          if (v > r.weight) v = r.weight;
+                          if (v < 0) v = 0;
+                          setCriteria({ ...criteria, [r.criterion]: v });
+                        }}
+                      />
+                    </div>
+                  ))}
 
-                      // không cho vượt điểm tối đa của tiêu chí
-                      if (value > (r.weight || 0)) value = r.weight;
-                      if (value < 0) value = 0;
-                      setCriteria({ ...criteria, [r.criterion]: value });
-                    }}
-                  />
+                  {/* Tổng điểm */}
+                  <div className="text-right mt-4 mb-2">
+                    <span className="font-semibold text-gray-700">Tổng điểm:</span>{" "}
+                    <span className="text-2xl font-bold text-fuchsia-600">{total}</span>
+                    <span className="text-gray-500"> / {maxTotal}</span>
+                  </div>
+
+                  {overLimit && (
+                    <p className="text-red-600 font-semibold mb-2">
+                      ❗ Vượt quá điểm tối đa!
+                    </p>
+                  )}
+
+                  <textarea
+                    placeholder="Nhận xét của giáo viên..."
+                    className="border rounded-xl w-full p-3 mt-4 h-32"
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                  ></textarea>
+
+                  <button
+                    onClick={handleSubmit}
+                    disabled={overLimit}
+                    className={`w-full mt-4 py-3 rounded-xl text-white font-bold transition ${overLimit
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-gradient-to-r from-purple-600 to-fuchsia-500 hover:opacity-90"
+                      }`}
+                  >
+                    Gửi điểm
+                  </button>
                 </div>
-              ))}
-
-              {/* Tổng điểm */}
-                 <div className="mt-4 text-right font-semibold">
-                Tổng điểm hiện tại:
-                <span className="text-fuchsia-600 text-lg ml-1">{total}</span>
-                <span className="text-gray-500 text-sm ml-1">/ {maxTotal}</span>
-
-                {overLimit && (
-                  <p className="text-red-600 font-semibold mt-1">
-                    ❗ Tổng điểm vượt quá điểm tối đa của cuộc thi!
-                  </p>
-                )}
-              </div>
-
-              <textarea
-                placeholder="Nhận xét của giáo viên..."
-                className="border rounded-lg w-full p-2 mt-3"
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-              ></textarea>
-
-              <div className="text-right mt-4">
-                <button
-                  onClick={handleSubmit}
-  disabled={overLimit}
-                  className={`px-4 py-2 rounded-lg transition ${overLimit
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-purple-600 text-white hover:bg-purple-700"
-                    }`}                >
-                  Gửi điểm
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+              </div >
+            </div >
+          </div >
+        )
+        }
       </>
     );
   }
@@ -457,7 +534,7 @@ max={r.weight}                    step="0.5"
     // Tổng điểm tối đa = tổng weight
     const total = items.reduce((a, b) => a + Number(b.weight || 0), 0);
     return (
-       <table className="min-w-full border">
+      <table className="min-w-full border">
         <thead className="bg-purple-50">
           <tr>
             <th>Tiêu chí</th>
@@ -481,7 +558,7 @@ max={r.weight}                    step="0.5"
                 {/* Điểm tối đa = weight */}
                 <td className="text-center">{r.weight}</td>
               </tr>
-           );
+            );
           })}
 
           <tr className="bg-gray-100 font-bold">
@@ -1029,7 +1106,7 @@ max={r.weight}                    step="0.5"
         )}
       </div>
 
-       {/* Tabs */}
+      {/* Tabs */}
       <div className="bg-white border border-gray-200 rounded-2xl p-2 flex gap-2 mb-6">
         {[
           { key: "submit", label: "✍️ Nộp bài" },
@@ -1077,176 +1154,193 @@ max={r.weight}                    step="0.5"
       )}
 
       {activeTab === "my" && (
-  <div className="space-y-8">
-    {/* Tiêu đề + số lượng bài */}
-    <div className="flex items-center justify-between">
-      <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-        {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) ? (
-          <>
-            <Users className="w-8 h-8 text-[#0ea5e9]" />
-            Tất cả bài dự thi
-          </>
-        ) : (
-          <>
-            <FileText className="w-8 h-8 text-[#0ea5e9]" />
-            Bài dự thi của bạn
-          </>
-        )}
-      </h3>
-      {entries.length > 0 && (
-        <div className="px-5 py-2.5 bg-gradient-to-r from-[#0ea5e9]/10 to-[#38bdf8]/10 text-[#0ea5e9] rounded-full font-semibold text-sm border border-[#0ea5e9]/20">
-          {entries.length} bài nộp
+        <div className="space-y-8">
+          {/* Tiêu đề + số lượng bài */}
+          <div className="flex items-center justify-between">
+            <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) ? (
+                <>
+                  <Users className="w-8 h-8 text-[#0ea5e9]" />
+                  Tất cả bài dự thi
+                </>
+              ) : (
+                <>
+                  <FileText className="w-8 h-8 text-[#0ea5e9]" />
+                  Bài dự thi của bạn
+                </>
+              )}
+            </h3>
+            {entries.length > 0 && (
+              <div className="px-5 py-2.5 bg-gradient-to-r from-[#0ea5e9]/10 to-[#38bdf8]/10 text-[#0ea5e9] rounded-full font-semibold text-sm border border-[#0ea5e9]/20">
+                {entries.length} bài nộp
+              </div>
+            )}
+          </div>
+
+          {/* Student View */}
+          {!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
+            <div className="grid gap-6">
+              {entries.length === 0 ? (
+                <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-2 border-dashed border-gray-300">
+                  <FileText className="w-20 h-20 text-gray-400 mx-auto mb-5" />
+                  <p className="text-xl font-medium text-gray-600">Bạn chưa nộp bài nào</p>
+                  <p className="text-gray-500 mt-2">
+                    Hãy chuyển sang tab <strong className="text-[#0ea5e9]">Nộp bài</strong> để bắt đầu viết!
+                  </p>
+                </div>
+              ) : (
+                entries.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="group bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-[#0ea5e9]/30 transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h4 className="text-xl font-bold text-gray-900 group-hover:text-[#0ea5e9] transition">
+                            {entry.title}
+                          </h4>
+                          <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                            <CalendarIcon className="w-4 h-4" />
+                            Nộp ngày {new Date(entry.createdAt).toLocaleDateString("vi-VN")}
+                          </p>
+                        </div>
+                        {entry.aiScore !== undefined && (
+                          <div className="text-right">
+                            <div className="text-4xl font-extrabold bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] bg-clip-text text-transparent">
+                              {entry.aiScore}
+                            </div>
+                            <p className="text-xs text-gray-500">Điểm AI</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <p className="text-gray-700 line-clamp-3 leading-relaxed mb-6">
+                        {entry.article}
+                      </p>
+
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => navigate(`/ai-submission-view/${entry.id}`)}
+                          className="flex-1 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+                        >
+                          <Eye className="w-5 h-5" />
+                          Xem chi tiết
+                        </button>
+                        <button
+                          onClick={() => navigate(`/ai-submission-edit/${entry.id}`)}
+                          className="flex-1 flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+                        >
+                          <Edit className="w-5 h-5" />
+                          Chỉnh sửa
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Teacher / Admin View - Nhóm theo lớp */}
+          {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
+            <div className="space-y-10">
+              {entries.length === 0 ? (
+                <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-2 border-dashed border-gray-300">
+                  <Users className="w-20 h-20 text-gray-400 mx-auto mb-5" />
+                  <p className="text-xl font-medium text-gray-600">Chưa có bài nộp nào</p>
+                </div>
+              ) : (
+                Object.entries(
+                  entries.reduce((acc, e) => {
+                    const className = e.className || "Chưa rõ lớp";
+                    if (!acc[className]) acc[className] = [];
+                    acc[className].push(e);
+                    return acc;
+                  }, {})
+                ).map(([className, students]) => (
+                  <div
+                    key={className}
+                    className="bg-white rounded-3xl shadow-lg border border-gray-200 overflow-hidden"
+                  >
+                    {/* Header lớp */}
+                    <div className="bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white px-8 py-5">
+                      <h3 className="text-xl font-bold flex items-center gap-3">
+                        <Users className="w-7 h-7" />
+                        {className}
+                        <span className="ml-auto text-sm font-normal opacity-90">
+                          {students.length} học sinh
+                        </span>
+                      </h3>
+                    </div>
+
+                    {/* Danh sách học sinh */}
+                    <div className="p-6 space-y-5">
+                      {students.map((e) => (
+                        <div
+                          key={e.id}
+                          className="flex items-center gap-6 p-6 bg-gray-50/70 rounded-2xl hover:bg-gray-100 hover:shadow-md transition-all duration-300 group"
+                        >
+                          {/* Avatar */}
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#38bdf8] text-white flex items-center justify-center text-2xl font-bold shadow-lg flex-shrink-0">
+                            {e.studentName?.[0] || "?"}
+                          </div>
+
+                          {/* Nội dung */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-gray-900 text-lg truncate">
+                              {e.studentName} <span className="text-gray-500 font-normal">— {e.code}</span>
+                            </p>
+                            <p className="font-semibold text-gray-800 mt-1">{e.title}</p>
+                            <p className="text-sm text-gray-600 line-clamp-2 mt-2">
+                              {e.article}
+                            </p>
+                          </div>
+
+                          {/* Nút hành động */}
+                          <div className="flex gap-3 flex-shrink-0">
+                            {e.manualScore ? (
+                              <div className="px-4 py-2 rounded-xl bg-purple-50 border border-purple-300 text-center">
+                                <div className="text-xs text-purple-600 font-medium">Điểm GV</div>
+                                <div className="text-2xl font-bold text-purple-700">
+                                  {e.manualScore?.totalScore}
+                                </div>
+                              </div>
+                            ) : e.aiScore ? (
+                              <div className="px-4 py-2 rounded-xl bg-fuchsia-50 border border-fuchsia-300 text-center">
+                                <div className="text-xs text-fuchsia-600 font-medium">Điểm AI</div>
+                                <div className="text-2xl font-bold text-fuchsia-700">{e.aiScore}</div>
+                              </div>
+                            ) : null}
+
+                            {/* Nút xem bài */}
+                            <button
+                              onClick={() => navigate(`/ai-submission-view/${e.id}`)}
+                              className="px-6 py-3 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white rounded-xl font-medium hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+                            >
+                              <Eye className="w-5 h-5" />
+                              Xem
+                            </button>
+
+                            {/* Nếu chưa có điểm GV → mới hiện nút chấm */}
+                            {!e.manualScore && (
+                              <ManualScoreButton
+                                entry={e}
+                                rubrics={rubrics}
+                                totalScore={activeContest?.totalScore}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       )}
-    </div>
-
-    {/* Student View */}
-    {!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
-      <div className="grid gap-6">
-        {entries.length === 0 ? (
-          <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-2 border-dashed border-gray-300">
-            <FileText className="w-20 h-20 text-gray-400 mx-auto mb-5" />
-            <p className="text-xl font-medium text-gray-600">Bạn chưa nộp bài nào</p>
-            <p className="text-gray-500 mt-2">
-              Hãy chuyển sang tab <strong className="text-[#0ea5e9]">Nộp bài</strong> để bắt đầu viết!
-            </p>
-          </div>
-        ) : (
-          entries.map((entry) => (
-            <div
-              key={entry.id}
-              className="group bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-[#0ea5e9]/30 transition-all duration-300 overflow-hidden"
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h4 className="text-xl font-bold text-gray-900 group-hover:text-[#0ea5e9] transition">
-                      {entry.title}
-                    </h4>
-                    <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-                      <CalendarIcon className="w-4 h-4" />
-                      Nộp ngày {new Date(entry.createdAt).toLocaleDateString("vi-VN")}
-                    </p>
-                  </div>
-                  {entry.aiScore !== undefined && (
-                    <div className="text-right">
-                      <div className="text-4xl font-extrabold bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] bg-clip-text text-transparent">
-                        {entry.aiScore}
-                      </div>
-                      <p className="text-xs text-gray-500">Điểm AI</p>
-                    </div>
-                  )}
-                </div>
-
-                <p className="text-gray-700 line-clamp-3 leading-relaxed mb-6">
-                  {entry.article}
-                </p>
-
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => navigate(`/ai-submission-view/${entry.id}`)}
-                    className="flex-1 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
-                  >
-                    <Eye className="w-5 h-5" />
-                    Xem chi tiết
-                  </button>
-                  <button
-                    onClick={() => navigate(`/ai-submission-edit/${entry.id}`)}
-                    className="flex-1 flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
-                  >
-                    <Edit className="w-5 h-5" />
-                    Chỉnh sửa
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    )}
-
-    {/* Teacher / Admin View - Nhóm theo lớp */}
-    {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
-      <div className="space-y-10">
-        {entries.length === 0 ? (
-          <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-2 border-dashed border-gray-300">
-            <Users className="w-20 h-20 text-gray-400 mx-auto mb-5" />
-            <p className="text-xl font-medium text-gray-600">Chưa có bài nộp nào</p>
-          </div>
-        ) : (
-          Object.entries(
-            entries.reduce((acc, e) => {
-              const className = e.className || "Chưa rõ lớp";
-              if (!acc[className]) acc[className] = [];
-              acc[className].push(e);
-              return acc;
-            }, {})
-          ).map(([className, students]) => (
-            <div
-              key={className}
-              className="bg-white rounded-3xl shadow-lg border border-gray-200 overflow-hidden"
-            >
-              {/* Header lớp */}
-              <div className="bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white px-8 py-5">
-                <h3 className="text-xl font-bold flex items-center gap-3">
-                  <Users className="w-7 h-7" />
-                  {className}
-                  <span className="ml-auto text-sm font-normal opacity-90">
-                    {students.length} học sinh
-                  </span>
-                </h3>
-              </div>
-
-              {/* Danh sách học sinh */}
-              <div className="p-6 space-y-5">
-                {students.map((e) => (
-                  <div
-                    key={e.id}
-                    className="flex items-center gap-6 p-6 bg-gray-50/70 rounded-2xl hover:bg-gray-100 hover:shadow-md transition-all duration-300 group"
-                  >
-                    {/* Avatar */}
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#38bdf8] text-white flex items-center justify-center text-2xl font-bold shadow-lg flex-shrink-0">
-                      {e.studentName?.[0] || "?"}
-                    </div>
-
-                    {/* Nội dung */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 text-lg truncate">
-                        {e.studentName} <span className="text-gray-500 font-normal">— {e.code}</span>
-                      </p>
-                      <p className="font-semibold text-gray-800 mt-1">{e.title}</p>
-                      <p className="text-sm text-gray-600 line-clamp-2 mt-2">
-                        {e.article}
-                      </p>
-                    </div>
-
-                    {/* Nút hành động */}
-                    <div className="flex gap-3 flex-shrink-0">
-                      <button
-                        onClick={() => navigate(`/ai-submission-view/${e.id}`)}
-                        className="px-6 py-3 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white rounded-xl font-medium hover:shadow-xl transition-all duration-200 flex items-center gap-2"
-                      >
-                        <Eye className="w-5 h-5" />
-                        Xem
-                      </button>
-                      <ManualScoreButton
-                        entry={e}
-                        rubrics={rubrics}
-                        totalScore={activeContest?.totalScore}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    )}
-  </div>
-)}
-
-
 
 
       {/* TAB: Rubric */}
