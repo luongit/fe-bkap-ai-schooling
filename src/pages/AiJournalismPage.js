@@ -363,12 +363,30 @@ setEntries(mapped);
     const handleSubmit = async () => {
       try {
         await api.post(`/journalism/entries/${entry.id}/grade-manual`, {
-          totalScore: total,            // điểm giáo viên chấm
-          feedback,
-          criteriaJson: criteria,       // gửi từng tiêu chí
-        });
-        toast.success("Đã gửi điểm chấm thủ công!");
-        setOpen(false);
+  totalScore: total,
+  feedback,
+  criteriaJson: criteria,
+});
+
+toast.success("Đã gửi điểm chấm thủ công!");
+setOpen(false);
+
+// ⭐ UPDATE UI KHÔNG CẦN F5
+setEntries(prev =>
+  prev.map(e =>
+    e.id === entry.id
+      ? {
+          ...e,
+          manualScore: {
+            totalScore: total,
+            feedback,
+            criteria: criteria,
+          },
+        }
+      : e
+  )
+);
+
       } catch (err) {
         toast.error("Chấm điểm thất bại!");
       }
