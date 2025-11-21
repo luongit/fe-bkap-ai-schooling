@@ -2,7 +2,6 @@ import React, { useState, useRef } from "react";
 import api from "../services/apiToken";
 import { toast } from "react-toastify";
 
-
 const icons = {
   plus: (props) => (
     <svg {...props} viewBox="0 0 24 24" stroke="currentColor">
@@ -213,15 +212,16 @@ export default function VideoStudioProLayout() {
 
       fd.append("slidesJson", JSON.stringify(slidesJson));
 
-
       if (!bgMusicFile) {
         toast.error("Bạn phải chọn audio trước khi tạo video");
         setLoading(false);
         return;
       }
-
+fd.append("userId", localStorage.getItem("userId"));
 
       fd.append("bgMusicFile", bgMusicFile);
+      
+      fd.append("userId", localStorage.getItem("userId"));
       const res = await api.post("/video/create-slides-advanced-upload", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -230,6 +230,7 @@ export default function VideoStudioProLayout() {
       if (res.data?.videoUrl) {
         toast.success("Video đã tạo thành công!");
         setVideoResult({ url: res.data.videoUrl, status: "success" });
+        window.dispatchEvent(new Event("video-library-refresh"));
       } else {
         throw new Error(res.data?.error || "Không có URL trả về!");
       }
@@ -367,7 +368,6 @@ export default function VideoStudioProLayout() {
         >
           <div className="flex items-center gap-4 flex-nowrap overflow-x-auto py-2">
             {/* Độ đậm */}
-
 
             {/* Thời gian */}
             <label className="flex items-center gap-2 text-sm flex-shrink-0">
@@ -710,3 +710,5 @@ export default function VideoStudioProLayout() {
     </div>
   );
 }
+
+
