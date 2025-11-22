@@ -25,7 +25,7 @@ const icons = {
 };
 
 const defaultStyle = {
-  "font-size": "32px",
+  "font-size": "1vw",
   "font-family": "Inter",
   "font-weight": "500",
   "highlight-color": "#fefa4a",
@@ -53,6 +53,29 @@ export default function VideoStudioProLayout() {
   const fileRef = useRef();
   const slide = slides[current];
   const disableEdit = slides.length === 0;
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId');
+
+
+  
+if (!token || !userId) {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen text-center">
+      <h1 className="text-2xl font-semibold mb-4">
+        Vui lòng đăng nhập để sử dụng tính năng tạo video
+      </h1>
+      <p className="text-gray-500 mb-6">
+        Bạn cần đăng nhập để bắt đầu tạo video với ảnh và nhạc nền.
+      </p>
+      <a
+        href="/auth/login"
+        className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+      >
+        Đăng nhập
+      </a>
+    </div>
+  );
+}
 
   const removeSlide = (id) => {
     setSlides((prevSlides) => {
