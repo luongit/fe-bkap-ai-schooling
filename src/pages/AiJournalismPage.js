@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import api from "../services/apiToken"; // axios instance có refresh token
 import { X } from "lucide-react"; // Thêm dòng này
+
 export default function AiJournalismPage() {
   // --------- STATE CỐT LÕI ---------
   const [contests, setContests] = useState([]);
@@ -41,9 +42,11 @@ const [viewEntry, setViewEntry] = useState(null);  // bài đang xem
 const [showEntryModal, setShowEntryModal] = useState(false); // modal xem bài
 const [activePreviewTab, setActivePreviewTab] = useState("content");
 const [previewFiles, setPreviewFiles] = useState([]);
-
+const [submissionFilter, setSubmissionFilter] = useState("all"); // all | ungraded | graded
   // Chế độ hiển thị tổng (list | detail)
   const [viewMode, setViewMode] = useState("list");
+  const [currentPage, setCurrentPage] = useState(1);
+const pageSize = 5;
 
   // --------- STATE thuộc “LIST VIEW” ---------
   const [query, setQuery] = useState("");
@@ -400,12 +403,21 @@ setEntries(prev =>
 
     return (
       <>
-        <button
-          onClick={() => setOpen(true)}
-          className="ml-2 bg-white border border-purple-300 text-purple-700 px-4 py-2 rounded-lg font-semibold hover:bg-purple-50 transition"
-        >
-          ✍️ Chấm thủ công
-        </button>
+      <button
+  onClick={() => {
+    if (new Date() > new Date(activeContest.endDate)) {
+      toast.error("⛔ Cuộc thi đã kết thúc, không thể chỉnh sửa điểm!");
+      return;
+    }
+    setOpen(true);
+  }}
+  className="px-5 py-2 rounded-xl font-semibold text-white 
+             bg-gradient-to-r from-purple-600 to-fuchsia-500 
+             hover:opacity-90 shadow-md transition"
+>
+  {entry.manualScore ? "✏️ Sửa điểm" : "✍️ Chấm bài"}
+</button>
+
 
         {open && (
           <div
@@ -701,6 +713,25 @@ setEntries(prev =>
     return arr;
   }, [contests, query, tab]);
 
+// Danh sách đã lọc theo filter (nếu có)
+const entriesFiltered = entries.filter(e => {
+  if (submissionFilter === "graded")
+    return e.manualScore || e.aiScore !== undefined;
+
+  if (submissionFilter === "ungraded")
+    return !e.manualScore && (e.aiScore === undefined || e.aiScore === null);
+
+  return true;
+});
+
+// Tổng số trang
+const totalPages = Math.ceil(entriesFiltered.length / pageSize);
+
+// Lấy bài theo trang
+const pagedEntries = entriesFiltered.slice(
+  (currentPage - 1) * pageSize,
+  currentPage * pageSize
+);
 
   // --------- RENDER ---------
   if (viewMode === "list") {
@@ -1191,29 +1222,85 @@ setEntries(prev =>
         </div>
       )}
 
-      {activeTab === "my" && (
-        <div className="space-y-8">
-          {/* Tiêu đề + số lượng bài */}
-          <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-              {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) ? (
-                <>
-                  <Users className="w-8 h-8 text-[#0ea5e9]" />
-                  Tất cả bài dự thi
-                </>
-              ) : (
-                <>
-                  <FileText className="w-8 h-8 text-[#0ea5e9]" />
-                  Bài dự thi của bạn
-                </>
-              )}
-            </h3>
-            {entries.length > 0 && (
-              <div className="px-5 py-2.5 bg-gradient-to-r from-[#0ea5e9]/10 to-[#38bdf8]/10 text-[#0ea5e9] rounded-full font-semibold text-sm border border-[#0ea5e9]/20">
-                {entries.length} bài nộp
-              </div>
-            )}
-          </div>
+    {activeTab === "my" && (
+  <div className="space-y-8">
+
+    {/* HEADER SIÊU SANG XỊN MỊN */}
+    <div className="flex flex-wrap items-center justify-between gap-6">
+
+      {/* Trái: Tiêu đề + Bộ lọc cao cấp */}
+      <div className="flex items-center gap-8">
+
+        <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+          {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) ? (
+            <>
+              <Users className="w-9 h-9 text-[#0ea5e9]" />
+              Tất cả bài dự thi
+            </>
+          ) : (
+            <>
+              <FileText className="w-9 h-9 text-[#0ea5e9]" />
+              Bài dự thi của bạn
+            </>
+          )}
+        </h3>
+
+   {/* BỘ LỌC SIÊU SANG – ĐÃ CHẤM Ở TRÊN, CHƯA CHẤM Ở DƯỚI (CHUẨN UX 2025) */}
+{["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && entries.length > 0 && (
+  <div className="flex items-center bg-gradient-to-r from-gray-50 to-gray-100/50 backdrop-blur-sm rounded-2xl shadow-xl border border-white/30 p-1.5 ring-1 ring-black/5">
+
+    {/* 1. TẤT CẢ */}
+    <button
+      onClick={() => setSubmissionFilter("all")}
+      className={`relative px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2.5
+        ${submissionFilter === "all" ? "bg-black text-white shadow-lg" : "text-gray-600 hover:bg-white/70 hover:shadow-md"}`}
+    >
+      <span>Tất cả</span>
+      <span className={`font-bold ${submissionFilter === "all" ? "text-sky-300" : "text-gray-500"}`}>
+        ({entries.length})
+      </span>
+    </button>
+
+    {/* 2. ĐÃ CHẤM – ĐẨY LÊN TRƯỚC (XANH LÁ) */}
+    <button
+      onClick={() => setSubmissionFilter("graded")}
+      className={`relative px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2.5
+        ${submissionFilter === "graded" ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg" : "text-gray-600 hover:bg-white/70 hover:shadow-md"}`}
+    >
+      <span>Đã chấm</span>
+      <span className={`font-bold ${submissionFilter === "graded" ? "text-emerald-100" : "text-emerald-600"}`}>
+        ({entries.filter(e => e.manualScore || e.aiScore !== undefined).length})
+      </span>
+    </button>
+
+    {/* 3. CHƯA CHẤM – ĐẨY XUỐNG SAU (CAM ĐỎ) */}
+    <button
+      onClick={() => setSubmissionFilter("ungraded")}
+      className={`relative px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2.5
+        ${submissionFilter === "ungraded" ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg" : "text-gray-600 hover:bg-white/70 hover:shadow-md"}`}
+    >
+      <span>Chưa chấm</span>
+      <span className={`font-bold ${submissionFilter === "ungraded" ? "text-orange-100" : "text-orange-600"}`}>
+        ({entries.filter(e => !e.manualScore && (e.aiScore === undefined || e.aiScore === null)).length})
+      </span>
+      {submissionFilter === "ungraded" && entries.filter(e => !e.manualScore && (e.aiScore === undefined || e.aiScore === null)).length > 0 && (
+        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+      )}
+    </button>
+
+  </div>
+)}
+      </div>
+
+      {/* Phải: Badge tổng – nâng cấp thêm chút sang */}
+      {entries.length > 0 && (
+        <div className="px-6 py-3 bg-gradient-to-r from-[#0ea5e9]/10 via-[#0ea5e9]/5 to-transparent text-[#0ea5e9] rounded-2xl font-bold text-sm border border-[#0ea5e9]/30 shadow-lg backdrop-blur-sm">
+          {entries.length} bài nộp
+        </div>
+      )}
+    </div>
+
+    {/* Phần danh sách giữ nguyên */}
 
           {/* Student View */}
           {!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
@@ -1227,7 +1314,7 @@ setEntries(prev =>
                   </p>
                 </div>
               ) : (
-                entries.map((entry) => (
+                pagedEntries.map((entry) => (
                   <div
                     key={entry.id}
                     className="group bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl hover:border-[#0ea5e9]/30 transition-all duration-300 overflow-hidden"
@@ -1252,7 +1339,6 @@ setEntries(prev =>
                           </div>
                         )}
                       </div>
-
                       <p className="text-gray-700 line-clamp-3 leading-relaxed mb-6">
                         {entry.article}
                       </p>
@@ -1312,17 +1398,19 @@ setEntries(prev =>
                 </div>
               ) : (
                 Object.entries(
-                  entries.reduce((acc, e) => {
+                  pagedEntries.reduce((acc, e) => {
                     const className = e.className || "Chưa rõ lớp";
                     if (!acc[className]) acc[className] = [];
                     acc[className].push(e);
                     return acc;
                   }, {})
                 ).map(([className, students]) => (
+                  
                   <div
                     key={className}
                     className="bg-white rounded-3xl shadow-lg border border-gray-200 overflow-hidden"
                   >
+                    
                     {/* Header lớp */}
                     <div className="bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white px-8 py-5">
                       <h3 className="text-xl font-bold flex items-center gap-3">
@@ -1374,6 +1462,7 @@ setEntries(prev =>
                             ) : null}
 
                             {/* Nút xem bài */}
+                            
                            <button
   onClick={async () => {
     // Dùng dữ liệu sẵn có trong list trước
@@ -1387,7 +1476,7 @@ setEntries(prev =>
         ...prev,
         ...fresh.data,
       }));
-
+      
       const res = await api.get(`/journalism/entries/${e.id}/submissions`);
       setPreviewFiles(res.data || []);
     } catch (err) {
@@ -1405,23 +1494,74 @@ setEntries(prev =>
 
 
 
-                            {/* Nếu chưa có điểm GV → mới hiện nút chấm */}
-                            {!e.manualScore && (
-                              <ManualScoreButton
-                                entry={e}
-                                rubrics={rubrics}
-                                totalScore={activeContest?.totalScore}
-                              />
-                            )}
+                           {new Date() <= new Date(activeContest?.endDate) && (
+  <ManualScoreButton
+    entry={e}
+    rubrics={rubrics}
+    totalScore={activeContest?.totalScore}
+    isEdit={!!e.manualScore}
+  />
+)}
+
+
                           </div>
                         </div>
                       ))}
+                      {/* ⭐⭐⭐ ĐẶT PAGINATION NGAY SAU KHỐI LIST — ĐÚNG CHỖ NÀY ⭐⭐⭐ */}
+{totalPages >= 1 && (
+  <div className="flex justify-center items-center gap-3 mt-10 select-none">
+
+    {/* Prev */}
+    <button
+      disabled={currentPage === 1}
+      onClick={() => setCurrentPage(currentPage - 1)}
+      className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+        currentPage === 1
+          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+          : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
+      }`}
+    >
+      ←
+    </button>
+
+    {/* Page numbers */}
+    {[...Array(totalPages)].map((_, i) => (
+      <button
+        key={i}
+        onClick={() => setCurrentPage(i + 1)}
+        className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+          currentPage === i + 1
+            ? "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow-lg scale-105"
+            : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:shadow"
+        }`}
+      >
+        {i + 1}
+      </button>
+    ))}
+
+    {/* Next */}
+    <button
+      disabled={currentPage === totalPages}
+      onClick={() => setCurrentPage(currentPage + 1)}
+      className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+        currentPage === totalPages
+          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+          : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
+      }`}
+    >
+      →
+    </button>
+
+  </div>
+)}
+
                     </div>
                   </div>
                 ))
               )}
             </div>
           )}
+          
         </div>
       )}
 
@@ -1472,6 +1612,7 @@ setEntries(prev =>
                       <td className="py-1 px-2 text-right font-semibold">{value}</td>
                     </tr>
                   ))}
+                  
                 </tbody>
               </table>
             )}
