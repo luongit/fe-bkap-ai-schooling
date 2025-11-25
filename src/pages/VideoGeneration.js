@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import api from "../services/apiToken";
 import { toast } from "react-toastify";
+import LoginRequiredBox from "../pages/LoginRequiredBox";
 
 const icons = {
   plus: (props) => (
@@ -59,23 +60,9 @@ export default function VideoStudioProLayout() {
 
   
 if (!token || !userId) {
-  return (
-    <div className="flex flex-col items-center justify-center h-screen text-center">
-      <h1 className="text-2xl font-semibold mb-4">
-        Vui lòng đăng nhập để sử dụng tính năng tạo video
-      </h1>
-      <p className="text-gray-500 mb-6">
-        Bạn cần đăng nhập để bắt đầu tạo video với ảnh và nhạc nền.
-      </p>
-      <a
-        href="/auth/login"
-        className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-      >
-        Đăng nhập
-      </a>
-    </div>
-  );
+  return <LoginRequiredBox />;
 }
+
 
   const removeSlide = (id) => {
     setSlides((prevSlides) => {

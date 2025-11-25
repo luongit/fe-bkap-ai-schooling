@@ -7,6 +7,7 @@ import {
 } from "react-icons/fi";
 import { toast } from "react-toastify";
 import api from "../services/apiToken";
+import LoginRequiredBox from "../pages/LoginRequiredBox";
 
 function Library() {
   const navigate = useNavigate();
@@ -192,24 +193,10 @@ function Library() {
     return () => window.removeEventListener("video-library-refresh", handler);
   }, [tab]);
 
-  if (!token || !userId) {
-  return (
-    <div className="flex flex-col items-center justify-center h-screen text-center">
-      <h1 className="text-2xl font-semibold mb-4">
-        Vui lòng đăng nhập để sử dụng tính năng xem thư viện
-      </h1>
-      <p className="text-gray-500 mb-6">
-        Bạn cần đăng nhập để bắt đầu xem thư viện ảnh và video.
-      </p>
-      <a
-        href="/auth/login"
-        className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-      >
-        Đăng nhập
-      </a>
-    </div>
-  );
+ if (!token || !userId) {
+  return <LoginRequiredBox />;
 }
+
 
   return (
     <div className="min-h-screen bg-gray-50">
