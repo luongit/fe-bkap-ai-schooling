@@ -47,7 +47,7 @@ export default function LoginRequiredBox() {
             {/* Dòng nhỏ xinh phía dưới */}
             <p className="mt-8 text-sm text-gray-500">
               Chưa có tài khoản?{" "}
-              <a href="/auth/register" className="text-[#0ea5e9] font-semibold hover:underline">
+              <a href="/register" className="text-[#0ea5e9] font-semibold hover:underline">
                 Đăng ký miễn phí
               </a>
             </p>
