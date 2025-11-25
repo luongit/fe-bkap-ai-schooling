@@ -1531,20 +1531,53 @@ if (!token) {
       ←
     </button>
 
-    {/* Page numbers */}
-    {[...Array(totalPages)].map((_, i) => (
-      <button
-        key={i}
-        onClick={() => setCurrentPage(i + 1)}
-        className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-          currentPage === i + 1
-            ? "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow-lg scale-105"
-            : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:shadow"
-        }`}
-      >
-        {i + 1}
-      </button>
-    ))}
+    {/* Page numbers with ellipsis */}
+    {(() => {
+      const pages = [];
+      const max = totalPages;
+
+      const addPage = (p) => {
+        pages.push(
+          <button
+            key={p}
+            onClick={() => setCurrentPage(p)}
+            className={`px-4 py-2 rounded-xl font-semibold transition-all ${
+              currentPage === p
+                ? "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow-lg scale-105"
+                : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:shadow"
+            }`}
+          >
+            {p}
+          </button>
+        );
+      };
+
+      // Always show page 1
+      addPage(1);
+
+      // If currentPage > 3 -> add ellipsis
+      if (currentPage > 3) {
+        pages.push(<span key="start-dots" className="px-2">…</span>);
+      }
+
+      // Pages around current
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(max - 1, currentPage + 1);
+
+      for (let p = start; p <= end; p++) {
+        if (p !== 1 && p !== max) addPage(p);
+      }
+
+      // If currentPage < max-2 -> add ellipsis
+      if (currentPage < max - 2) {
+        pages.push(<span key="end-dots" className="px-2">…</span>);
+      }
+
+      // Always show last page if > 1
+      if (max > 1) addPage(max);
+
+      return pages;
+    })()}
 
     {/* Next */}
     <button
@@ -1561,6 +1594,7 @@ if (!token) {
 
   </div>
 )}
+
 
                     </div>
                   </div>
