@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiDownload, FiImage, FiSend, FiLoader, FiXCircle } from 'react-icons/fi';
 import api from "../services/apiToken";
 import '../style/ImageGeneration.css';
+import LoginRequiredBox from "../pages/LoginRequiredBox";
 
 const DEFAULT_STYLE = "default";
 const DEFAULT_SIZE = "1024x1024";
@@ -197,20 +198,9 @@ function ImageGeneration() {
   return (
     <main className="img-main">
       {!token ? (
-        <section className="img-hero img-full-center">
-          <div className="img-auth-box">
-            <h1 className="text-2xl font-semibold text-gray-800 mb-4">
-              Bạn cần đăng nhập để sử dụng tính năng này
-            </h1>
-            <p className="text-gray-500 mb-6">
-              Vui lòng đăng nhập để bắt đầu tạo ảnh AI.
-            </p>
-            <a href="/auth/login" className="img-login-btn">
-              Đăng nhập
-            </a>
-          </div>
-        </section>
-      ) : (
+  <LoginRequiredBox />
+) : (
+
         <>
           <section className="img-hero">
             {!started && (

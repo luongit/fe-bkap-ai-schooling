@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import api from "../services/apiToken"; // axios instance có refresh token
 import { X } from "lucide-react"; // Thêm dòng này
+import LoginRequiredBox from "../pages/LoginRequiredBox";
 
 export default function AiJournalismPage() {
   // --------- STATE CỐT LÕI ---------
@@ -732,6 +733,12 @@ const pagedEntries = entriesFiltered.slice(
   (currentPage - 1) * pageSize,
   currentPage * pageSize
 );
+const token = localStorage.getItem("token");
+
+// Nếu chưa đăng nhập thì bắt đăng nhập trước
+if (!token) {
+  return <LoginRequiredBox />;
+}
 
   // --------- RENDER ---------
   if (viewMode === "list") {
