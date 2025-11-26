@@ -28,6 +28,7 @@ import LoginRequiredBox from "./pages/LoginRequiredBox";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
 
 import "./style/mobile.css";
 import "./components/css/Sidebar.css";
@@ -102,6 +103,7 @@ function App() {
               <Route path="/ai-submission-edit/:entryId" element={<AiSubmissionEditPage />} />
               <Route path="/library" element={<AiImageLibrary />} />
               <Route path="/login-required" element={<LoginRequiredBox />} />
+              <Route path="/profile/change-password" element={<ChangePasswordPage />} />
 
               <Route
                 path="*"
