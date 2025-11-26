@@ -20,7 +20,7 @@ import {
   Edit,            // THÊM DÒNG NÀY
   PenTool,         // (tùy chọn thêm nếu bạn muốn dùng icon bút đẹp hơn)
   Scale,
-  
+
 } from "lucide-react";
 import api from "../services/apiToken"; // axios instance có refresh token
 import { X } from "lucide-react"; // Thêm dòng này
@@ -39,15 +39,15 @@ export default function AiJournalismPage() {
   const [feedback, setFeedback] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
-const [viewEntry, setViewEntry] = useState(null);  // bài đang xem
-const [showEntryModal, setShowEntryModal] = useState(false); // modal xem bài
-const [activePreviewTab, setActivePreviewTab] = useState("content");
-const [previewFiles, setPreviewFiles] = useState([]);
-const [submissionFilter, setSubmissionFilter] = useState("all"); // all | ungraded | graded
+  const [viewEntry, setViewEntry] = useState(null);  // bài đang xem
+  const [showEntryModal, setShowEntryModal] = useState(false); // modal xem bài
+  const [activePreviewTab, setActivePreviewTab] = useState("content");
+  const [previewFiles, setPreviewFiles] = useState([]);
+  const [submissionFilter, setSubmissionFilter] = useState("all"); // all | ungraded | graded
   // Chế độ hiển thị tổng (list | detail)
   const [viewMode, setViewMode] = useState("list");
   const [currentPage, setCurrentPage] = useState(1);
-const pageSize = 5;
+  const pageSize = 5;
 
   // --------- STATE thuộc “LIST VIEW” ---------
   const [query, setQuery] = useState("");
@@ -217,7 +217,7 @@ const pageSize = 5;
       if (["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role)) {
         // gọi API cho giáo viên
         const res1 = await api.get(`/journalism/entries/teacher-view/${contest.id}`);
-        console.log("data:",res1)
+        console.log("data:", res1)
 
         const mapped = (res1.data || []).map(item => {
           let manualScoreObj = null;
@@ -244,18 +244,18 @@ const pageSize = 5;
       } else if (user?.studentId) {
         // học sinh chỉ xem bài của mình
         const res1 = await api.get(`/journalism/entries/student/${user.studentId}`);
-const filtered = (res1.data || []).filter(
-  (e) => e.contest?.id === Number(contest.id)
-);
+        const filtered = (res1.data || []).filter(
+          (e) => e.contest?.id === Number(contest.id)
+        );
 
-const mapped = filtered.map(e => ({
-  ...e,
-  studentName: user.fullName,
-  code: user.code || user.username || "—",
-  className: user.className || "—"
-}));
+        const mapped = filtered.map(e => ({
+          ...e,
+          studentName: user.fullName,
+          code: user.code || user.username || "—",
+          className: user.className || "—"
+        }));
 
-setEntries(mapped);
+        setEntries(mapped);
 
         if (filtered.length > 0) setShowForm(false);
       }
@@ -367,29 +367,29 @@ setEntries(mapped);
     const handleSubmit = async () => {
       try {
         await api.post(`/journalism/entries/${entry.id}/grade-manual`, {
-  totalScore: total,
-  feedback,
-  criteriaJson: criteria,
-});
+          totalScore: total,
+          feedback,
+          criteriaJson: criteria,
+        });
 
-toast.success("Đã gửi điểm chấm thủ công!");
-setOpen(false);
+        toast.success("Đã gửi điểm chấm thủ công!");
+        setOpen(false);
 
-// ⭐ UPDATE UI KHÔNG CẦN F5
-setEntries(prev =>
-  prev.map(e =>
-    e.id === entry.id
-      ? {
-          ...e,
-          manualScore: {
-            totalScore: total,
-            feedback,
-            criteria: criteria,
-          },
-        }
-      : e
-  )
-);
+        // ⭐ UPDATE UI KHÔNG CẦN F5
+        setEntries(prev =>
+          prev.map(e =>
+            e.id === entry.id
+              ? {
+                ...e,
+                manualScore: {
+                  totalScore: total,
+                  feedback,
+                  criteria: criteria,
+                },
+              }
+              : e
+          )
+        );
 
       } catch (err) {
         toast.error("Chấm điểm thất bại!");
@@ -404,20 +404,20 @@ setEntries(prev =>
 
     return (
       <>
-      <button
-  onClick={() => {
-    if (new Date() > new Date(activeContest.endDate)) {
-      toast.error("⛔ Cuộc thi đã kết thúc, không thể chỉnh sửa điểm!");
-      return;
-    }
-    setOpen(true);
-  }}
-  className="px-5 py-2 rounded-xl font-semibold text-white 
+        <button
+          onClick={() => {
+            if (new Date() > new Date(activeContest.endDate)) {
+              toast.error("⛔ Cuộc thi đã kết thúc, không thể chỉnh sửa điểm!");
+              return;
+            }
+            setOpen(true);
+          }}
+          className="px-5 py-2 rounded-xl font-semibold text-white 
              bg-gradient-to-r from-purple-600 to-fuchsia-500 
              hover:opacity-90 shadow-md transition"
->
-  {entry.manualScore ? "✏️ Sửa điểm" : "✍️ Chấm bài"}
-</button>
+        >
+          {entry.manualScore ? "✏️ Sửa điểm" : "✍️ Chấm bài"}
+        </button>
 
 
         {open && (
@@ -485,12 +485,12 @@ setEntries(prev =>
                             className="w-full h-[720px] rounded-xl border"
                           ></iframe>
                         )}
-                      {/* PPT / PPTX */}
+                        {/* PPT / PPTX */}
                         {["ppt", "pptx"].includes(ext) && (
-                        <iframe
-                         src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`}
-                      className="w-full h-[720px] rounded-xl border bg-white"
-                       ></iframe>
+                          <iframe
+                            src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`}
+                            className="w-full h-[720px] rounded-xl border bg-white"
+                          ></iframe>
                         )}
                         {/* OTHER */}
                         {!["jpg", "jpeg", "png", "gif", "webp", "mp4", "mov", "avi", "mkv", "pdf"]
@@ -713,32 +713,37 @@ setEntries(prev =>
 
     return arr;
   }, [contests, query, tab]);
+  // ====== HELPER: check đã chấm / chưa chấm ======
+  const hasManualScore = (e) =>
+    e.manualScore &&
+    e.manualScore.totalScore !== undefined &&
+    e.manualScore.totalScore !== null;
 
-// Danh sách đã lọc theo filter (nếu có)
-const entriesFiltered = entries.filter(e => {
-  if (submissionFilter === "graded")
-    return e.manualScore || e.aiScore !== undefined;
+  const hasAiScore = (e) =>
+    e.aiScore !== undefined && e.aiScore !== null; // 0 điểm vẫn được tính là đã chấm
 
-  if (submissionFilter === "ungraded")
-    return !e.manualScore && (e.aiScore === undefined || e.aiScore === null);
+  const isGraded = (e) => hasManualScore(e) || hasAiScore(e);
+  const entriesFiltered = entries.filter((e) => {
+    if (submissionFilter === "graded") return isGraded(e);
+    if (submissionFilter === "ungraded") return !isGraded(e);
+    return true; // all
+  });
 
-  return true;
-});
 
-// Tổng số trang
-const totalPages = Math.ceil(entriesFiltered.length / pageSize);
+  // Tổng số trang
+  const totalPages = Math.ceil(entriesFiltered.length / pageSize);
 
-// Lấy bài theo trang
-const pagedEntries = entriesFiltered.slice(
-  (currentPage - 1) * pageSize,
-  currentPage * pageSize
-);
-const token = localStorage.getItem("token");
+  // Lấy bài theo trang
+  const pagedEntries = entriesFiltered.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+  const token = localStorage.getItem("token");
 
-// Nếu chưa đăng nhập thì bắt đăng nhập trước
-if (!token) {
-  return <LoginRequiredBox />;
-}
+  // Nếu chưa đăng nhập thì bắt đăng nhập trước
+  if (!token) {
+    return <LoginRequiredBox />;
+  }
 
   // --------- RENDER ---------
   if (viewMode === "list") {
@@ -759,7 +764,7 @@ if (!token) {
               </div>
 
               {/* Nút tạo cuộc thi — chỉ hiện với ADMIN / TEACHER / SYSTEM_ADMIN */}
-              {["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user?.role) && (
+              {["ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
                 <button
                   onClick={() => (window.location.href = "ai-journalism/create")}
                   className="border border-purple-500 text-purple-700 font-semibold px-5 py-2 rounded-lg hover:bg-purple-50 transition-all shadow-sm"
@@ -1009,7 +1014,7 @@ if (!token) {
 
                     <div className="items-center p-6 px-5 py-4 border-t bg-gray-50 flex justify-start gap-2">
                       <div className="ml-auto flex gap-2">
-                        {["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user?.role) && (
+                        {["ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
                           <button
                             onClick={() => handleDeleteContest(c.id)}
                             className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
@@ -1018,7 +1023,7 @@ if (!token) {
                             Xóa cuộc thi <Delete className="ml-1 h-3 w-3" />
                           </button>
                         )}
-                        {user && (["ADMIN", "TEACHER", "SYSTEM_ADMIN"].includes(user.role) || user.userId === c.createdBy?.id) && (
+                        {user && (["ADMIN", "SYSTEM_ADMIN"].includes(user.role) || user.userId === c.createdBy?.id) && (
                           <button
                             onClick={() => navigate(`/ai-journalism/edit/${c.id}`)}
                             className="inline-flex items-center justify-center gap-2 whitespace-nowrap 
@@ -1229,85 +1234,92 @@ if (!token) {
         </div>
       )}
 
-    {activeTab === "my" && (
-  <div className="space-y-8">
+      {activeTab === "my" && (
+        <div className="space-y-8">
 
-    {/* HEADER SIÊU SANG XỊN MỊN */}
-    <div className="flex flex-wrap items-center justify-between gap-6">
+          {/* HEADER SIÊU SANG XỊN MỊN */}
+          <div className="flex flex-wrap items-center justify-between gap-6">
 
-      {/* Trái: Tiêu đề + Bộ lọc cao cấp */}
-      <div className="flex items-center gap-8">
+            {/* Trái: Tiêu đề + Bộ lọc cao cấp */}
+            <div className="flex items-center gap-8">
 
-        <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-          {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) ? (
-            <>
-              <Users className="w-9 h-9 text-[#0ea5e9]" />
-              Tất cả bài dự thi
-            </>
-          ) : (
-            <>
-              <FileText className="w-9 h-9 text-[#0ea5e9]" />
-              Bài dự thi của bạn
-            </>
-          )}
-        </h3>
+              <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) ? (
+                  <>
+                    <Users className="w-9 h-9 text-[#0ea5e9]" />
+                    Tất cả bài dự thi
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-9 h-9 text-[#0ea5e9]" />
+                    Bài dự thi của bạn
+                  </>
+                )}
+              </h3>
 
-   {/* BỘ LỌC SIÊU SANG – ĐÃ CHẤM Ở TRÊN, CHƯA CHẤM Ở DƯỚI (CHUẨN UX 2025) */}
-{["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && entries.length > 0 && (
-  <div className="flex items-center bg-gradient-to-r from-gray-50 to-gray-100/50 backdrop-blur-sm rounded-2xl shadow-xl border border-white/30 p-1.5 ring-1 ring-black/5">
+              {/* BỘ LỌC SIÊU SANG – ĐÃ CHẤM Ở TRÊN, CHƯA CHẤM Ở DƯỚI (CHUẨN UX 2025) */}
+              {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && entries.length > 0 && (
+                <div className="flex items-center bg-gradient-to-r from-gray-50 to-gray-100/50 backdrop-blur-sm rounded-2xl shadow-xl border border-white/30 p-1.5 ring-1 ring-black/5">
 
-    {/* 1. TẤT CẢ */}
-    <button
-      onClick={() => setSubmissionFilter("all")}
-      className={`relative px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2.5
+                  {/* 1. TẤT CẢ */}
+                  <button
+                    onClick={() => {
+                      setSubmissionFilter("all");
+                      setCurrentPage(1);
+                    }} className={`relative px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2.5
         ${submissionFilter === "all" ? "bg-black text-white shadow-lg" : "text-gray-600 hover:bg-white/70 hover:shadow-md"}`}
-    >
-      <span>Tất cả</span>
-      <span className={`font-bold ${submissionFilter === "all" ? "text-sky-300" : "text-gray-500"}`}>
-        ({entries.length})
-      </span>
-    </button>
+                  >
+                    <span>Tất cả</span>
+                    <span className={`font-bold ${submissionFilter === "all" ? "text-sky-300" : "text-gray-500"}`}>
+                      ({entries.length})
+                    </span>
+                  </button>
 
-    {/* 2. ĐÃ CHẤM – ĐẨY LÊN TRƯỚC (XANH LÁ) */}
-    <button
-      onClick={() => setSubmissionFilter("graded")}
-      className={`relative px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2.5
+                  {/* 2. ĐÃ CHẤM – ĐẨY LÊN TRƯỚC (XANH LÁ) */}
+                  <button
+                    onClick={() => {
+                      setSubmissionFilter("graded");
+                      setCurrentPage(1);
+                    }}
+                    className={`relative px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2.5
         ${submissionFilter === "graded" ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg" : "text-gray-600 hover:bg-white/70 hover:shadow-md"}`}
-    >
-      <span>Đã chấm</span>
-      <span className={`font-bold ${submissionFilter === "graded" ? "text-emerald-100" : "text-emerald-600"}`}>
-        ({entries.filter(e => e.manualScore || e.aiScore !== undefined).length})
-      </span>
-    </button>
+                  >
+                    <span>Đã chấm</span>
+                    <span className={`font-bold ${submissionFilter === "graded" ? "text-emerald-100" : "text-emerald-600"}`}>
+                      ({entries.filter(isGraded).length})
+                    </span>
+                  </button>
 
-    {/* 3. CHƯA CHẤM – ĐẨY XUỐNG SAU (CAM ĐỎ) */}
-    <button
-      onClick={() => setSubmissionFilter("ungraded")}
-      className={`relative px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2.5
+                  {/* 3. CHƯA CHẤM – ĐẨY XUỐNG SAU (CAM ĐỎ) */}
+                  <button
+                    onClick={() => {
+                      setSubmissionFilter("ungraded");
+                      setCurrentPage(1);
+                    }} className={`relative px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2.5
         ${submissionFilter === "ungraded" ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg" : "text-gray-600 hover:bg-white/70 hover:shadow-md"}`}
-    >
-      <span>Chưa chấm</span>
-      <span className={`font-bold ${submissionFilter === "ungraded" ? "text-orange-100" : "text-orange-600"}`}>
-        ({entries.filter(e => !e.manualScore && (e.aiScore === undefined || e.aiScore === null)).length})
-      </span>
-      {submissionFilter === "ungraded" && entries.filter(e => !e.manualScore && (e.aiScore === undefined || e.aiScore === null)).length > 0 && (
-        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
-      )}
-    </button>
+                  >
+                    <span>Chưa chấm</span>
+                    <span className={`font-bold ${submissionFilter === "ungraded" ? "text-orange-100" : "text-orange-600"}`}>
+                      ({entries.filter(e => !isGraded(e)).length})
+                    </span>
+                    {submissionFilter === "ungraded" && entries.filter(e => !e.manualScore && (e.aiScore === undefined || e.aiScore === null)).length > 0 && (
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                    )}
+                  </button>
 
-  </div>
-)}
-      </div>
+                </div>
+              )}
+            </div>
 
-      {/* Phải: Badge tổng – nâng cấp thêm chút sang */}
-      {entries.length > 0 && (
-        <div className="px-6 py-3 bg-gradient-to-r from-[#0ea5e9]/10 via-[#0ea5e9]/5 to-transparent text-[#0ea5e9] rounded-2xl font-bold text-sm border border-[#0ea5e9]/30 shadow-lg backdrop-blur-sm">
-          {entries.length} bài nộp
-        </div>
-      )}
-    </div>
+            {/* Phải: Badge tổng – nâng cấp thêm chút sang */}
+            {entries.length > 0 && (
+              <div className="px-6 py-3 bg-gradient-to-r from-[#0ea5e9]/10 via-[#0ea5e9]/5 to-transparent text-[#0ea5e9] rounded-2xl font-bold text-sm border border-[#0ea5e9]/30 shadow-lg backdrop-blur-sm">
+                {entries.length} bài nộp
+              </div>
+            )}
+          </div>
 
-    {/* Phần danh sách giữ nguyên */}
+          {/* Phần danh sách giữ nguyên */}
 
           {/* Student View */}
           {!["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
@@ -1351,33 +1363,33 @@ if (!token) {
                       </p>
 
                       <div className="flex gap-4">
-                       <button
-  onClick={async () => {
-    // Dùng dữ liệu có sẵn từ list trước cho chắc
-    setViewEntry(entry);
-    setShowEntryModal(true);
-    setActivePreviewTab("content");
+                        <button
+                          onClick={async () => {
+                            // Dùng dữ liệu có sẵn từ list trước cho chắc
+                            setViewEntry(entry);
+                            setShowEntryModal(true);
+                            setActivePreviewTab("content");
 
-    try {
-      // Load chi tiết và MERGE, không ghi đè mất studentName / code / className
-      const fresh = await api.get(`/journalism/entries/${entry.id}`);
-      setViewEntry((prev) => ({
-        ...prev,
-        ...fresh.data,
-      }));
+                            try {
+                              // Load chi tiết và MERGE, không ghi đè mất studentName / code / className
+                              const fresh = await api.get(`/journalism/entries/${entry.id}`);
+                              setViewEntry((prev) => ({
+                                ...prev,
+                                ...fresh.data,
+                              }));
 
-      const res = await api.get(`/journalism/entries/${entry.id}/submissions`);
-      setPreviewFiles(res.data || []);
-    } catch (err) {
-      console.error(err);
-      toast.error("Không tải được chi tiết, đang hiển thị dữ liệu tạm.");
-    }
-  }}
-  className="flex-1 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
->
-  <Eye className="w-5 h-5" />
-  Xem chi tiết
-</button>
+                              const res = await api.get(`/journalism/entries/${entry.id}/submissions`);
+                              setPreviewFiles(res.data || []);
+                            } catch (err) {
+                              console.error(err);
+                              toast.error("Không tải được chi tiết, đang hiển thị dữ liệu tạm.");
+                            }
+                          }}
+                          className="flex-1 flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white py-3.5 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+                        >
+                          <Eye className="w-5 h-5" />
+                          Xem chi tiết
+                        </button>
 
 
                         <button
@@ -1412,12 +1424,12 @@ if (!token) {
                     return acc;
                   }, {})
                 ).map(([className, students]) => (
-                  
+
                   <div
                     key={className}
                     className="bg-white rounded-3xl shadow-lg border border-gray-200 overflow-hidden"
                   >
-                    
+
                     {/* Header lớp */}
                     <div className="bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white px-8 py-5">
                       <h3 className="text-xl font-bold flex items-center gap-3">
@@ -1469,131 +1481,128 @@ if (!token) {
                             ) : null}
 
                             {/* Nút xem bài */}
-                            
-                           <button
-  onClick={async () => {
-    // Dùng dữ liệu sẵn có trong list trước
-    setViewEntry(e);
-    setShowEntryModal(true);
-    setActivePreviewTab("content");
 
-    try {
-      const fresh = await api.get(`/journalism/entries/${e.id}`);
-      setViewEntry((prev) => ({
-        ...prev,
-        ...fresh.data,
-      }));
-      
-      const res = await api.get(`/journalism/entries/${e.id}/submissions`);
-      setPreviewFiles(res.data || []);
-    } catch (err) {
-      console.error(err);
-      toast.error("Không tải được chi tiết, đang hiển thị dữ liệu tạm.");
-    }
-  }}
-  className="px-6 py-3 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] 
+                            <button
+                              onClick={async () => {
+                                // Dùng dữ liệu sẵn có trong list trước
+                                setViewEntry(e);
+                                setShowEntryModal(true);
+                                setActivePreviewTab("content");
+
+                                try {
+                                  const fresh = await api.get(`/journalism/entries/${e.id}`);
+                                  setViewEntry((prev) => ({
+                                    ...prev,
+                                    ...fresh.data,
+                                  }));
+
+                                  const res = await api.get(`/journalism/entries/${e.id}/submissions`);
+                                  setPreviewFiles(res.data || []);
+                                } catch (err) {
+                                  console.error(err);
+                                  toast.error("Không tải được chi tiết, đang hiển thị dữ liệu tạm.");
+                                }
+                              }}
+                              className="px-6 py-3 bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] 
              text-white rounded-xl font-medium hover:shadow-xl 
              transition-all duration-200 flex items-center gap-2"
->
-  <Eye className="w-5 h-5" />
-  Xem
-</button>
+                            >
+                              <Eye className="w-5 h-5" />
+                              Xem
+                            </button>
 
 
 
-                           {new Date() <= new Date(activeContest?.endDate) && (
-  <ManualScoreButton
-    entry={e}
-    rubrics={rubrics}
-    totalScore={activeContest?.totalScore}
-    isEdit={!!e.manualScore}
-  />
-)}
+                            {new Date() <= new Date(activeContest?.endDate) && (
+                              <ManualScoreButton
+                                entry={e}
+                                rubrics={rubrics}
+                                totalScore={activeContest?.totalScore}
+                                isEdit={!!e.manualScore}
+                              />
+                            )}
 
 
                           </div>
                         </div>
                       ))}
                       {/* ⭐⭐⭐ ĐẶT PAGINATION NGAY SAU KHỐI LIST — ĐÚNG CHỖ NÀY ⭐⭐⭐ */}
-{totalPages >= 1 && (
-  <div className="flex justify-center items-center gap-3 mt-10 select-none">
+                      {totalPages >= 1 && (
+                        <div className="flex justify-center items-center gap-3 mt-10 select-none">
 
-    {/* Prev */}
-    <button
-      disabled={currentPage === 1}
-      onClick={() => setCurrentPage(currentPage - 1)}
-      className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-        currentPage === 1
-          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-          : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
-      }`}
-    >
-      ←
-    </button>
+                          {/* Prev */}
+                          <button
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                            className={`px-4 py-2 rounded-xl font-semibold transition-all ${currentPage === 1
+                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
+                              }`}
+                          >
+                            ←
+                          </button>
 
-    {/* Page numbers with ellipsis */}
-    {(() => {
-      const pages = [];
-      const max = totalPages;
+                          {/* Page numbers with ellipsis */}
+                          {(() => {
+                            const pages = [];
+                            const max = totalPages;
 
-      const addPage = (p) => {
-        pages.push(
-          <button
-            key={p}
-            onClick={() => setCurrentPage(p)}
-            className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-              currentPage === p
-                ? "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow-lg scale-105"
-                : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:shadow"
-            }`}
-          >
-            {p}
-          </button>
-        );
-      };
+                            const addPage = (p) => {
+                              pages.push(
+                                <button
+                                  key={p}
+                                  onClick={() => setCurrentPage(p)}
+                                  className={`px-4 py-2 rounded-xl font-semibold transition-all ${currentPage === p
+                                      ? "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow-lg scale-105"
+                                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:shadow"
+                                    }`}
+                                >
+                                  {p}
+                                </button>
+                              );
+                            };
 
-      // Always show page 1
-      addPage(1);
+                            // Always show page 1
+                            addPage(1);
 
-      // If currentPage > 3 -> add ellipsis
-      if (currentPage > 3) {
-        pages.push(<span key="start-dots" className="px-2">…</span>);
-      }
+                            // If currentPage > 3 -> add ellipsis
+                            if (currentPage > 3) {
+                              pages.push(<span key="start-dots" className="px-2">…</span>);
+                            }
 
-      // Pages around current
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(max - 1, currentPage + 1);
+                            // Pages around current
+                            const start = Math.max(2, currentPage - 1);
+                            const end = Math.min(max - 1, currentPage + 1);
 
-      for (let p = start; p <= end; p++) {
-        if (p !== 1 && p !== max) addPage(p);
-      }
+                            for (let p = start; p <= end; p++) {
+                              if (p !== 1 && p !== max) addPage(p);
+                            }
 
-      // If currentPage < max-2 -> add ellipsis
-      if (currentPage < max - 2) {
-        pages.push(<span key="end-dots" className="px-2">…</span>);
-      }
+                            // If currentPage < max-2 -> add ellipsis
+                            if (currentPage < max - 2) {
+                              pages.push(<span key="end-dots" className="px-2">…</span>);
+                            }
 
-      // Always show last page if > 1
-      if (max > 1) addPage(max);
+                            // Always show last page if > 1
+                            if (max > 1) addPage(max);
 
-      return pages;
-    })()}
+                            return pages;
+                          })()}
 
-    {/* Next */}
-    <button
-      disabled={currentPage === totalPages}
-      onClick={() => setCurrentPage(currentPage + 1)}
-      className={`px-4 py-2 rounded-xl font-semibold transition-all ${
-        currentPage === totalPages
-          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-          : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
-      }`}
-    >
-      →
-    </button>
+                          {/* Next */}
+                          <button
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                            className={`px-4 py-2 rounded-xl font-semibold transition-all ${currentPage === totalPages
+                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
+                              }`}
+                          >
+                            →
+                          </button>
 
-  </div>
-)}
+                        </div>
+                      )}
 
 
                     </div>
@@ -1602,7 +1611,7 @@ if (!token) {
               )}
             </div>
           )}
-          
+
         </div>
       )}
 
@@ -1653,7 +1662,7 @@ if (!token) {
                       <td className="py-1 px-2 text-right font-semibold">{value}</td>
                     </tr>
                   ))}
-                  
+
                 </tbody>
               </table>
             )}
@@ -1676,239 +1685,238 @@ if (!token) {
             </div>
           </div>
         </div>
-        
+
       )
-      
+
       }
-     {/* MODAL XEM BÀI NỘP – SIÊU ĐẸP, HIỆN ĐẠI 2025 */}
-{showEntryModal && viewEntry && (
-  <div
-    className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xl flex items-center justify-center p-4 animate-fadeIn"
-    onClick={() => setShowEntryModal(false)}
-  >
-    <div
-      className="bg-white w-full max-w-7xl max-h-[92vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row animate-scaleIn"
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* SIDEBAR TRÁI – THÔNG TIN + TAB */}
-      <div className="w-full lg:w-96 bg-gradient-to-b from-blue-50 to-indigo-50 border-r border-gray-200 flex flex-col">
-        {/* Header thông tin học sinh */}
-        <div className="p-8 pb-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-             {(viewEntry.studentName || viewEntry.student?.fullName || "H").charAt(0)}
+      {/* MODAL XEM BÀI NỘP – SIÊU ĐẸP, HIỆN ĐẠI 2025 */}
+      {showEntryModal && viewEntry && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xl flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setShowEntryModal(false)}
+        >
+          <div
+            className="bg-white w-full max-w-7xl max-h-[92vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row animate-scaleIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* SIDEBAR TRÁI – THÔNG TIN + TAB */}
+            <div className="w-full lg:w-96 bg-gradient-to-b from-blue-50 to-indigo-50 border-r border-gray-200 flex flex-col">
+              {/* Header thông tin học sinh */}
+              <div className="p-8 pb-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                    {(viewEntry.studentName || viewEntry.student?.fullName || "H").charAt(0)}
 
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-900">
-  {viewEntry.studentName || viewEntry.student?.fullName || "Không rõ tên"}
-</h3>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {viewEntry.studentName || viewEntry.student?.fullName || "Không rõ tên"}
+                    </h3>
 
-              <p className="text-sm text-gray-600">Học sinh</p>
-            </div>
-          </div>
-
-          <div className="space-y-3 text-sm">
-            {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Mã HS:</span>
-                  <span className="font-semibold">
-  {viewEntry.code || viewEntry.student?.code || "—"}
-</span>
+                    <p className="text-sm text-gray-600">Học sinh</p>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Lớp:</span>
-                  <span className="font-semibold">
-  {viewEntry.className || viewEntry.student?.className || "—"}
-</span>
+
+                <div className="space-y-3 text-sm">
+                  {["TEACHER", "ADMIN", "SYSTEM_ADMIN"].includes(user?.role) && (
+                    <>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Mã HS:</span>
+                        <span className="font-semibold">
+                          {viewEntry.code || viewEntry.student?.code || "—"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Lớp:</span>
+                        <span className="font-semibold">
+                          {viewEntry.className || viewEntry.student?.className || "—"}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Nộp ngày:</span>
+                    <span className="font-semibold">
+                      {new Date(viewEntry.createdAt).toLocaleDateString("vi-VN", {
+                        weekday: "long",
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
                 </div>
-              </>
-            )}
-            <div className="flex justify-between">
-              <span className="text-gray-600">Nộp ngày:</span>
-              <span className="font-semibold">
-                {new Date(viewEntry.createdAt).toLocaleDateString("vi-VN", {
-                  weekday: "long",
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })}
-              </span>
-            </div>
-          </div>
-        </div>
+              </div>
 
-        {/* Tab navigation */}
-        <div className="flex-1 px-6 pb-6">
-          <div className="space-y-2">
-            {[
-              { id: "content", icon: "📄", label: "Nội dung bài viết", color: "blue" },
-              { id: "files", icon: "📎", label: "Tệp đính kèm", color: "purple" },
-              { id: "score", icon: "⭐", label: "Điểm & đánh giá", color: "green" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActivePreviewTab(tab.id)}
-                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 ${
-                  activePreviewTab === tab.id
-                    ? `bg-${tab.color}-600 text-white shadow-xl font-bold`
-                    : "bg-white/80 text-gray-700 hover:bg-gray-100 shadow-md"
-                }`}
-              >
-                <span className="text-2xl">{tab.icon}</span>
-                <span className="text-left flex-1">{tab.label}</span>
-                {activePreviewTab === tab.id && (
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-50 to-white">
-        {/* Close button */}
-        <button
-  onClick={() => setShowEntryModal(false)}
-  className="absolute top-6 right-6 w-12 h-12 bg-white/90 backdrop-blur rounded-full shadow-xl flex items-center justify-center text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-300 z-10"
->
-  <X className="w-6 h-6" />
-</button>
-
-        {/* Nội dung */}
-        <div className="flex-1 overflow-y-auto p-8 lg:p-12">
-          {/* TAB NỘI DUNG */}
-          {activePreviewTab === "content" && (
-            <div className="max-w-4xl mx-auto">
-              <h1 className="text-4xl font-extrabold text-gray-900 mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                {viewEntry.title}
-              </h1>
-              <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed whitespace-pre-line bg-white p-8 rounded-3xl shadow-inner border border-gray-100">
-                {viewEntry.article}
+              {/* Tab navigation */}
+              <div className="flex-1 px-6 pb-6">
+                <div className="space-y-2">
+                  {[
+                    { id: "content", icon: "📄", label: "Nội dung bài viết", color: "blue" },
+                    { id: "files", icon: "📎", label: "Tệp đính kèm", color: "purple" },
+                    { id: "score", icon: "⭐", label: "Điểm & đánh giá", color: "green" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActivePreviewTab(tab.id)}
+                      className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 ${activePreviewTab === tab.id
+                          ? `bg-${tab.color}-600 text-white shadow-xl font-bold`
+                          : "bg-white/80 text-gray-700 hover:bg-gray-100 shadow-md"
+                        }`}
+                    >
+                      <span className="text-2xl">{tab.icon}</span>
+                      <span className="text-left flex-1">{tab.label}</span>
+                      {activePreviewTab === tab.id && (
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          )}
 
-          {/* TAB FILE */}
-          {activePreviewTab === "files" && (
-            <div className="space-y-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
-                <span className="text-4xl">📎</span> Tệp đính kèm
-              </h2>
-              {previewFiles.length === 0 ? (
-                <div className="text-center py-20">
-                  <div className="text-9xl mb-6 opacity-20">📄</div>
-                  <p className="text-xl text-gray-500">Chưa có tệp nào được nộp</p>
-                </div>
-              ) : (
-<div className="space-y-6">
-                  {previewFiles.map((f, idx) => {
-                    const url = f.fileUrl;
-                    const name = f.fileName || url.split("/").pop();
-                    const ext = name.split(".").pop().toLowerCase();
-                    return (
-                      <div
-  key={f.id}
-  className="max-w-[780px] mx-auto bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
->
+            {/* MAIN CONTENT */}
+            <div className="flex-1 flex flex-col bg-gradient-to-br from-gray-50 to-white">
+              {/* Close button */}
+              <button
+                onClick={() => setShowEntryModal(false)}
+                className="absolute top-6 right-6 w-12 h-12 bg-white/90 backdrop-blur rounded-full shadow-xl flex items-center justify-center text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all duration-300 z-10"
+              >
+                <X className="w-6 h-6" />
+              </button>
 
-                        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 text-white">
-                          <p className="font-bold text-lg truncate">{name}</p>
-                          <p className="text-sm opacity-90">Tệp #{idx + 1}</p>
-                        </div>
-                        <div className="p-4">
-                          {["jpg", "jpeg", "png", "gif", "webp"].includes(ext) && (
-                            <img src={url} className="w-full rounded-2xl border-4 border-white shadow-lg" alt={name} />
-                          )}
-                          {["mp4", "mov", "avi"].includes(ext) && (
-                            <video controls className="w-full rounded-2xl shadow-lg">
-                              <source src={url} />
-                            </video>
-                          )}
-                          {ext === "pdf" && (
-                            <iframe src={url} className="w-full h-96 rounded-2xl border-4 border-white shadow-lg"></iframe>
-                          )}
-                          {["ppt", "pptx"].includes(ext) && (
-  <iframe
-    src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`}
-    className="w-full h-[600px] rounded-2xl border-4 border-white shadow-lg bg-white"
-  ></iframe>
-)}
+              {/* Nội dung */}
+              <div className="flex-1 overflow-y-auto p-8 lg:p-12">
+                {/* TAB NỘI DUNG */}
+                {activePreviewTab === "content" && (
+                  <div className="max-w-4xl mx-auto">
+                    <h1 className="text-4xl font-extrabold text-gray-900 mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                      {viewEntry.title}
+                    </h1>
+                    <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed whitespace-pre-line bg-white p-8 rounded-3xl shadow-inner border border-gray-100">
+                      {viewEntry.article}
+                    </div>
+                  </div>
+                )}
 
-                          {![
-                            "jpg","jpeg","png","gif","webp",
-                            "mp4","mov","avi","pdf","ppt","pptx"
-                          ].includes(ext) && (
-                            <div className="text-center py-16">
-                              <div className="text-9xl mb-4">📦</div>
-                              <a href={url} target="_blank" className="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-2xl transition">
-                                Tải xuống {name}
-                              </a>
+                {/* TAB FILE */}
+                {activePreviewTab === "files" && (
+                  <div className="space-y-8">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
+                      <span className="text-4xl">📎</span> Tệp đính kèm
+                    </h2>
+                    {previewFiles.length === 0 ? (
+                      <div className="text-center py-20">
+                        <div className="text-9xl mb-6 opacity-20">📄</div>
+                        <p className="text-xl text-gray-500">Chưa có tệp nào được nộp</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {previewFiles.map((f, idx) => {
+                          const url = f.fileUrl;
+                          const name = f.fileName || url.split("/").pop();
+                          const ext = name.split(".").pop().toLowerCase();
+                          return (
+                            <div
+                              key={f.id}
+                              className="max-w-[780px] mx-auto bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                            >
+
+                              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 text-white">
+                                <p className="font-bold text-lg truncate">{name}</p>
+                                <p className="text-sm opacity-90">Tệp #{idx + 1}</p>
+                              </div>
+                              <div className="p-4">
+                                {["jpg", "jpeg", "png", "gif", "webp"].includes(ext) && (
+                                  <img src={url} className="w-full rounded-2xl border-4 border-white shadow-lg" alt={name} />
+                                )}
+                                {["mp4", "mov", "avi"].includes(ext) && (
+                                  <video controls className="w-full rounded-2xl shadow-lg">
+                                    <source src={url} />
+                                  </video>
+                                )}
+                                {ext === "pdf" && (
+                                  <iframe src={url} className="w-full h-96 rounded-2xl border-4 border-white shadow-lg"></iframe>
+                                )}
+                                {["ppt", "pptx"].includes(ext) && (
+                                  <iframe
+                                    src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`}
+                                    className="w-full h-[600px] rounded-2xl border-4 border-white shadow-lg bg-white"
+                                  ></iframe>
+                                )}
+
+                                {![
+                                  "jpg", "jpeg", "png", "gif", "webp",
+                                  "mp4", "mov", "avi", "pdf", "ppt", "pptx"
+                                ].includes(ext) && (
+                                    <div className="text-center py-16">
+                                      <div className="text-9xl mb-4">📦</div>
+                                      <a href={url} target="_blank" className="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:shadow-2xl transition">
+                                        Tải xuống {name}
+                                      </a>
+                                    </div>
+                                  )}
+                              </div>
                             </div>
-                          )}
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* TAB ĐIỂM */}
+                {activePreviewTab === "score" && (
+                  <div className="max-w-4xl mx-auto space-y-8">
+                    <h2 className="text-4xl font-extrabold text-gray-900 mb-10 text-center">
+                      Đánh giá & Điểm số
+                    </h2>
+
+                    {/* AI Score */}
+                    {viewEntry.aiScore && (
+                      <div className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-10 rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-500">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-2xl font-bold mb-2">Điểm AI chấm tự động</h3>
+                            <p className="text-lg opacity-90">Phân tích bằng trí tuệ nhân tạo</p>
+                          </div>
+                          <div className="text-8xl font-extrabold">{viewEntry.aiScore}</div>
+                        </div>
+                        <div className="mt-6 p-6 bg-white/20 backdrop-blur rounded-2xl">
+                          <p className="text-lg leading-relaxed italic">“{viewEntry.aiFeedback}”</p>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                    )}
+
+                    {/* Manual Score */}
+                    {viewEntry.manualScore && (
+                      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-10 rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-500">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-2xl font-bold mb-2">Điểm giáo viên chấm</h3>
+                            <p className="text-lg opacity-90">Nhận xét trực tiếp từ giáo viên</p>
+                          </div>
+                          <div className="text-8xl font-extrabold">{viewEntry.manualScore.totalScore}</div>
+                        </div>
+                        <div className="mt-6 p-6 bg-white/20 backdrop-blur rounded-2xl">
+                          <p className="text-lg leading-relaxed italic">“{viewEntry.manualScore.feedback}”</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {!viewEntry.aiScore && !viewEntry.manualScore && (
+                      <div className="text-center py-20">
+                        <div className="text-9xl mb-6 opacity-20">📭</div>
+                        <p className="text-2xl text-gray-500">Chưa có đánh giá nào</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-
-          {/* TAB ĐIỂM */}
-          {activePreviewTab === "score" && (
-            <div className="max-w-4xl mx-auto space-y-8">
-              <h2 className="text-4xl font-extrabold text-gray-900 mb-10 text-center">
-                Đánh giá & Điểm số
-              </h2>
-
-              {/* AI Score */}
-              {viewEntry.aiScore && (
-                <div className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-10 rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-500">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">Điểm AI chấm tự động</h3>
-                      <p className="text-lg opacity-90">Phân tích bằng trí tuệ nhân tạo</p>
-                    </div>
-                    <div className="text-8xl font-extrabold">{viewEntry.aiScore}</div>
-                  </div>
-                  <div className="mt-6 p-6 bg-white/20 backdrop-blur rounded-2xl">
-                    <p className="text-lg leading-relaxed italic">“{viewEntry.aiFeedback}”</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Manual Score */}
-              {viewEntry.manualScore && (
-                <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-10 rounded-3xl shadow-2xl transform hover:scale-105 transition-all duration-500">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">Điểm giáo viên chấm</h3>
-                      <p className="text-lg opacity-90">Nhận xét trực tiếp từ giáo viên</p>
-                    </div>
-                    <div className="text-8xl font-extrabold">{viewEntry.manualScore.totalScore}</div>
-                  </div>
-                  <div className="mt-6 p-6 bg-white/20 backdrop-blur rounded-2xl">
-                    <p className="text-lg leading-relaxed italic">“{viewEntry.manualScore.feedback}”</p>
-                  </div>
-                </div>
-              )}
-
-              {!viewEntry.aiScore && !viewEntry.manualScore && (
-                <div className="text-center py-20">
-                  <div className="text-9xl mb-6 opacity-20">📭</div>
-                  <p className="text-2xl text-gray-500">Chưa có đánh giá nào</p>
-                </div>
-              )}
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
     </div>
   );
