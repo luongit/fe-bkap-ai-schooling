@@ -14,6 +14,7 @@ import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/atom-one-dark.css';
 import 'react-toastify/dist/ReactToastify.css';
 import '../style/chat.css';
+import LoginRequiredBox from "../pages/LoginRequiredBox";
 
 const API_URL = process.env.REACT_APP_API_URL || '';
 
@@ -291,16 +292,8 @@ export default function WritingPage() {
     <main className="main">
       <section className="hero">
         {!token ? (
-          <div className="not-logged">
-            <div className="not-logged-box">
-              <p className="not-logged-text">
-                Bạn cần đăng nhập để bắt đầu trò chuyện
-              </p>
-              <a href="/auth/login" className="login-btn">
-                Đăng nhập
-              </a>
-            </div>
-          </div>
+             <LoginRequiredBox />
+
         ) : (
           <>
             {!hasMessages && (
