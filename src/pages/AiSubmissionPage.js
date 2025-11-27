@@ -90,7 +90,6 @@ export default function AiSubmissionPage() {
   const validateForm = () => {
     if (!title.trim()) return toast.error("Vui lòng nhập tiêu đề bài viết!");
     if (!article.trim()) return toast.error("Vui lòng nhập nội dung bài viết!");
-    if (!image) return toast.error("Vui lòng chọn ảnh đại diện!");
     if (!video) return toast.error("Vui lòng chọn video dự thi!");
     if (!slide) return toast.error("Vui lòng chọn slide thuyết trình!");
     return true;
@@ -263,7 +262,7 @@ export default function AiSubmissionPage() {
 
               <div className="flex flex-col gap-5">
                 <UploadBox
-                  label="Ảnh đại diện của nhóm"
+                  label="Ảnh đại diện của nhóm (không bắt buộc)"
                   icon={Image}
                   accept="image/*"
                   file={image}
