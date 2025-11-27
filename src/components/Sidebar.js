@@ -172,7 +172,6 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
   const fetchProfile = async () => {
     try {
-      if (process.env.NODE_ENV === "production") return;
       const res = await api.get("/profile");
       if (process.env.NODE_ENV === "development") {
       }
