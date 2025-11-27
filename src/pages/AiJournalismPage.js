@@ -20,6 +20,7 @@ import {
   Edit,            // THÊM DÒNG NÀY
   PenTool,         // (tùy chọn thêm nếu bạn muốn dùng icon bút đẹp hơn)
   Scale,
+  Star,
 
 } from "lucide-react";
 import api from "../services/apiToken"; // axios instance có refresh token
@@ -797,7 +798,7 @@ export default function AiJournalismPage() {
                         CUỘC THI NỔI BẬT
                       </div>
 
-                      <h2 className="text-2xl md:text-3xl font-bold mb-2">
+                      <h2 className="text-2xl md:text-3xl text-grey-600 font-bold mb-2">
                         {featured.title}
                       </h2>
                       <h3 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">
@@ -813,46 +814,75 @@ export default function AiJournalismPage() {
 
                 {/* Footer actions */}
                 <div className="p-6 md:p-10 bg-white">
-                  <div className="flex flex-col gap-4 md:gap-6">
+                  <div className="flex flex-col gap-6 md:gap-8">
 
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Globe className="h-5 w-5" />
-                      <div className="text-sm">
-                        Quy mô cuộc thi : <b>Toàn lãnh thổ Việt Nam</b>
-                      </div>
+                    {/* Đối tượng */}
+                    <div className="flex items-center gap-3 text-gray-700">
+                      <Globe className="h-5 w-5 text-blue-700" />
+                      <span className="text-sm text-gray-900 md:text-base">
+                        Đối tượng cuộc thi: <span className="font-semibold">Học sinh THCS Mễ Trì</span>
+                      </span>
                     </div>
 
+                    {/* Hình thức thi + Nút CTA */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 text-gray-700">
+                        <Users className="h-5 w-5 text-blue-500" />
+                        <span className="text-sm text-gray-900 md:text-base">
+                          Hình thức thi:  Theo nhóm <span className="font-semibold">3 - 4</span> học sinh
+                        </span>
+                      </div>
 
-                    <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center">
-                      <div className="flex items-center gap-2 text-gray-600 flex-1">
-                        <Users className="h-5 w-5" />
-                        <div className="text-sm">
-                          Số lượng tham gia khoảng <b>800 - 1000</b> người
+                      <button
+                        onClick={() => openContest(featured)}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg text-sm md:text-base font-medium text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-sm h-10 px-6"
+                      >
+                        Truy cập chi tiết cuộc thi
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* Điểm tối đa */}
+                    <div className="flex items-center gap-3 text-gray-700">
+                      <Award className="h-5 w-5 text-yellow-500" />
+                      <span className="text-sm text-gray-900 md:text-base">
+                        Điểm tối đa của cuộc thi : <span className="font-semibold">{featured.totalScore} điểm</span>
+                      </span>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-xl p-5 md:p-6 border border-gray-200">
+                      <div className="flex items-start gap-3">
+                        <Star className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 space-y-3">
+                          <h4 className="font-semibold text-orange-500 text-base">Yêu cầu sản phẩm:</h4>
+                          <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
+                            <li className="flex items-start gap-2">
+                              <span className="text-blue-600 mt-0.5">•</span>
+                              <span>Sản phẩm gồm 5 - 10 hình ảnh + video kèm slide</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-blue-600 mt-0.5">•</span>
+                              <span>Mỗi hình phải có chú thích ngắn hoặc lời kể</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-blue-600 mt-0.5">•</span>
+                              <span>Định dạng: MP4 / PDF / PowerPoint </span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-blue-600 mt-0.5">•</span>
+                              <span>Video tối đa 3 phút, kích thước ≤ 300MB</span>
+                            </li>
+                            <li className="flex items-start gap-2 md:col-span-2">
+                              <span className="text-blue-600 mt-0.5">•</span>
+                              <span>Nộp kèm bản mô tả ý tưởng (tối đa 1 trang A4)</span>
+                            </li>
+                          </ul>
                         </div>
                       </div>
-                      <div className="flex gap-3 self-stretch md:self-auto">
-                        <button
-                          onClick={() => openContest(featured)}
-                          className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium text-white shadow h-9 px-4 py-2 bg-blue-700 hover:bg-blue-800 transition-colors"
-                        >
-                          Truy cập chi tiết cuộc thi <ArrowRight className="ml-2 h-4 w-4" />
-                        </button>
-                      </div>
                     </div>
-
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Award className="h-5 w-5" />
-                      <div className="text-sm">
-                        Tổng : <b>{featured.totalScore} Điểm</b>
-                      </div>
-                    </div>
-
-
 
                   </div>
                 </div>
-
-
               </div>
             </section>
           )}
@@ -925,9 +955,7 @@ export default function AiJournalismPage() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-black/30" />
-                      <div className="absolute bottom-2 left-2 text-white font-semibold drop-shadow-md">
-                        {c.title}
-                      </div>
+                      
                     </div>
 
                     {/* body */}
@@ -950,43 +978,26 @@ export default function AiJournalismPage() {
 
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2">
-                          <Hash className="h-4 w-4 text-gray-500" />
-                          <span>Mã số cuộc thi: {c.id}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CalendarIcon className="h-4 w-4 text-gray-500" />
-                          <span>Cuộc thi khởi tạo vào : {formatDate(c.createdAt)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
                           <CalendarIcon className="h-4 w-4 text-gray-500" />
                           <span>
-                            Ngày bắt đầu cuộc thi: <b>{formatDate(c.startDate)}</b>
+                            Ngày bắt đầu cuộc thi : {formatDate(c.startDate)}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <CalendarIcon className="h-4 w-4 text-gray-500" />
                           <span>
-                            Ngày kết thúc cuộc thi: <b>{formatDate(c.endDate)}</b>
+                            Ngày kết thúc cuộc thi : {formatDate(c.endDate)}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-gray-500" />
-                          <span>
-                            Thời gian nhận bài:{" "}
-                            <b>
-                              {formatDate(c.submissionStart)} → {" "}
-                              {formatDate(c.submissionEnd)}
-                            </b>
-                          </span>
-                        </div>
+                        
                         <div className="flex items-center gap-2">
                           <Award className="h-4 w-4 text-gray-500" />
-                          <span>Tổng điểm: {c.totalScore} điểm</span>
+                          <span> Điểm tối đa của cuộc thi : {c.totalScore} điểm</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-gray-500" />
                           <span className="flex items-center gap-1">
-                            Trạng thái:
+                            Tình trạng phê duyệt :
                             {c.status === "ACTIVE" && (
                               <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-300">
                                 Được công bố chính thức
@@ -1098,30 +1109,15 @@ export default function AiJournalismPage() {
 
             </div>
           </div>
+          <br/ >
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1">
-              {isContestOpen() ? (
-                <span className=" text-sm font-semibold text-green-700 flex items-center gap-1">
-                  🕓 Đang mở
-                </span>
-              ) : new Date() < new Date(activeContest?.startDate) ? (
-                <span className="text-sm font-semibold text-yellow-700 flex items-center gap-1">
-                  🕓 Chưa mở
-                </span>
-              ) : (
-                <span className="text-sm font-semibold text-red-700 flex items-center gap-1">
-                  🕓 Đã kết thúc
-                </span>
-              )}
-            </span>
-
-
+          
             <div className="text-sm text-gray-600">
               <span className="mr-3">
-                📅 Bắt đầu: <b>{formatDate(activeContest?.startDate)}</b>
+                
               </span>
               <span>
-                📅 Kết thúc: <b>{formatDate(activeContest?.endDate)}</b>
+                
               </span>
             </div>
           </div>
@@ -1132,31 +1128,42 @@ export default function AiJournalismPage() {
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-gray-500" />
             <span>
-              Thời gian nhận bài:{" "}
+              Thời gian cuộc thi :{" "}
               <b>
-                {formatDate(activeContest?.submissionStart)} →{" "}
-                {formatDate(activeContest?.submissionEnd)}
+                {formatDate(activeContest?.startDate)} →{" "}
+                {formatDate(activeContest?.endDate)}
               </b>
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Award className="w-4 h-4 text-gray-500" />
             <span>
-              Tổng : <b>{activeContest?.totalScore} điểm</b>
+              Điểm tối đa của cuộc thi : <b>{activeContest?.totalScore} điểm</b>
             </span>
           </div>
+          
           <div className="flex items-center gap-2">
-            <Hash className="w-4 h-4 text-gray-500" />
-            <span>Mã cuộc thi: {activeContest?.id}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4 text-gray-500" />
-            <span>Tạo lúc: {formatDate(activeContest?.createdAt)}</span>
+              Trạng thái cuộc thi :
+             <span className="flex items-center gap-1">
+              {isContestOpen() ? (
+                <span className=" text-sm font-semibold text-green-700 flex items-center gap-1">
+                  🕓 Đang mở cuộc thi
+                </span>
+              ) : new Date() < new Date(activeContest?.startDate) ? (
+                <span className="text-sm font-semibold text-yellow-700 flex items-center gap-1">
+                  🕓 Chưa mở cuộc thi
+                </span>
+              ) : (
+                <span className="text-sm font-semibold text-red-700 flex items-center gap-1">
+                  🕓 Đã kết thúc
+                </span>
+              )}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-gray-500" />
             <span className="flex items-center gap-1">
-              Trạng thái:
+              Tình trạng phê duyệt :
               {activeContest?.status === "ACTIVE" && (
                 <span className="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-300">
                   Được công bố chính thức
@@ -1535,8 +1542,8 @@ export default function AiJournalismPage() {
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(currentPage - 1)}
                             className={`px-4 py-2 rounded-xl font-semibold transition-all ${currentPage === 1
-                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
                               }`}
                           >
                             ←
@@ -1553,8 +1560,8 @@ export default function AiJournalismPage() {
                                   key={p}
                                   onClick={() => setCurrentPage(p)}
                                   className={`px-4 py-2 rounded-xl font-semibold transition-all ${currentPage === p
-                                      ? "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow-lg scale-105"
-                                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:shadow"
+                                    ? "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow-lg scale-105"
+                                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:shadow"
                                     }`}
                                 >
                                   {p}
@@ -1594,8 +1601,8 @@ export default function AiJournalismPage() {
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(currentPage + 1)}
                             className={`px-4 py-2 rounded-xl font-semibold transition-all ${currentPage === totalPages
-                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
                               }`}
                           >
                             →
@@ -1760,8 +1767,8 @@ export default function AiJournalismPage() {
                       key={tab.id}
                       onClick={() => setActivePreviewTab(tab.id)}
                       className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 ${activePreviewTab === tab.id
-                          ? `bg-${tab.color}-600 text-white shadow-xl font-bold`
-                          : "bg-white/80 text-gray-700 hover:bg-gray-100 shadow-md"
+                        ? `bg-${tab.color}-600 text-white shadow-xl font-bold`
+                        : "bg-white/80 text-gray-700 hover:bg-gray-100 shadow-md"
                         }`}
                     >
                       <span className="text-2xl">{tab.icon}</span>
