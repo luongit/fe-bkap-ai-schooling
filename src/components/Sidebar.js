@@ -174,10 +174,9 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     try {
       const res = await api.get("/profile");
       setProfile(res.data);
-      if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+      if (process.env.REACT_APP_ENV === "dev") {
         console.log("Profile nhận được:", res.data);
       }
-
     } catch (err) {
       console.error("Không lấy được profile:", err);
     }
