@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import api from "../services/apiToken";
 import { toast } from "react-toastify";
 import LoginRequiredBox from "../pages/LoginRequiredBox";
@@ -51,6 +51,8 @@ export default function VideoStudioProLayout() {
   const [loading, setLoading] = useState(false);
   const [videoResult, setVideoResult] = useState(null);
   const [autoDuration, setAutoDuration] = useState(false);
+  const [credit, setCredit] = useState(0);
+  const [videoCost, setVideoCost] = useState(0);
   const fileRef = useRef();
   const slide = slides[current];
   const disableEdit = slides.length === 0;
@@ -58,10 +60,30 @@ export default function VideoStudioProLayout() {
   const userId = localStorage.getItem('userId');
 
 
-  
-if (!token || !userId) {
-  return <LoginRequiredBox />;
-}
+  // Load credit & giá tạo video khi mở trang
+  useEffect(() => {
+    const loadCreditInfo = async () => {
+      try {
+        const bal = await api.get(`/credit/balance?userId=${userId}`);
+        const cost = await api.get(`/pricing/VIDEO_CREATE`);
+
+        setCredit(bal.data.credit);
+        setVideoCost(cost.data.creditCost);
+      } catch (e) {
+        console.error("Lỗi khi tải credit:", e);
+        // Nếu lỗi API, có thể cho nút Tạo Video disabled luôn:
+        // setVideoCost(1);
+        // setCredit(0);
+      }
+    };
+
+    loadCreditInfo();
+  }, [userId]);
+
+  if (!token || !userId) {
+    return <LoginRequiredBox />;
+  }
+
 
 
   const removeSlide = (id) => {
@@ -191,66 +213,75 @@ if (!token || !userId) {
   const handleExport = async () => {
     if (!slides.length) return toast.error("Hãy thêm ít nhất một ảnh!");
 
+    const userId = localStorage.getItem("userId");
+
     try {
       setLoading(true);
       setVideoResult(null);
 
-      //  1. Chuẩn bị FormData gửi backend
+      const balanceRes = await api.get(`/credit/balance?userId=${userId}`);
+      const balance = balanceRes.data.credit;
+
+      const pricingRes = await api.get(`/pricing/VIDEO_CREATE`);
+      const cost = pricingRes.data.creditCost;
+
+      if (balance < cost) {
+        setLoading(false);
+        return toast.error(
+          `Không đủ credit để tạo video!\nBạn cần ${cost} credit, hiện có ${balance}.`
+        );
+      }
+
+      if (!bgMusicFile) {
+        setLoading(false);
+        return toast.error("Bạn phải chọn audio trước khi tạo video!");
+      }
+
       const fd = new FormData();
 
-      // Upload nhiều ảnh
       slides.forEach((s) => fd.append("files", s.imageFile));
 
-      // Chuẩn hóa slidesJson
       const slidesJson = slides.map((s) => ({
-        durationSec: s.duration || estimateDuration(s.text),
-        texts: [
-          {
-            text: s.text,
-            style: {
-              color: s.style.color,
-              "font-size": s.style["font-size"],
-              "font-family": s.style["font-family"],
-              "font-weight": s.style["font-weight"],
-              "text-shadow": s.style["text-shadow"],
-              "horizontal-position": s.style["horizontal-position"],
-              "vertical-position": s.style["vertical-position"],
-            },
-          },
-        ],
+        durationSec: s.duration,
+        texts: [{ text: s.text }]
       }));
 
       fd.append("slidesJson", JSON.stringify(slidesJson));
-
-      if (!bgMusicFile) {
-        toast.error("Bạn phải chọn audio trước khi tạo video");
-        setLoading(false);
-        return;
-      }
-fd.append("userId", localStorage.getItem("userId"));
-
       fd.append("bgMusicFile", bgMusicFile);
-      
-      fd.append("userId", localStorage.getItem("userId"));
+      fd.append("userId", userId);
+
+
       const res = await api.post("/video/create-slides-advanced-upload", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Nhận kết quả
+      if (res.data?.status === "NO_CREDIT") {
+        setLoading(false);
+        return toast.error(res.data.error);
+      }
+
       if (res.data?.videoUrl) {
         toast.success("Video đã tạo thành công!");
         setVideoResult({ url: res.data.videoUrl, status: "success" });
+
         window.dispatchEvent(new Event("video-library-refresh"));
-      } else {
-        throw new Error(res.data?.error || "Không có URL trả về!");
+        return;
       }
+
+      throw new Error("Không có URL trả về!");
+
     } catch (err) {
-      console.error("Lỗi khi tạo video:", err);
-      toast.error("Lỗi" + (err.message || "Lỗi không xác định"));
-      setVideoResult({ status: "error", message: err.message });
+      if (err.response && err.response.status === 402) {
+        setLoading(false);
+        return toast.error("Bạn đã hết credit để tạo video!");
+      }
+
+      // Các lỗi khác
+      toast.error("Lỗi: " + (err.message));
     } finally {
       setLoading(false);
     }
+
   };
 
   // ======================= RENDER UI =======================
