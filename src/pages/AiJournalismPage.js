@@ -1535,8 +1535,8 @@ export default function AiJournalismPage() {
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(currentPage - 1)}
                             className={`px-4 py-2 rounded-xl font-semibold transition-all ${currentPage === 1
-                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
                               }`}
                           >
                             ←
@@ -1553,8 +1553,8 @@ export default function AiJournalismPage() {
                                   key={p}
                                   onClick={() => setCurrentPage(p)}
                                   className={`px-4 py-2 rounded-xl font-semibold transition-all ${currentPage === p
-                                      ? "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow-lg scale-105"
-                                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:shadow"
+                                    ? "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow-lg scale-105"
+                                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:shadow"
                                     }`}
                                 >
                                   {p}
@@ -1594,8 +1594,8 @@ export default function AiJournalismPage() {
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(currentPage + 1)}
                             className={`px-4 py-2 rounded-xl font-semibold transition-all ${currentPage === totalPages
-                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "bg-gradient-to-r from-[#0ea5e9] to-[#38bdf8] text-white shadow hover:shadow-lg hover:scale-105"
                               }`}
                           >
                             →
@@ -1760,8 +1760,8 @@ export default function AiJournalismPage() {
                       key={tab.id}
                       onClick={() => setActivePreviewTab(tab.id)}
                       className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 ${activePreviewTab === tab.id
-                          ? `bg-${tab.color}-600 text-white shadow-xl font-bold`
-                          : "bg-white/80 text-gray-700 hover:bg-gray-100 shadow-md"
+                        ? `bg-${tab.color}-600 text-white shadow-xl font-bold`
+                        : "bg-white/80 text-gray-700 hover:bg-gray-100 shadow-md"
                         }`}
                     >
                       <span className="text-2xl">{tab.icon}</span>
