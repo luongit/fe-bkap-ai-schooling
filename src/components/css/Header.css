@@ -151,3 +151,80 @@
     height: 20px;
   }
 }
+/* ===== WRAPPER CĂN PHẢI ===== */
+.contest-wrapper {
+  position: relative;
+  margin-left: auto;        /* đẩy nút sang phải */
+  margin-right: 25px;       /* cách mép phải */
+  display: flex;
+  align-items: center;
+}
+
+/* ===== BADGE HOT ===== */
+.contest-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: linear-gradient(45deg, #ff3d3d, #ff7b00);
+  color: white;
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 8px;
+  animation: badgePulse 1.8s infinite ease-in-out;
+}
+
+@keyframes badgePulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ===== BUTTON CHÍNH ===== */
+.contest-header-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #dddfff;
+  padding: 7px 20px;
+  border-radius: 22px;
+  cursor: pointer;
+  transition: all .25s ease;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+  
+  /* animation rung nhẹ mỗi 3 giây */
+  animation: contestShake 3s infinite;
+}
+
+@keyframes contestShake {
+  0%, 93% { transform: translateX(0); }
+  94% { transform: translateX(-2px); }
+  95% { transform: translateX(2px); }
+  96% { transform: translateX(-2px); }
+  97% { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+.contest-header-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(123, 97, 255, 0.25);
+  border-color: #7b61ff;
+}
+
+/* Glow nhẹ xung quanh nút */
+.contest-header-btn:hover {
+  box-shadow: 0 0 12px rgba(123, 97, 255, 0.4),
+              0 8px 20px rgba(123, 97, 255, 0.25);
+}
+
+.contest-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6850ff;
+}
+
+/* Icon */
+.contest-icon svg {
+  display: flex;
+}
