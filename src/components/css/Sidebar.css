@@ -224,6 +224,12 @@
   transition: color 0.2s ease;
 }
 
+.sidebar-icon svg {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+
 .menu-dropdown li::before {
   display: none !important;
   content: none !important;

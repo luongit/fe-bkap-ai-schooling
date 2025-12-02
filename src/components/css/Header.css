@@ -12,6 +12,19 @@
   width: 100%;
 }
 
+.contest-header-btn {
+  margin-left: auto;  
+}
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+
+
+
 /* BRAND LOGO */
 .brand {
   font-size: 18px;
@@ -25,13 +38,7 @@
 }
 
 /* HEADER RIGHT AREA */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  position: absolute;
-  right: 12px;
-}
+
 
 /* CREDIT HEADER BOX */
 .credit-header-wrapper {

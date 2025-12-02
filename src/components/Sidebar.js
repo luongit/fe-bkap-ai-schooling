@@ -3,6 +3,7 @@ import { Link, useNavigate, NavLink, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { HiOutlineChatAlt2 } from "react-icons/hi";
+import { LuBot } from "react-icons/lu";
 import CreditModal from "../components/CreditModal";
 import {
   FiMessageCircle,
@@ -16,11 +17,12 @@ import {
   FiMoreVertical,
   FiTrash2,
   FiImage,
-  FiVideo,
   FiAward,
   FiFeather,
   FiLogOut,
   FiCreditCard,
+  FiFolderMinus,
+  FiFilm,
 } from "react-icons/fi";
 import "./css/Sidebar.css";
 import "../style/chat.css";
@@ -39,8 +41,6 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const [creditError, setCreditError] = useState("");
   const [profile, setProfile] = useState(null);
   const [showCreditModal, setShowCreditModal] = useState(false);
-  const [creditHistory, setCreditHistory] = useState([]);
-  const [loadingCreditHistory, setLoadingCreditHistory] = useState(false);
   const { sessionId } = useParams();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 920);
   const [openGroups, setOpenGroups] = useState({
@@ -193,7 +193,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
       className={`side-item w-full flex items-center gap-2 px-2 py-1.5 ${isCollapsed ? "justify-center" : ""
         }`}
     >
-      <Icon className="sidebar-icon w-4 h-4" />
+      <Icon className="sidebar-icon" />
       {!isCollapsed && (
         <span className="text-base font-normal">{label}</span>
       )}
@@ -286,7 +286,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
         <nav className="side-list">
           <Group
             icon={HiOutlineChatAlt2}
-            title="Trò Chuyện"
+            title="Trò chuyện với AI"
             open={openGroups.chat}
             onToggle={() => toggleGroup("chat")}
           >
@@ -302,7 +302,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
           <Group
             icon={FiEdit3}
-            title="Sáng tạo AI"
+            title="Sáng tạo cùng AI"
             open={openGroups.creative}
             onToggle={() => toggleGroup("creative")}
           >
@@ -318,11 +318,31 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                 }`
               }
             >
-              <FiImage className="sidebar-icon w-4 h-4" />
+              <FiImage className="sidebar-icon" />
               {!isCollapsed && (
                 <span className="text-base font-normal">Sáng tạo ảnh AI</span>
               )}
             </NavLink>
+
+            <NavLink
+              to="/assistant"
+              onClick={() => {
+                sessionStorage.removeItem("assistantHistory");
+                window.dispatchEvent(new Event("newAssistant"));
+                if (typeof onToggleSidebar === "function") onToggleSidebar();
+              }}
+              className={({ isActive }) =>
+                `side-item w-full flex items-center gap-2 px-2 py-1.5 ${isActive ? "bg-gray-200 text-gray-900 font-semibold" : ""
+                }`
+              }
+            >
+              <LuBot className="sidebar-icon" />
+              {!isCollapsed && (
+                <span className="text-base font-normal">Trợ lý AI cá nhân</span>
+              )}
+            </NavLink>
+
+
 
             <NavLink
               to="/generate-video"
@@ -336,9 +356,9 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                 }`
               }
             >
-              <FiVideo className="sidebar-icon w-4 h-4" />
+              <FiFilm className="sidebar-icon" />
               {!isCollapsed && (
-                <span className="text-base font-normal">Tạo Video</span>
+                <span className="text-base font-normal">Tạo video từ ảnh</span>
               )}
             </NavLink>
 
@@ -352,7 +372,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                 }`
               }
             >
-              <FiImage className="sidebar-icon w-4 h-4" />
+              <FiFolderMinus className="sidebar-icon" />
               {!isCollapsed && (
                 <span className="text-base font-normal">Thư viện của tôi</span>
               )}
@@ -378,7 +398,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             <div className="flex items-center gap-2">
               <FiAward className="sidebar-icon" />
               {!isCollapsed && (
-                <span className="text-base font-bold">Cuộc thi</span>
+                <span className="text-base font-bold">Cuộc thi AI</span>
               )}
             </div>
           </NavLink>
@@ -388,7 +408,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
         {!isCollapsed && (
           <div className="history-wrapper">
-            <div className="side-note text-base">Lịch sử</div>
+            <div className="side-note text-base">Lịch sử trò chuyện</div>
             <ul className="history-scroll">
               {loading ? (
                 <li className="side-item text-gray-400 italic text-base">
@@ -431,7 +451,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                         }}
                         className="absolute right-2 text-gray-500 hover:text-gray-700"
                       >
-                        <FiMoreVertical className="sidebar-icon w-4 h-4" />
+                        <FiMoreVertical className="sidebar-icon" />
                       </button>
 
                       {opened && (
@@ -450,7 +470,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                 })
               ) : (
                 <li className="side-item text-gray-400 italic text-base">
-                  Chưa có lịch sử chat
+                  Chưa có lịch sử trò chuyện
                 </li>
               )}
             </ul>
@@ -471,7 +491,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                 if (typeof onToggleSidebar === "function") onToggleSidebar();
               }}
             >
-              <FiLogIn className="sidebar-icon w-4 h-4" />
+              <FiLogIn className="sidebar-icon" />
               {!isCollapsed && (
                 <span className="text-base font-normal">Đăng Nhập</span>
               )}
@@ -485,7 +505,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                 if (typeof onToggleSidebar === "function") onToggleSidebar();
               }}
             >
-              <FiUserPlus className="sidebar-icon w-4 h-4" />
+              <FiUserPlus className="sidebar-icon" />
               {!isCollapsed && (
                 <span className="text-base font-normal">Tạo tài khoản</span>
               )}
@@ -522,7 +542,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                   onClick={toggleSidebar}
                   className="collapse-toggle w-8 h-8 flex items-center justify-center"
                 >
-                  <FiChevronLeft className="sidebar-icon w-4 h-4" />
+                  <FiChevronLeft className="sidebar-icon" />
                 </button>
               )}
             </div>
@@ -532,7 +552,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                 onClick={toggleSidebar}
                 className="collapse-toggle w-8 h-8 flex items-center justify-center mt-2"
               >
-                <FiChevronLeft className="sidebar-icon w-4 h-4 rotate-180" />
+                <FiChevronLeft className="sidebar-icon rotate-180" />
               </button>
             )}
 
