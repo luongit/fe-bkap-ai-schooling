@@ -1,22 +1,18 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || "",
+  withCredentials: true
 });
 
-
-
-// GẮN ACCESS TOKEN TỰ ĐỘNG TRƯỚC MỖI REQUEST
-
+// GỬI TOKEN TRƯỚC REQUEST
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
 
-  // Nếu data là FormData (upload file) → KHÔNG set Content-Type
   if (config.data instanceof FormData) {
-    delete config.headers["Content-Type"]; // tự set multipart/form-data
+    delete config.headers["Content-Type"];
   } else {
     config.headers["Content-Type"] = "application/json";
   }
@@ -24,57 +20,57 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-
-
-//  XỬ LÝ TOKEN HẾT HẠN (401) → TỰ ĐỘNG REFRESH
-
+// XỬ LÝ TOKEN HẾT HẠN
 api.interceptors.response.use(
-  (response) => response, //  OK -> Trả về luôn
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Nếu lỗi 401 mà chưa retry thì thử refresh token
+    // --- KIỂM TRA 401 ---
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      const remember = localStorage.getItem("rememberMe") === "true";
       const refreshToken = localStorage.getItem("refreshToken");
-      if (!refreshToken) {
+
+      //  CASE 1: No REMEMBER → không refresh → logout
+      if (!remember) {
         toast.warning("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
         localStorage.clear();
+        sessionStorage.clear();
         window.location.href = "/auth/login";
         return Promise.reject(error);
       }
 
-      try {
+      //  CASE 2: Tick REMEMBER → refresh token
+      if (remember && refreshToken) {
+        try {
+          const res = await axios.post(
+            `${process.env.REACT_APP_API_URL}/auth/refresh`,
+            { refreshToken },
+            { headers: { "Content-Type": "application/json" } }
+          );
 
-        const res = await axios.post(
-          `${process.env.REACT_APP_API_URL}/auth/refresh`,
-          { refreshToken },
-          { headers: { "Content-Type": "application/json" } }
-        );
+          if (res.data.accessToken) {
+            // Lưu token mới
+            localStorage.setItem("token", res.data.accessToken);
+            localStorage.setItem("refreshToken", res.data.refreshToken);
 
-        if (res.data.accessToken) {
+            // Retry request cũ
+            originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
 
-          localStorage.setItem("token", res.data.accessToken);
-          localStorage.setItem("refreshToken", res.data.refreshToken);
-
-          // Gắn token mới vào request cũ và gửi lại
-          originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
-          toast.info("Phiên đăng nhập đã được làm mới tự động vui lòng tải lại trang");
-          return api(originalRequest);
-        } else {
-          throw new Error("Không nhận được token mới từ server");
+            toast.info("Phiên đăng nhập đã được làm mới !");
+            return api(originalRequest);
+          }
+        } catch (refreshError) {
+          toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+          localStorage.clear();
+          sessionStorage.clear();
+          window.location.href = "/auth/login";
         }
-      } catch (refreshError) {
-        //  Refresh thất bại -> đăng xuất
-        console.error("Lỗi refresh token:", refreshError);
-        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
-        localStorage.clear();
-        window.location.href = "/auth/login";
       }
     }
 
-    // Nếu lỗi khác hoặc refresh thất bại -> reject
     return Promise.reject(error);
   }
 );

@@ -107,13 +107,22 @@ function Home() {
         }
       } catch (err) {
         console.error('Fetch credit error:', err);
+
+        if (err.status === 401 || err.response?.status === 401) {
+          toast.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+          localStorage.clear();
+          window.location.href = "/auth/login";
+          return;
+        }
+
         setErrorMessage(err.message || 'Không lấy được thông tin credit. Vui lòng thử lại.');
       }
+
     };
     fetchInitialCredit();
   }, [token, API_URL]);
 
-  
+
   const loadSession = useCallback(
     async (sid) => {
       if (!token) return;
@@ -132,8 +141,17 @@ function Home() {
         sessionStorage.setItem('chatHistory', JSON.stringify(mapped));
       } catch (err) {
         console.error('Load session error:', err);
+
+        if (err.status === 401 || err.response?.status === 401) {
+          toast.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+          localStorage.clear();
+          window.location.href = "/auth/login";
+          return;
+        }
+
         setErrorMessage('Không tải được lịch sử chat. Vui lòng thử lại.');
       }
+
     },
     [API_URL, token],
   );
@@ -271,8 +289,17 @@ function Home() {
       window.dispatchEvent(new Event('sessionUpdated'));
     } catch (err) {
       console.error('Delete session error:', err);
+
+      if (err.status === 401 || err.response?.status === 401) {
+        toast.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+        localStorage.clear();
+        window.location.href = "/auth/login";
+        return;
+      }
+
       setErrorMessage('Không xóa được cuộc trò chuyện. Vui lòng thử lại.');
     }
+
   }, [API_URL, token]);
 
   const handleStop = useCallback(() => {
@@ -363,7 +390,15 @@ function Home() {
         signal,
       });
 
+      if (res.status === 401) {
+        toast.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+        localStorage.clear();
+        window.location.href = "/auth/login";
+        return;
+      }
+
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder('utf-8');
@@ -477,7 +512,7 @@ function Home() {
     <main className="main">
       <section className="hero">
         {!token ? (
-                  <LoginRequiredBox />
+          <LoginRequiredBox />
 
         ) : (
           <>
@@ -563,7 +598,7 @@ function Home() {
           </div>
         </>
       )}
-      
+
     </main>
   );
 }

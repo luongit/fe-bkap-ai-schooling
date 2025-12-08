@@ -52,7 +52,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
   const fetchCredit = async (showToast = false) => {
     const token =
-      localStorage.getItem("accessToken") || localStorage.getItem("token");
+      localStorage.getItem("token")
     if (!token) return;
     try {
       const res = await api.get("/user/credits");
@@ -71,7 +71,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
   useEffect(() => {
     const token =
-      localStorage.getItem("accessToken") || localStorage.getItem("token");
+      localStorage.getItem("token")
     const user = localStorage.getItem("username");
     if (token) {
       setIsLoggedIn(true);
@@ -110,7 +110,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
 
   const fetchSessions = async () => {
     const token =
-      localStorage.getItem("accessToken") || localStorage.getItem("token");
+      localStorage.getItem("token")
     if (!token) return;
     setLoading(true);
     try {
@@ -146,7 +146,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   const deleteSession = async (id) => {
     if (!window.confirm("Xác nhận xóa cuộc trò chuyện này?")) return;
     const token =
-      localStorage.getItem("accessToken") || localStorage.getItem("token");
+      localStorage.getItem("token")
     if (!token) return;
     try {
       await api.delete(`/conversations/${id}`);
@@ -163,12 +163,25 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
     if (!isMobile) toast.info("Tính năng đang phát triển");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");  // call backend remove refresh token
+
+      toast.success("Đăng xuất thành công!");
+
+    } catch (err) {
+      console.error("Logout Error:", err);
+    }
+
+    // clear local
     localStorage.clear();
     sessionStorage.clear();
+
     setIsLoggedIn(false);
-    window.location.href = "/";
+
+    window.location.href = "/auth/login";
   };
+
 
   const fetchProfile = async () => {
     try {
@@ -179,6 +192,11 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
       }
     } catch (err) {
       console.error("Không lấy được profile:", err);
+      if (err.response?.status === 401) {
+        toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!");
+        localStorage.clear();
+        window.location.href = "/auth/login";
+      }
     }
   };
 
