@@ -29,7 +29,9 @@ import LoginRequiredBox from "./pages/LoginRequiredBox";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
-
+import AssistantListPage from './pages/AssistantListPage';
+import CreateAssistantPage from './pages/CreateAssistantPage';
+import AssistantChatPage from './pages/AssistantChatPage';
 import "./style/mobile.css";
 import "./components/css/Sidebar.css";
 import "./components/css/TopIntro.css";
@@ -104,6 +106,10 @@ function App() {
               <Route path="/library" element={<AiImageLibrary />} />
               <Route path="/login-required" element={<LoginRequiredBox />} />
               <Route path="/profile/change-password" element={<ChangePasswordPage />} />
+              <Route path="/assistants" element={<AssistantListPage />} />
+              <Route path="/assistants/create" element={<CreateAssistantPage />} />
+              <Route path="/assistants/:assistantId/chat" element={<AssistantChatPage />} />
+
 
               <Route
                 path="*"

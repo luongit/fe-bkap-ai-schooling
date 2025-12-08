@@ -325,7 +325,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             </NavLink>
 
             <NavLink
-              to="/assistant"
+              to="/assistants"
               onClick={() => {
                 sessionStorage.removeItem("assistantHistory");
                 window.dispatchEvent(new Event("newAssistant"));
