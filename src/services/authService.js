@@ -2,10 +2,11 @@
 import axios from "axios";
 import api from "./apiToken";
 
-export const login = async (identifier, password) => {
+export const login = async (identifier, password,rememberMe) => {
   const response = await api.post("/auth/login", {
     identifier,
     password,
+    rememberMe,
   });
   return response.data;
 };

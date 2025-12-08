@@ -17,10 +17,20 @@ function ProfilePage() {
         toast.success("Tải thông tin thành công!", { autoClose: 2000 });
       } catch (err) {
         console.error("Lỗi khi load profile", err);
+
+        //  Nếu token hết hạn hoặc refresh token không hợp lệ → logout
+        if (err.status === 401 || err.response?.status === 401) {
+          toast.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+          localStorage.clear();
+          window.location.href = "/auth/login";
+          return;
+        }
+
         toast.error("Không thể tải thông tin");
       } finally {
         setLoading(false);
       }
+
     };
     fetchProfile();
   }, []);

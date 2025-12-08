@@ -65,11 +65,20 @@ function Header({ toggleSidebar }) {
         setProfile(data);
       } catch (err) {
         console.error("Không lấy được profile:", err);
+        if (err.status === 401 || err.response?.status === 401) {
+          toast.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+          localStorage.clear();
+          window.location.href = "/auth/login";
+          return;
+        }
+
         setProfile(null);
       }
     };
     fetchProfile();
   }, [token]);
+
+
 
   // 
   const fetchCredit = async (showToast = true) => {
@@ -134,7 +143,7 @@ function Header({ toggleSidebar }) {
 
   return (
     <header className="header">
-      
+
       <div className="header-right">
         {/* 🔥 Nút Cuộc Thi AI – bản đẹp nhất */}
         {token && (
