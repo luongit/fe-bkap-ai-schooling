@@ -14,7 +14,7 @@ function ProfilePage() {
       try {
         const data = await getProfile();
         setProfile(data);
-        toast.success("Tải thông tin thành công!", { autoClose: 2000 });
+        toast.success("Tải thông tin thành công!", { autoClose: 1000 });
       } catch (err) {
         console.error("Lỗi khi load profile", err);
 
