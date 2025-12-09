@@ -85,7 +85,7 @@ function App() {
                 <Route path="/ai-journalism/create" element={<AiJournalismCreatePage />} />
                 <Route path="/ai-journalism/edit/:contestId" element={<AiJournalismEditPage />} />
               </Route>
-
+              
               <Route path="/" element={<Home />} />
               <Route path="/403" element={<Error403Page />} />
               <Route path="/login" element={<LoginPage />} />
