@@ -17,6 +17,10 @@ export default function CreateAssistantPage() {
 
   const [loading, setLoading] = useState(false);
 
+  // ⭐ NEW: Modal & input state
+  const [showNewCategoryModal, setShowNewCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+
   useEffect(() => {
     api
       .get("/categories")
@@ -31,6 +35,38 @@ export default function CreateAssistantPage() {
     if (file) {
       const url = URL.createObjectURL(file);
       setPreview(url);
+    }
+  };
+
+  // ⭐ NEW: Hàm tạo danh mục mới
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error("Tên danh mục không được để trống!");
+      return;
+    }
+
+    try {
+      const res = await api.post("/categories/student-create", {
+        name: newCategoryName,
+      });
+
+      const newCat = res.data;
+
+      // thêm vào danh sách FE
+      setCategories((prev) => [...prev, newCat]);
+
+      // chọn danh mục mới
+      setCategoryId(newCat.id);
+
+      toast.success("Tạo danh mục mới thành công!");
+
+      // đóng modal
+      setShowNewCategoryModal(false);
+      setNewCategoryName("");
+    } catch (err) {
+      toast.error(
+        err?.response?.data || "Không thể tạo danh mục mới!"
+      );
     }
   };
 
@@ -53,7 +89,10 @@ export default function CreateAssistantPage() {
     };
 
     const formData = new FormData();
-    formData.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify(dto)], { type: "application/json" })
+    );
     if (avatar) formData.append("avatar", avatar);
 
     try {
@@ -77,11 +116,11 @@ export default function CreateAssistantPage() {
   return (
     <div className="flex justify-center py-12 px-4 bg-gray-50 min-h-screen">
       <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-10 border border-gray-100">
-
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">✨ Tạo trợ lý AI mới</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">
+          ✨ Tạo trợ lý AI mới
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-
           {/* Avatar */}
           <div className="flex items-center gap-6">
             <div>
@@ -143,15 +182,25 @@ Bạn là một chuyên gia tư vấn tâm lý nhẹ nhàng, luôn trò chuyện
             <select
               className="w-full px-4 py-3 border rounded-2xl bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value === "create-new") {
+                  setShowNewCategoryModal(true);
+                } else {
+                  setCategoryId(e.target.value);
+                }
+              }}
               required
             >
               <option value="">-- Chọn danh mục --</option>
+
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
                 </option>
               ))}
+
+              {/* ⭐ Option tạo mới */}
+              <option value="create-new">➕ Tạo danh mục mới...</option>
             </select>
           </div>
 
@@ -167,6 +216,38 @@ Bạn là một chuyên gia tư vấn tâm lý nhẹ nhàng, luôn trò chuyện
           </button>
         </form>
       </div>
+
+      {/* ⭐⭐ Modal tạo danh mục */}
+      {showNewCategoryModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl">
+            <h2 className="text-xl font-bold mb-4">➕ Tạo danh mục mới</h2>
+
+            <input
+              className="w-full px-4 py-3 border rounded-xl bg-gray-50 outline-none"
+              placeholder="Nhập tên danh mục..."
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowNewCategoryModal(false)}
+                className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300"
+              >
+                Hủy
+              </button>
+
+              <button
+                onClick={handleCreateCategory}
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Tạo danh mục
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
