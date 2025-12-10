@@ -18,6 +18,10 @@ export const loginWithGoogle = () => {
   window.location.href = `${API_URL}/auth/google`;
 };
 
+export const loginWithFacebook = () => {
+  window.location.href = `${API_URL}/auth/facebook`;
+};
+
 
 export const register = async (userData) => {
   const res = await axios.post(`${API_URL}/auth/register`, userData);

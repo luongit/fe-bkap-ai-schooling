@@ -10,19 +10,19 @@ export default function LoginPage() {
   // Detect môi trường
   const isLocal = window.location.hostname === "localhost";
 
-  // Backend URL tương ứng DEV / PROD
   const GOOGLE_LOGIN_URL = isLocal
     ? "http://localhost:8080/api/auth/google"
     : "https://bkapai.vn/api/auth/google";
 
-  // API me để lấy user info sau khi login Google
+  const FACEBOOK_LOGIN_URL = isLocal
+    ? "http://localhost:8080/api/auth/facebook"
+    : "https://bkapai.vn/api/auth/facebook";
+
+  // API me để lấy user info sau khi login social
   const API_ME = isLocal
     ? "http://localhost:8080/api/auth/me"
     : "https://bkapai.vn/api/auth/me";
 
-  // =============================
-  // Xử lý login thủ công
-  // =============================
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -40,9 +40,6 @@ export default function LoginPage() {
     }
   };
 
-  // =============================
-  // Nhận token từ Google Redirect
-  // =============================
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
@@ -62,15 +59,16 @@ export default function LoginPage() {
 
           window.location.href = "/";
         })
-        .catch(() => setError("Lỗi đăng nhập Google"));
+        .catch(() => setError("Lỗi đăng nhập mạng xã hội"));
     }
   }, []);
 
-  // =============================
-  // Xử lý nút Login Google
-  // =============================
   const handleGoogleLogin = () => {
     window.location.href = GOOGLE_LOGIN_URL;
+  };
+
+  const handleFacebookLogin = () => {
+    window.location.href = FACEBOOK_LOGIN_URL;
   };
 
   return (
@@ -111,13 +109,19 @@ export default function LoginPage() {
         </button>
 
         <div className="my-4 text-center text-gray-500">Hoặc</div>
-
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600 flex items-center justify-center gap-2"
+          className="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600 flex items-center justify-center gap-2 mb-3"
         >
           <i className="fab fa-google"></i> Đăng nhập bằng Google
+        </button>
+        <button
+          type="button"
+          onClick={handleFacebookLogin}
+          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center justify-center gap-2"
+        >
+          <i className="fab fa-facebook"></i> Đăng nhập bằng Facebook
         </button>
       </form>
     </div>
