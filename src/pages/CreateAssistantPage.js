@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/apiToken";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function CreateAssistantPage() {
   const navigate = useNavigate();
@@ -17,10 +18,12 @@ export default function CreateAssistantPage() {
 
   const [loading, setLoading] = useState(false);
 
-  // ⭐ NEW: Modal & input state
+  // Modal & input state
   const [showNewCategoryModal, setShowNewCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
 
+  // Load danh mục
   useEffect(() => {
     api
       .get("/categories")
@@ -31,45 +34,64 @@ export default function CreateAssistantPage() {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     setAvatar(file);
-
     if (file) {
-      const url = URL.createObjectURL(file);
-      setPreview(url);
+      setPreview(URL.createObjectURL(file));
     }
   };
 
-  // ⭐ NEW: Hàm tạo danh mục mới
+  // FE check trùng
+  const isDuplicateCategory = (name) => {
+    return categories.some(
+      (cat) => cat.label.toLowerCase() === name.toLowerCase().trim()
+    );
+  };
+
+  // TẠO DANH MỤC MỚI
   const handleCreateCategory = async () => {
-    if (!newCategoryName.trim()) {
+    const trimmed = newCategoryName.trim();
+
+    if (!trimmed) {
       toast.error("Tên danh mục không được để trống!");
       return;
     }
 
+    if (isDuplicateCategory(trimmed)) {
+      toast.error("Danh mục này đã tồn tại!");
+      return;
+    }
+
+    setCreatingCategory(true);
+
     try {
       const res = await api.post("/categories/student-create", {
-        name: newCategoryName,
+        name: trimmed,
       });
 
       const newCat = res.data;
 
-      // thêm vào danh sách FE
       setCategories((prev) => [...prev, newCat]);
-
-      // chọn danh mục mới
       setCategoryId(newCat.id);
 
-      toast.success("Tạo danh mục mới thành công!");
+      toast.success(`Đã tạo danh mục "${trimmed}" thành công!`);
 
-      // đóng modal
       setShowNewCategoryModal(false);
       setNewCategoryName("");
     } catch (err) {
-      toast.error(
-        err?.response?.data || "Không thể tạo danh mục mới!"
-      );
+      const backendMessage = err?.response?.data?.toString()?.toLowerCase() || "";
+
+      if (backendMessage.includes("không phù hợp")) {
+        toast.error("Tên danh mục không phù hợp với môi trường học đường!");
+      } else if (backendMessage.includes("đã tồn tại")) {
+        toast.error("Danh mục này đã tồn tại!");
+      } else {
+        toast.error("Không thể tạo danh mục! Vui lòng thử lại.");
+      }
+    } finally {
+      setCreatingCategory(false);
     }
   };
 
+  // SUBMIT TẠO TRỢ LÝ
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -77,7 +99,7 @@ export default function CreateAssistantPage() {
     if (!categoryId) return toast.error("Bạn phải chọn danh mục!");
 
     setLoading(true);
-    toast.loading("Đang tạo trợ lý...");
+    toast.info("Đang tạo trợ lý...");
 
     const dto = {
       name,
@@ -89,25 +111,17 @@ export default function CreateAssistantPage() {
     };
 
     const formData = new FormData();
-    formData.append(
-      "dto",
-      new Blob([JSON.stringify(dto)], { type: "application/json" })
-    );
+    formData.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
     if (avatar) formData.append("avatar", avatar);
 
     try {
       await api.post("/assistants", formData);
 
-      toast.dismiss();
       toast.success("Tạo trợ lý thành công! 🎉");
 
-      setTimeout(() => {
-        navigate("/assistants");
-      }, 800);
+      setTimeout(() => navigate("/assistants"), 800);
     } catch (err) {
-      toast.dismiss();
       toast.error("Lỗi: Không thể tạo trợ lý!");
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -115,10 +129,12 @@ export default function CreateAssistantPage() {
 
   return (
     <div className="flex justify-center py-12 px-4 bg-gray-50 min-h-screen">
+
+      {/* ⭐ Toast container */}
+      <ToastContainer position="top-right" autoClose={2200} />
+
       <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-10 border border-gray-100">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          ✨ Tạo trợ lý AI mới
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">✨ Tạo trợ lý AI mới</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Avatar */}
@@ -169,8 +185,7 @@ export default function CreateAssistantPage() {
             <textarea
               className="w-full px-4 py-3 border rounded-2xl bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
               rows="5"
-              placeholder={`Ví dụ: 
-Bạn là một chuyên gia tư vấn tâm lý nhẹ nhàng, luôn trò chuyện thân thiện, ấm áp…`}
+              placeholder="Hãy mô tả tính cách và cách trả lời của trợ lý..."
               value={systemPrompt}
               onChange={(e) => setSystemPrompt(e.target.value)}
             />
@@ -199,7 +214,6 @@ Bạn là một chuyên gia tư vấn tâm lý nhẹ nhàng, luôn trò chuyện
                 </option>
               ))}
 
-              {/* ⭐ Option tạo mới */}
               <option value="create-new">➕ Tạo danh mục mới...</option>
             </select>
           </div>
@@ -217,13 +231,14 @@ Bạn là một chuyên gia tư vấn tâm lý nhẹ nhàng, luôn trò chuyện
         </form>
       </div>
 
-      {/* ⭐⭐ Modal tạo danh mục */}
+      {/* ⭐ Modal tạo danh mục */}
       {showNewCategoryModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
           <div className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl">
             <h2 className="text-xl font-bold mb-4">➕ Tạo danh mục mới</h2>
 
             <input
+              autoFocus
               className="w-full px-4 py-3 border rounded-xl bg-gray-50 outline-none"
               placeholder="Nhập tên danh mục..."
               value={newCategoryName}
@@ -233,6 +248,7 @@ Bạn là một chuyên gia tư vấn tâm lý nhẹ nhàng, luôn trò chuyện
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowNewCategoryModal(false)}
+                disabled={creatingCategory}
                 className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300"
               >
                 Hủy
@@ -240,9 +256,11 @@ Bạn là một chuyên gia tư vấn tâm lý nhẹ nhàng, luôn trò chuyện
 
               <button
                 onClick={handleCreateCategory}
-                className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+                disabled={creatingCategory}
+                className={`px-4 py-2 rounded-xl text-white 
+                ${creatingCategory ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
               >
-                Tạo danh mục
+                {creatingCategory ? "Đang tạo..." : "Tạo danh mục"}
               </button>
             </div>
           </div>
