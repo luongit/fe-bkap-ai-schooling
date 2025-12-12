@@ -5,7 +5,9 @@ import { format } from "date-fns";
 
 export default function AssistantChatPage() {
   const { assistantId } = useParams();
-  const USER_ID = 1;
+
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const USER_ID = storedUser?.id || storedUser?.userId;
 
   const [assistant, setAssistant] = useState(null);
   const [conversations, setConversations] = useState([]);
@@ -19,32 +21,28 @@ export default function AssistantChatPage() {
   const inputRef = useRef(null);
 
   /* ============================================================
-        🔥 USEEFFECT - LOAD DUY NHẤT 1 LẦN KHI CHỌN TRỢ LÝ
-        Bao gồm: load assistant + load conversation list + tạo convo đầu tiên
+        🚀 KHỞI TẠO TRANG — KHÔNG TẠO CUỘC TRÒ CHUYỆN MỚI
      ============================================================ */
   useEffect(() => {
     async function init() {
-      // Load assistant
-      const assistantRes = await api.get(`/assistants/${assistantId}`);
-      setAssistant(assistantRes.data);
+      try {
+        const assistantRes = await api.get(`/assistants/${assistantId}`);
+        setAssistant(assistantRes.data);
 
-      // Load conversation list
-      const res = await api.get(`/conversations/user/${USER_ID}`);
-      const list = res.data.filter(
-        (c) => c.assistant.id === Number(assistantId)
-      );
+        if (!USER_ID) return;
 
-      setConversations(list);
+        // Load list conversation, nhưng không mở & không tạo mới!
+        const res = await api.get(`/conversations/user/${USER_ID}`);
+        const list = res.data.filter(
+          (c) => c.assistant.id === Number(assistantId)
+        );
+        setConversations(list);
 
-      // Nếu chưa có conversation → tạo 1 cái duy nhất
-      if (list.length === 0) {
-        const newConv = await api.post("/conversations", {
-          assistantId: Number(assistantId),
-          userId: USER_ID,
-        });
+        // ❗ KHÔNG tự tạo conversation
+        // ❗ KHÔNG tự mở conversation
 
-        setConversationId(newConv.data.id);
-        setConversations([newConv.data]); // add vào danh sách
+      } catch (err) {
+        console.error("❌ Lỗi khởi tạo:", err);
       }
     }
 
@@ -52,18 +50,24 @@ export default function AssistantChatPage() {
   }, [assistantId]);
 
   /* ============================================================
-        📌 LOAD MESSAGES KHI MỞ CONVERSATION
+        📌 Load messages khi mở conversation (user click)
      ============================================================ */
   const openConversation = async (id) => {
-    setConversationId(id);
-    const res = await api.get(`/chat/conversation/${id}`);
-    setMessages(res.data);
+    try {
+      setConversationId(id);
+      const res = await api.get(`/chat/conversation/${id}`);
+      setMessages(res.data);
+    } catch (err) {
+      console.error("❌ Lỗi load messages:", err);
+    }
   };
 
   /* ============================================================
-        ➕ NEW CONVERSATION (Button)
+        ➕ Tạo cuộc trò chuyện mới (NGƯỜI DÙNG BẤM)
      ============================================================ */
   const newConversation = async () => {
+    if (!USER_ID) return;
+
     const res = await api.post("/conversations", {
       assistantId: Number(assistantId),
       userId: USER_ID,
@@ -73,37 +77,32 @@ export default function AssistantChatPage() {
 
     setConversationId(newConv.id);
     setMessages([]);
-
-    // Cập nhật danh sách hội thoại
     setConversations((prev) => [newConv, ...prev]);
   };
 
   /* ============================================================
-        📨 GỬI TIN NHẮN + STREAMING
+        📨 Gửi tin nhắn + streaming
      ============================================================ */
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !conversationId) return;
 
     const userText = input;
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: userText }]);
     setIsTyping(true);
 
-    const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/chat/stream`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          conversationId,
-          userId: USER_ID,
-          message: userText,
-        }),
-      }
-    );
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/chat/stream`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${storedUser?.accessToken || localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        conversationId,
+        userId: USER_ID,
+        message: userText,
+      }),
+    });
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
@@ -141,18 +140,16 @@ export default function AssistantChatPage() {
   };
 
   /* ============================================================
-        📌 AUTO SCROLL
+        📜 Auto scroll
      ============================================================ */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   /* ============================================================
-        📋 COPY TEXT
+        📋 Copy text
      ============================================================ */
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-  };
+  const copyToClipboard = (text) => navigator.clipboard.writeText(text);
 
   /* ============================================================
         🎨 UI
@@ -183,42 +180,30 @@ export default function AssistantChatPage() {
                   alt={assistant?.name}
                   className="w-14 h-14 rounded-full object-cover ring-4 ring-blue-500/20"
                 />
-                <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
               <div>
-                <h2
-                  className={`font-bold text-lg ${
-                    darkMode ? "text-white" : "text-gray-900"
-                  }`}
-                >
+                <h2 className={`font-bold text-lg ${darkMode ? "text-white" : "text-gray-900"}`}>
                   {assistant?.name || "Đang tải..."}
                 </h2>
-                <p className="text-sm text-green-500 font-medium">
-                  ● Đang hoạt động
-                </p>
               </div>
             </div>
+
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className={`p-2 rounded-lg ${
-                darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-              } transition`}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               {darkMode ? "☀️" : "🌙"}
             </button>
           </div>
         </div>
 
-        {/* New conversation button */}
+        {/* New conversation */}
         <div className="p-4">
           <button
             onClick={newConversation}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3.5 px-5 rounded-2xl transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-3"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-            </svg>
-            Cuộc trò chuyện mới
+            + Cuộc trò chuyện mới
           </button>
         </div>
 
@@ -228,27 +213,13 @@ export default function AssistantChatPage() {
             <div
               key={c.id}
               onClick={() => openConversation(c.id)}
-              className={`group mb-2 p-4 rounded-2xl cursor-pointer transition-all ${
-                c.id === conversationId
-                  ? darkMode
-                    ? "bg-gray-700 border border-blue-500/50"
-                    : "bg-blue-50 border border-blue-300"
-                  : darkMode
-                  ? "hover:bg-gray-700/70"
-                  : "hover:bg-gray-100"
-              }`}
+              className="mb-2 p-4 rounded-xl cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
             >
-              <p
-                className={`font-medium truncate ${
-                  darkMode ? "text-gray-200" : "text-gray-800"
-                }`}
-              >
+              <p className={`font-medium truncate ${darkMode ? "text-gray-200" : "text-gray-800"}`}>
                 {c.title || "Cuộc trò chuyện mới"}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                {c.createdAt
-                  ? format(new Date(c.createdAt), "dd/MM/yyyy HH:mm")
-                  : "—"}
+                {c.createdAt ? format(new Date(c.createdAt), "dd/MM/yyyy HH:mm") : "—"}
               </p>
             </div>
           ))}
@@ -257,175 +228,120 @@ export default function AssistantChatPage() {
 
       {/* ==================== MAIN CHAT ==================== */}
       <div className="flex-1 flex flex-col">
-        {/* Messages area */}
-        <div className="flex-1 overflow-y-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto space-y-6">
-            {/* Greeting */}
-            {messages.length === 0 && !isTyping && (
-              <div className="text-center mt-20 animate-fadeIn">
-                <img
-                  src={assistant?.avatarUrl}
-                  alt="AI"
-                  className="w-28 h-28 rounded-full mx-auto mb-6 shadow-2xl ring-8 ring-blue-500/10"
-                />
-                <h3
-                  className={`text-2xl font-bold ${
-                    darkMode ? "text-white" : "text-gray-800"
-                  }`}
-                >
-                  Chào bạn! Có điều gì mình có thể giúp bạn không?
-                </h3>
-                <p className="text-gray-500 mt-3">
-                  Mình sẵn sàng trò chuyện rồi đây ✨
-                </p>
-              </div>
-            )}
+        
+        {/* ======================================================
+              🟦 TRANG GIỚI THIỆU — CHƯA BẮT ĐẦU CUỘC TRÒ CHUYỆN
+           ====================================================== */}
+        {conversationId === null && (
+          <div className="flex-1 flex flex-col justify-center items-center text-center px-6">
+            <img
+              src={assistant?.avatarUrl}
+              alt="AI"
+              className="w-32 h-32 rounded-full shadow-xl mb-6 ring-4 ring-blue-500/20"
+            />
+            <h1 className={`text-3xl font-bold mb-3 ${darkMode ? "text-white" : "text-gray-800"}`}>
+              {assistant?.name}
+            </h1>
+            <p className="text-gray-500 max-w-xl leading-relaxed">
+              {assistant?.description || "Trợ lý AI sẵn sàng hỗ trợ bạn mọi lúc!"}
+            </p>
+            <button
+              onClick={newConversation}
+              className="mt-8 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl shadow-lg"
+            >
+              Bắt đầu cuộc trò chuyện →
+            </button>
+          </div>
+        )}
 
-            {/* Render messages */}
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`flex ${
-                  m.role === "user" ? "justify-end" : "justify-start"
-                } group`}
-              >
-                {m.role === "assistant" && (
-                  <div className="flex items-start gap-4 max-w-3xl">
+        {/* ======================================================
+                    CHAT UI — CHỈ HIỂN THỊ KHI ĐÃ CÓ conversationId
+           ====================================================== */}
+        {conversationId !== null && (
+          <>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-4 py-8">
+              <div className="max-w-4xl mx-auto space-y-6">
+
+                {messages.map((m, i) => (
+                  <div
+                    key={i}
+                    className={`flex ${
+                      m.role === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    {m.role === "assistant" && (
+                      <div className="flex items-start gap-4 max-w-3xl">
+                        <img
+                          src={assistant?.avatarUrl}
+                          alt="AI"
+                          className="w-10 h-10 rounded-full shadow-lg"
+                        />
+                        <div
+                          className={`px-6 py-4 rounded-3xl ${
+                            darkMode ? "bg-gray-800 text-white" : "bg-white shadow"
+                          }`}
+                        >
+                          <div className="whitespace-pre-wrap">{m.content}</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {m.role === "user" && (
+                      <div className="px-6 py-4 rounded-3xl bg-blue-600 text-white shadow max-w-3xl">
+                        <div className="whitespace-pre-wrap">{m.content}</div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isTyping && (
+                  <div className="flex items-start gap-4">
                     <img
                       src={assistant?.avatarUrl}
                       alt="AI"
-                      className="w-10 h-10 rounded-full shadow-lg ring-2 ring-blue-500/20"
+                      className="w-10 h-10 rounded-full shadow-lg"
                     />
-                    <div
-                      className={`px-6 py-4 rounded-3xl rounded-tl-lg ${
-                        darkMode
-                          ? "bg-gray-800 text-gray-100 border border-gray-700"
-                          : "bg-white text-gray-800 shadow-xl border border-gray-100"
-                      } relative`}
-                    >
-                      <div className="whitespace-pre-wrap leading-relaxed">
-                        {m.content}
-                      </div>
-                      <button
-                        onClick={() => copyToClipboard(m.content)}
-                        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition p-2 hover:bg-gray-200/50 rounded-lg"
-                      >
-                        📋
-                      </button>
+                    <div className="bg-gray-200 dark:bg-gray-700 px-5 py-4 rounded-3xl">
+                      ...
                     </div>
                   </div>
                 )}
 
-                {m.role === "user" && (
-                  <div className="px-6 py-4 rounded-3xl rounded-tr-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-xl max-w-3xl relative">
-                    <div className="whitespace-pre-wrap leading-relaxed">
-                      {m.content}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* Typing indicator */}
-            {isTyping && (
-              <div className="flex items-start gap-4">
-                <img
-                  src={assistant?.avatarUrl}
-                  alt="AI"
-                  className="w-10 h-10 rounded-full shadow-lg"
-                />
-                <div className="bg-gray-200 dark:bg-gray-700 px-5 py-4 rounded-3xl rounded-tl-lg">
-                  <div className="flex gap-2">
-                    <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></span>
-                    <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-100"></span>
-                    <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-200"></span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
-
-        {/* Input area */}
-        <div
-          className={`border-t ${
-            darkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"
-          } p-6`}
-        >
-          <div className="max-w-4xl mx-auto">
-            <div className="relative">
-              <div
-                className={`flex items-center gap-4 ${
-                  darkMode ? "bg-gray-700" : "bg-gray-100"
-                } rounded-3xl px-6 py-4 shadow-2xl transition-all ring-2 ring-transparent focus-within:ring-blue-500`}
-              >
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" &&
-                    !e.shiftKey &&
-                    (e.preventDefault(), sendMessage())
-                  }
-                  placeholder="Nhập tin nhắn của bạn..."
-                  className="flex-1 bg-transparent outline-none text-lg placeholder-gray-500"
-                />
-
-                <button
-                  onClick={sendMessage}
-                  disabled={!input.trim() || isTyping}
-                  className={`relative p-3 rounded-full transition-all transform ${
-                    input.trim() && !isTyping
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white scale-100 hover:scale-110 shadow-lg"
-                      : "bg-gray-400 text-gray-600 cursor-not-allowed"
-                  }`}
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                    />
-                  </svg>
-                  {input.trim() && !isTyping && (
-                    <span className="absolute inset-0 rounded-full bg-white/30 animate-ping"></span>
-                  )}
-                </button>
+                <div ref={messagesEndRef} />
               </div>
             </div>
 
-            <p className="text-center text-xs text-gray-500 mt-4">
-              Trợ lý AI • Có thể đưa ra thông tin không chính xác
-            </p>
-          </div>
-        </div>
-      </div>
+            {/* Input */}
+            <div className="border-t p-6 bg-white dark:bg-gray-800">
+              <div className="max-w-4xl mx-auto">
+                <div className="flex items-center gap-4 bg-gray-100 dark:bg-gray-700 px-6 py-4 rounded-3xl">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                    placeholder="Nhập tin nhắn..."
+                    className="flex-1 bg-transparent outline-none"
+                  />
 
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out;
-        }
-      `}</style>
+                  <button
+                    onClick={sendMessage}
+                    disabled={!input.trim()}
+                    className={`p-3 rounded-full ${
+                      input.trim()
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    }`}
+                  >
+                    Gửi
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
