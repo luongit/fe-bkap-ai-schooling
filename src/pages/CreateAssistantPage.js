@@ -7,23 +7,27 @@ import "react-toastify/dist/ReactToastify.css";
 export default function CreateAssistantPage() {
   const navigate = useNavigate();
 
+  
   const [categories, setCategories] = useState([]);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
   const [categoryId, setCategoryId] = useState("");
+
   const [avatar, setAvatar] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+
+  const [knowledgeFiles, setKnowledgeFiles] = useState([]);
 
   const [loading, setLoading] = useState(false);
 
-  // Modal & input state
+  
   const [showNewCategoryModal, setShowNewCategoryModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creatingCategory, setCreatingCategory] = useState(false);
 
-  // Load danh mục
+  
   useEffect(() => {
     api
       .get("/categories")
@@ -31,67 +35,49 @@ export default function CreateAssistantPage() {
       .catch(() => toast.error("Không tải được danh mục!"));
   }, []);
 
+  // ===== AVATAR =====
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     setAvatar(file);
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-    }
+    if (file) setAvatarPreview(URL.createObjectURL(file));
   };
 
-  // FE check trùng
-  const isDuplicateCategory = (name) => {
-    return categories.some(
+  // ===== KNOWLEDGE FILES =====
+  const handleKnowledgeFilesChange = (e) => {
+    setKnowledgeFiles(Array.from(e.target.files));
+  };
+
+  // ===== CATEGORY =====
+  const isDuplicateCategory = (name) =>
+    categories.some(
       (cat) => cat.label.toLowerCase() === name.toLowerCase().trim()
     );
-  };
 
-  // TẠO DANH MỤC MỚI
   const handleCreateCategory = async () => {
     const trimmed = newCategoryName.trim();
-
-    if (!trimmed) {
-      toast.error("Tên danh mục không được để trống!");
-      return;
-    }
-
-    if (isDuplicateCategory(trimmed)) {
-      toast.error("Danh mục này đã tồn tại!");
-      return;
-    }
+    if (!trimmed) return toast.error("Tên danh mục không được để trống!");
+    if (isDuplicateCategory(trimmed))
+      return toast.error("Danh mục này đã tồn tại!");
 
     setCreatingCategory(true);
-
     try {
       const res = await api.post("/categories/student-create", {
         name: trimmed,
       });
 
-      const newCat = res.data;
-
-      setCategories((prev) => [...prev, newCat]);
-      setCategoryId(newCat.id);
-
-      toast.success(`Đã tạo danh mục "${trimmed}" thành công!`);
-
+      setCategories((prev) => [...prev, res.data]);
+      setCategoryId(res.data.id);
+      toast.success(`Đã tạo danh mục "${trimmed}"`);
       setShowNewCategoryModal(false);
       setNewCategoryName("");
-    } catch (err) {
-      const backendMessage = err?.response?.data?.toString()?.toLowerCase() || "";
-
-      if (backendMessage.includes("không phù hợp")) {
-        toast.error("Tên danh mục không phù hợp với môi trường học đường!");
-      } else if (backendMessage.includes("đã tồn tại")) {
-        toast.error("Danh mục này đã tồn tại!");
-      } else {
-        toast.error("Không thể tạo danh mục! Vui lòng thử lại.");
-      }
+    } catch {
+      toast.error("Không thể tạo danh mục!");
     } finally {
       setCreatingCategory(false);
     }
   };
 
-  // SUBMIT TẠO TRỢ LÝ
+  // ===== SUBMIT =====
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -111,17 +97,26 @@ export default function CreateAssistantPage() {
     };
 
     const formData = new FormData();
-    formData.append("dto", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+    formData.append(
+      "dto",
+      new Blob([JSON.stringify(dto)], { type: "application/json" })
+    );
+
     if (avatar) formData.append("avatar", avatar);
 
+    knowledgeFiles.forEach((file) => {
+      formData.append("knowledgeFiles", file);
+    });
+
     try {
-      await api.post("/assistants", formData);
+      await api.post("/assistants/create-with-files", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-      toast.success("Tạo trợ lý thành công! 🎉");
-
+      toast.success("🎉 Tạo trợ lý AI thành công!");
       setTimeout(() => navigate("/assistants"), 800);
-    } catch (err) {
-      toast.error("Lỗi: Không thể tạo trợ lý!");
+    } catch {
+      toast.error("❌ Không thể tạo trợ lý!");
     } finally {
       setLoading(false);
     }
@@ -129,73 +124,91 @@ export default function CreateAssistantPage() {
 
   return (
     <div className="flex justify-center py-12 px-4 bg-gray-50 min-h-screen">
-
-      {/* ⭐ Toast container */}
       <ToastContainer position="top-right" autoClose={2200} />
 
-      <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-10 border border-gray-100">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">✨ Tạo trợ lý AI mới</h1>
+      <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-10 border">
+        <h1 className="text-3xl font-bold mb-8">✨ Tạo Trợ Lý AI</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Avatar */}
-          <div className="flex items-center gap-6">
+          {/* AVATAR */}
+          <div className="flex gap-6 items-center">
             <div>
-              <label className="block font-medium mb-1">Ảnh đại diện</label>
+              <label className="font-medium block mb-1">Ảnh đại diện</label>
               <input type="file" accept="image/*" onChange={handleAvatarChange} />
             </div>
 
-            <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-              {preview ? (
-                <img src={preview} className="w-full h-full object-cover" />
+            <div className="w-24 h-24 rounded-2xl border overflow-hidden">
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  className="w-full h-full object-cover"
+                />
               ) : (
-                <div className="flex items-center justify-center w-full h-full text-gray-400">
+                <div className="flex items-center justify-center h-full text-gray-400">
                   Chưa có ảnh
                 </div>
               )}
             </div>
           </div>
 
-          {/* Name */}
+          {/* NAME */}
           <div>
-            <label className="block mb-1 font-medium">Tên trợ lý *</label>
+            <label className="font-medium">Tên trợ lý *</label>
             <input
-              className="w-full px-4 py-3 border rounded-2xl bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="Ví dụ: Bác Sĩ Tâm Lý Ấm Áp"
+              className="w-full px-4 py-3 border rounded-2xl bg-gray-50"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
             />
           </div>
 
-          {/* Description */}
+          {/* DESCRIPTION */}
           <div>
-            <label className="block mb-1 font-medium">Mô tả</label>
+            <label className="font-medium">Mô tả</label>
             <textarea
-              className="w-full px-4 py-3 border rounded-2xl bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-              rows="3"
-              placeholder="Giới thiệu nhân vật AI..."
+              className="w-full px-4 py-3 border rounded-2xl bg-gray-50"
+              rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
-          {/* Prompt */}
+          {/* PROMPT */}
           <div>
-            <label className="block mb-1 font-medium">System Prompt</label>
+            <label className="font-medium">System Prompt</label>
             <textarea
-              className="w-full px-4 py-3 border rounded-2xl bg-gray-50 focus:ring-2 focus:ring-purple-500 outline-none"
-              rows="5"
-              placeholder="Hãy mô tả tính cách và cách trả lời của trợ lý..."
+              className="w-full px-4 py-3 border rounded-2xl bg-gray-50"
+              rows={5}
               value={systemPrompt}
               onChange={(e) => setSystemPrompt(e.target.value)}
             />
           </div>
 
-          {/* Category */}
+          {/* KNOWLEDGE FILES */}
           <div>
-            <label className="block mb-1 font-medium">Danh mục *</label>
+            <label className="font-medium">
+              📚 Tài liệu kiến thức (PDF, DOCX, TXT)
+            </label>
+            <input
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.txt"
+              onChange={handleKnowledgeFilesChange}
+            />
+
+            {knowledgeFiles.length > 0 && (
+              <ul className="mt-2 text-sm text-gray-600 list-disc list-inside">
+                {knowledgeFiles.map((f, i) => (
+                  <li key={i}>{f.name}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* CATEGORY */}
+          <div>
+            <label className="font-medium">Danh mục *</label>
             <select
-              className="w-full px-4 py-3 border rounded-2xl bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-4 py-3 border rounded-2xl bg-gray-50"
               value={categoryId}
               onChange={(e) => {
                 if (e.target.value === "create-new") {
@@ -204,43 +217,37 @@ export default function CreateAssistantPage() {
                   setCategoryId(e.target.value);
                 }
               }}
-              required
             >
               <option value="">-- Chọn danh mục --</option>
-
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
                 </option>
               ))}
-
-              <option value="create-new">➕ Tạo danh mục mới...</option>
+              <option value="create-new">➕ Tạo danh mục mới</option>
             </select>
           </div>
 
-          {/* Submit */}
+          {/* SUBMIT */}
           <button
-            type="submit"
             disabled={loading}
-            className={`w-full py-4 mt-4 rounded-2xl text-white text-lg font-semibold 
-            bg-gradient-to-r from-blue-600 to-purple-600 transition shadow-lg
-            ${loading ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
+            className="w-full py-4 rounded-2xl text-white text-lg font-semibold
+            bg-gradient-to-r from-blue-600 to-purple-600"
           >
-            🚀 {loading ? "Đang tạo..." : "Tạo Trợ Lý AI"}
+            {loading ? "Đang tạo..." : "🚀 Tạo Trợ Lý AI"}
           </button>
         </form>
       </div>
 
-      {/* ⭐ Modal tạo danh mục */}
+      {/* CREATE CATEGORY MODAL */}
       {showNewCategoryModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl">
-            <h2 className="text-xl font-bold mb-4">➕ Tạo danh mục mới</h2>
+          <div className="bg-white p-6 rounded-2xl w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">➕ Tạo danh mục</h2>
 
             <input
               autoFocus
-              className="w-full px-4 py-3 border rounded-xl bg-gray-50 outline-none"
-              placeholder="Nhập tên danh mục..."
+              className="w-full px-4 py-3 border rounded-xl bg-gray-50"
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
             />
@@ -248,19 +255,16 @@ export default function CreateAssistantPage() {
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowNewCategoryModal(false)}
-                disabled={creatingCategory}
-                className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300"
+                className="px-4 py-2 rounded-xl bg-gray-200"
               >
                 Hủy
               </button>
-
               <button
                 onClick={handleCreateCategory}
                 disabled={creatingCategory}
-                className={`px-4 py-2 rounded-xl text-white 
-                ${creatingCategory ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"}`}
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white"
               >
-                {creatingCategory ? "Đang tạo..." : "Tạo danh mục"}
+                {creatingCategory ? "Đang tạo..." : "Tạo"}
               </button>
             </div>
           </div>
