@@ -142,11 +142,16 @@ export default function AiSubmissionPage() {
   }
 
   /* ------------------- UPLOAD BOX COMPONENT ------------------- */
-  const UploadBox = ({ label, icon: Icon, accept, onChange, file }) => (
+  const UploadBox = ({ label, icon: Icon, accept, onChange, file , description }) => (
     <div className="border-2 border-dashed border-purple-300 hover:border-purple-500 transition-colors rounded-2xl p-4 text-center bg-white/70 shadow-sm">
       <div className="flex flex-col items-center gap-2">
         <Icon className="w-8 h-8 text-purple-500" />
         <p className="font-semibold text-gray-700">{label}</p>
+        {description && (
+        <p className="text-xs text-gray-500 leading-relaxed">
+          {description}
+        </p>
+      )}
         <label className="cursor-pointer text-sm text-purple-600 hover:text-purple-800 underline">
           Chọn tệp
           <input
@@ -274,6 +279,7 @@ export default function AiSubmissionPage() {
                   accept="video/*"
                   file={video}
                   onChange={setVideo}
+                  description="Chấp nhận tệp video ! Dung lượng tệp nhỏ hơn 100MB."
                 />
                 <UploadBox
                   label="Slide của bài thi"
@@ -285,6 +291,7 @@ export default function AiSubmissionPage() {
                   "
                   file={slide}
                   onChange={setSlide}
+                  description="Chấp nhận tệp dạng PDF, PPT, PPTX !"
                 />
               </div>
             </div>
@@ -296,7 +303,7 @@ export default function AiSubmissionPage() {
                 className="flex items-center gap-2 px-6 py-2 border border-purple-500 text-purple-700 font-semibold rounded-lg hover:bg-purple-50 transition disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
               >
                 <Send className="h-5 w-5" />
-                {loading ? "Đang nộp..." : "Nộp Bài Thi"}
+                {loading ? "Đang nộp bài thi..." : "Nộp Bài Thi"}
               </button>
             </div>
           </form>
