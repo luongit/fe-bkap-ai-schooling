@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { login } from "../services/authService";
+
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -40,8 +42,15 @@ export default function LoginPage() {
     }
   };
 
+
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+
+    if (params.get("verified") === "true") {
+    toast.success("Kích hoạt tài khoản thành công!");
+    window.history.replaceState({}, "", window.location.pathname);
+  }
     const token = params.get("token");
 
     if (token) {
