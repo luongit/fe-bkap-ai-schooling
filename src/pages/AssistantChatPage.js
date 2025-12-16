@@ -104,9 +104,7 @@ export default function AssistantChatPage() {
     }
   };
 
-  /* ============================================================
-        📨 GỬI TIN NHẮN + STREAMING
-     ============================================================ */
+ 
   const sendMessage = async () => {
     if (!input.trim() || !conversationId) return;
 
@@ -174,16 +172,11 @@ export default function AssistantChatPage() {
     }
   };
 
-  /* ============================================================
-        📜 AUTO SCROLL
-     ============================================================ */
+ 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  /* ============================================================
-        📋 COPY TEXT
-     ============================================================ */
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -193,9 +186,7 @@ export default function AssistantChatPage() {
     }
   };
 
-  /* ============================================================
-        🎨 RENDER UI
-     ============================================================ */
+
   return (
     <div className={`flex h-screen overflow-hidden font-sans antialiased ${darkMode ? "bg-gray-950 text-white" : "bg-gray-50"} transition-colors duration-500`}>
       {/* ==================== SIDEBAR ==================== */}
