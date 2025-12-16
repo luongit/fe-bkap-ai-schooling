@@ -43,7 +43,7 @@ export default function AssistantListPage() {
     }
 
     console.log(" Gọi API lấy conversation của user:", userId);
-    api.get(`/conversations/user/${userId}`)
+    api.get(`/conversations/chatbot/user/${userId}`)
       .then((res) => {
         let unique = [];
         let used = new Set();
