@@ -1,0 +1,554 @@
+/* ✅ Không cần index.html: import font trực tiếp */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;500&display=swap");
+
+:root{
+  --bg0:#0b1220;
+  --bg1:#0a0f1c;
+  --panel: rgba(255,255,255,0.06);
+  --panel2: rgba(255,255,255,0.10);
+  --border: rgba(255,255,255,0.10);
+  --muted:#4e4ecb;
+
+  --paper:#fbfaf7;
+  --paper2:#f3f4f6;
+  --ink:#111827;
+
+  --radius: 18px;
+}
+
+/* ====== ROOT LAYOUT ====== */
+.sb-root{
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  overflow-x: hidden; 
+  background:
+    radial-gradient(1200px 600px at 30% -10%, rgba(99,102,241,0.25), transparent 60%),
+    radial-gradient(900px 500px at 80% 10%, rgba(34,211,238,0.22), transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+      --sb-text: #e5e7eb;
+  --sb-muted: #a1a1aa;
+  color: var(--sb-text);
+}
+
+
+/* ====== SIDEBAR ====== */
+.sb-sidebar{
+  border-right: 1px solid var(--border);
+  padding: 18px 14px;
+  background: rgba(0,0,0,0.15);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+.sb-side-header{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 10px 14px;
+}
+
+.sb-side-title{
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.2px;
+}
+
+.sb-status-pill{
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid var(--border);
+  color: #e5e7eb;
+}
+
+.sb-side-box{
+  margin: 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.06);
+  padding: 12px;
+}
+
+.sb-side-label{
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 8px;
+}
+
+.sb-prompt-preview{
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.9);
+  white-space: pre-wrap;
+}
+
+.sb-progress{
+  margin: 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.06);
+  padding: 12px;
+}
+
+.sb-progress-label{
+  font-size: 13px;
+  color: rgba(255,255,255,0.92);
+  margin-bottom: 10px;
+}
+
+.sb-progress-bar{
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.10);
+}
+
+.sb-progress-fill{
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(99,102,241,0.95), rgba(34,211,238,0.95));
+  transition: width 0.6s ease;
+}
+
+.sb-side-actions{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.sb-side-btn{
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.95);
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease;
+}
+.sb-side-btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.12); }
+.sb-side-btn:disabled{ opacity: .45; cursor: not-allowed; transform:none; }
+
+.sb-side-counter{
+  flex: 1;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.sb-counter-main{
+  font-weight: 700;
+  letter-spacing: .2px;
+  margin-bottom: 2px;
+}
+.sb-counter-sub{
+  font-size: 12px;
+  color: rgba(255,255,255,0.70);
+}
+
+.sb-side-foot{
+  margin: 10px;
+  padding: 10px 12px;
+  color: rgba(255,255,255,0.65);
+  font-size: 12px;
+}
+
+.sb-main{
+  position: relative;
+  padding: 20px 0 180px; /* ❗ bỏ padding ngang */
+  overflow-x: hidden;   /* ✅ khóa tràn */
+}
+
+
+/* ====== AUDIO BAR TOP ====== */
+.sb-audio-bar{
+  position: sticky;
+  top: 14px;
+  z-index: 30;
+  width: fit-content;
+  margin: 0 auto 16px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.22);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+.sb-audio-bar audio{
+  width: 520px;
+  max-width: 72vw;
+}
+
+/* ====== BOOK STAGE ====== */
+.sb-stage{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding: 10px 0 0;
+}
+
+/* BOOK CONTAINER */
+.book{
+  width: 920px;          /* ✅ khóa chiều ngang */
+  max-width: 92%;
+  height: 560px;         /* ✅ thấp lại */
+  aspect-ratio: 16 / 9;  /* ✅ giữ tỷ lệ đẹp */
+
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 12px 1fr;
+
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: transparent;
+
+  perspective: 1400px;
+  user-select: none;
+}
+
+
+.book:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 45px 100px rgba(0,0,0,0.55);
+}
+
+.page{
+  position: relative;
+  overflow: hidden;
+}
+
+.page-inner{
+  position: absolute;
+  inset: 0;
+}
+
+.page.left .page-inner{
+  background: var(--paper2);
+}
+
+.page.right .page-inner{
+  background: var(--paper);
+}
+
+/* spine */
+.spine{
+  background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.18));
+  box-shadow: inset 0 0 18px rgba(0,0,0,0.4);
+}
+
+/* IMAGE PAGE */
+.page-image{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 20px;
+}
+.page-image img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+}
+
+/* TEXT PAGE */
+.page-text{
+  font-family: "Source Serif 4", serif;
+  color: var(--ink);
+  padding: 52px 54px;
+  overflow: auto;
+}
+
+/* dropcap like Gemini */
+.dropcap-wrap{
+  font-size: 18px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+
+.dropcap-wrap::first-letter{
+  float: left;
+  font-size: 48px;
+  line-height: 0.9;
+  padding: 8px 10px 0 0;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* page numbers - show nicer on hover */
+.page-num{
+  position:absolute;
+  bottom: 16px;
+  font-size: 12px;
+  color: rgba(17,24,39,0.45);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all .18s ease;
+  font-family: Inter, system-ui;
+}
+.left-num{ left: 18px; }
+.right-num{ right: 18px; }
+
+.book:hover .page-num{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* hover zones like Gemini (cursor + subtle highlight) */
+.hover-zone{
+  position:absolute;
+  top:0;
+  bottom:0;
+  width: 50%;
+  z-index: 5;
+  pointer-events: none; /* ✅ không làm lệch layout */
+}
+.left-zone{ left:0; cursor: w-resize; }
+.right-zone{ right:0; cursor: e-resize; }
+
+.book:hover .left-zone{
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), transparent);
+}
+.book:hover .right-zone{
+  background: linear-gradient(270deg, rgba(255,255,255,0.06), transparent);
+}
+
+/* ====== PAGE FLIP ANIMATION ======
+   Mô phỏng lật "trang phải" giống Gemini:
+   overlay nằm trên trang phải rồi gập vào spine */
+.book::after{
+  content:"";
+  position:absolute;
+  top:0;
+  right:0;
+  width: calc((100% - 14px) / 2);
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transform-origin: left center;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.10), rgba(0,0,0,0.02) 35%, rgba(0,0,0,0.0)),
+    radial-gradient(600px 220px at 0% 40%, rgba(0,0,0,0.14), transparent 60%),
+    rgba(251,250,247,1);
+  box-shadow: -20px 0 40px rgba(0,0,0,0.18);
+  border-left: 1px solid rgba(0,0,0,0.08);
+}
+
+/* next flip */
+.book.flip-next::after{
+  opacity: 1;
+  animation: pageFlipNext 520ms ease-in-out forwards;
+}
+
+/* prev flip: overlay nằm bên trái và lật ra */
+.book.flip-prev::after{
+  right: auto;
+  left: 0;
+  transform-origin: right center;
+  opacity: 1;
+  animation: pageFlipPrev 520ms ease-in-out forwards;
+}
+
+@keyframes pageFlipNext{
+  0%   { transform: rotateY(0deg); filter: brightness(1); }
+  45%  { transform: rotateY(-80deg); filter: brightness(0.98); }
+  100% { transform: rotateY(-160deg); filter: brightness(0.95); opacity: 0; }
+}
+
+@keyframes pageFlipPrev{
+  0%   { transform: rotateY(0deg); filter: brightness(1); }
+  45%  { transform: rotateY(80deg); filter: brightness(0.98); }
+  100% { transform: rotateY(160deg); filter: brightness(0.95); opacity: 0; }
+}
+
+.book.is-flipping{
+  cursor: progress;
+}
+
+/* ====== EMPTY ====== */
+.sb-empty{
+  max-width: 720px;
+  margin: 90px auto 0;
+  padding: 22px 18px;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+.sb-empty-title{
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.sb-empty-sub{
+  color: rgba(255,255,255,0.75);
+  line-height: 1.6;
+}
+
+/* ====== CHAT (reuse from Home) ====== */
+.sb-chat{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 18px;
+
+  width: min(760px, 100%);
+  max-width: calc(100% - 32px);
+
+  z-index: 200;
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+.sb-chat-hint{
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+
+/* responsive */
+@media (max-width: 1100px){
+  .sb-root{ grid-template-columns: 1fr; }
+  .sb-sidebar{ display:none; }
+  .sb-chat{
+    left: 50%;
+    width: min(760px, calc(100vw - 32px));
+  }
+  .book{
+    width: 94%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+
+  .sb-audio-bar audio{
+    width: min(520px, calc(100vw - 64px));
+  }
+}
+.storybook-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  padding: 48px 0;
+}
+/* ===== READER TOP ===== */
+.sb-reader-top{
+  position: sticky;
+  top: 14px;
+  z-index: 20;
+
+  margin: 0 auto 16px;
+  width: 100%;
+  max-width: 920px; /* BẰNG KHỔ BOOK */
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+
+  padding: 12px 16px;
+  border-radius: 14px;
+
+  background: rgba(15,23,42,0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+/* LEFT */
+.sb-rt-left{
+  display:flex;
+  align-items:center;
+}
+.sb-rt-title{
+  font-weight:600;
+  font-size:14px;
+  color:#fff;
+  white-space:nowrap;
+}
+
+/* CENTER */
+.sb-rt-center{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.sb-rt-page{
+  font-size:13px;
+  opacity:.85;
+  min-width:52px;
+  text-align:center;
+}
+
+/* RIGHT */
+.sb-rt-right{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+}
+
+/* ICON BUTTON */
+.icon-btn{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:rgba(255,255,255,.12);
+  border:none;
+  color:#fff;
+  font-size:14px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:.2s;
+}
+.icon-btn:hover{
+  background:rgba(255,255,255,.22);
+}
+.icon-btn:disabled{
+  opacity:.4;
+  cursor:not-allowed;
+}
+
+/* VOLUME */
+.sb-volume{
+  width:80px;
+  accent-color:#60a5fa;
+}
+.icon-btn{
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.icon-btn:hover{
+  background: rgba(255,255,255,0.3);
+}
+
+.icon-btn:disabled{
+  opacity: .4;
+  cursor: not-allowed;
+}

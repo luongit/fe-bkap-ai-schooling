@@ -1,0 +1,99 @@
+/* ===== MODAL BACKDROP ===== */
+.sb-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(5,10,20,.92);
+  z-index: 9999;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* ===== MODAL READER ===== */
+.sb-reader{
+  width: 100vw;
+  height: 100vh;
+
+  background:
+    radial-gradient(1200px 600px at 30% -10%, rgba(99,102,241,0.25), transparent 60%),
+    radial-gradient(900px 500px at 80% 10%, rgba(34,211,238,0.22), transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+
+  display:flex;
+  flex-direction:column;
+}
+
+/* ===== BOOK (SAME AS MAIN) ===== */
+.sb-modal-book{
+  flex: 1;
+  margin: 16px auto 24px;
+
+  width: min(920px, 96vw);
+  height: 560px;
+
+  display: grid;
+  grid-template-columns: 1fr 12px 1fr;
+
+  border-radius: 22px;
+  overflow: hidden;
+
+  box-shadow: var(--shadow);
+  background: transparent;
+}
+
+/* reuse same page styles */
+.sb-modal-book .page{
+  position: relative;
+  overflow: hidden;
+}
+
+.sb-modal-book .page-inner{
+  position: absolute;
+  inset: 0;
+}
+
+.sb-modal-book .page.left .page-inner{
+  background: var(--paper2);
+}
+
+.sb-modal-book .page.right .page-inner{
+  background: var(--paper);
+}
+
+/* image */
+.sb-modal-book .page-image{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 20px;
+}
+
+.sb-modal-book .page-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:16px;
+}
+
+/* text – KHÔNG set lại font */
+.sb-modal-book .page-text{
+  padding: 52px 54px;
+  overflow:auto;
+}
+
+/* spine */
+.sb-modal-book .spine{
+  background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.18));
+  box-shadow: inset 0 0 18px rgba(0,0,0,.4);
+}
+.sb-reader-shell{
+  width: 100%;
+  height: 100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  /* ❗ quan trọng */
+  pointer-events: auto;
+}
