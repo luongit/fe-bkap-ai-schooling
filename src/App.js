@@ -36,7 +36,6 @@ import "./style/mobile.css";
 import "./components/css/Sidebar.css";
 import "./components/css/TopIntro.css";
 import StorybookCreatePage from "./pages/storybook/StorybookCreatePage";
-import StorybookHistoryPage from "./pages/storybook/StorybookHistoryPage";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -112,10 +111,7 @@ function App() {
               <Route path="/assistants/create" element={<CreateAssistantPage />} />
               <Route path="/assistants/:assistantId/chat" element={<AssistantChatPage />} />
 <Route path="/storybook/create" element={<StorybookCreatePage />} />
-<Route
-  path="/storybook/history"
-  element={<Navigate to="/storybook/create?tab=history" replace />}
-/>
+
 
               <Route
                 path="*"

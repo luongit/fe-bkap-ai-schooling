@@ -4,7 +4,6 @@ import ChatComposer from "../../components/ChatComposer";
 import "./storybook-create.css";
 import StorybookModal from "./StorybookModal";
 import { useSearchParams } from "react-router-dom";
-import StorybookHistoryPanel from "./StorybookHistoryPanel";
 
 export default function StorybookCreatePage() {
   const [prompt, setPrompt] = useState("");
