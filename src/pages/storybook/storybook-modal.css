@@ -2,44 +2,96 @@
 .sb-backdrop{
   position: fixed;
   inset: 0;
-  background: rgba(5,10,20,.92);
   z-index: 9999;
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background: radial-gradient(
+    circle at top,
+    rgba(15,23,42,.85),
+    rgba(2,6,23,.95)
+  );
+  backdrop-filter: blur(6px);
 }
+
 
 /* ===== MODAL READER ===== */
 .sb-reader{
-  width: 100vw;
-  height: 100vh;
+  position: absolute;
+  inset: 0;
+
+  display: grid;
+  grid-template-rows: auto 1fr;   /* top bar | book */
 
   background:
     radial-gradient(1200px 600px at 30% -10%, rgba(99,102,241,0.25), transparent 60%),
     radial-gradient(900px 500px at 80% 10%, rgba(34,211,238,0.22), transparent 55%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
-
-  display:flex;
-  flex-direction:column;
+    linear-gradient(180deg, #0f172a, #020617);
 }
-
 /* ===== BOOK (SAME AS MAIN) ===== */
+.sb-side-header{
+  padding: 6px 4px;
+  margin-bottom: 18px;
+
+  background: none;
+  border: none;
+}
 .sb-modal-book{
-  flex: 1;
-  margin: 16px auto 24px;
-
-  width: min(920px, 96vw);
-  height: 560px;
-
   display: grid;
   grid-template-columns: 1fr 12px 1fr;
 
-  border-radius: 22px;
-  overflow: hidden;
+  width: 980px;
+  max-width: calc(100% - 64px);
+  height: 560px;
 
-  box-shadow: var(--shadow);
-  background: transparent;
+  perspective: 1400px;
+}
+
+
+.sb-modal-book > .page,
+.sb-modal-book > .spine{
+  height: 560px;
+}
+
+.sb-modal-book{
+  display: grid;
+  grid-template-columns: 1fr 12px 1fr;
+  width: 980px;
+  max-width: calc(100% - 64px);
+}
+
+
+/* ===== MODAL TOP BAR – CĂN THEO BOOK ===== */
+.sb-backdrop .sb-reader-top{
+  width: 980px;                       /* = book */
+  max-width: calc(100% - 64px);
+  margin: 16px auto 12px;             /* center */
+
+  height: 52px;
+  padding: 0 16px;
+
+  border-radius: 16px;
+}
+.sb-reader-top{
+  width: 980px;
+  max-width: calc(100% - 64px);
+
+  height: 52px;
+  margin: 16px auto 12px;
+
+  padding: 0 16px;
+  border-radius: 16px;
+
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sb-reader-shell{
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* reuse same page styles */
