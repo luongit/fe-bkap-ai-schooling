@@ -5,8 +5,9 @@ import "./storybook-create.css";
 import StorybookModal from "./StorybookModal";
 import { useSearchParams } from "react-router-dom";
 import { API_BASE_URL } from "../../services/api";
+import { exportStorybookPdf } from "../../services/storybookExport";
 
-
+import { createPortal } from "react-dom";
 export default function StorybookCreatePage() {
   const [prompt, setPrompt] = useState("");
   const sb = useStorybook();
@@ -133,6 +134,8 @@ export default function StorybookCreatePage() {
      AUTO PLAY AUDIO WHEN PAGE CHANGES
   ====================== */
   useEffect(() => {
+    if (openReader) return;   // ⛔ RẤT QUAN TRỌNG
+
     if (!page?.audioUrl || !audioRef.current) return;
 
     const audio = audioRef.current;
@@ -188,13 +191,18 @@ export default function StorybookCreatePage() {
     else flipTo("next");
   };
   const exportPdf = async () => {
-    if (!sb.storybookId) return;
+    if (!sb.storybookId) {
+      console.warn("[PDF] No storybookId");
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
 
+      console.log("[PDF] Request export...");
+
       const res = await fetch(
-        `/api/storybooks/${sb.storybookId}/export/pdf`,
+        `${API_BASE_URL}/storybooks/${sb.storybookId}/export/pdf`,
         {
           method: "POST",
           headers: {
@@ -207,15 +215,29 @@ export default function StorybookCreatePage() {
         throw new Error("Export PDF failed");
       }
 
+      // ✅ NHẬN FILE
       const blob = await res.blob();
+
+      // ✅ TẠO LINK DOWNLOAD
       const url = window.URL.createObjectURL(blob);
 
-      window.open(url, "_blank");
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `storybook-${sb.storybookId}.pdf`; // 👈 tên file
+      document.body.appendChild(a);
+
+      console.log("[PDF] Trigger download");
+      a.click();
+
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error(err);
-      alert("Không thể xuất PDF (token hết hạn?)");
+      console.error("[PDF] Export error:", err);
+      alert("Không thể export PDF");
     }
   };
+
+
 
 
   /* =====================
@@ -352,31 +374,28 @@ export default function StorybookCreatePage() {
 
                 {/* DOWNLOAD PDF */}
                 <button
-                  className="icon-btn"
+                  className="icon-btn"  
                   title="Tải PDF"
-                  onClick={exportPdf}
+                  onClick={() => exportStorybookPdf(sb.storybookId)}
                 >
                   ⬇
                 </button>
+
 
 
                 {/* FULLSCREEN */}
                 <button
                   className="icon-btn"
                   title="Toàn màn hình"
-                  onClick={() => {
-                    // ⛔ DỪNG AUDIO MAIN TRƯỚC
-                    if (audioRef.current) {
-                      audioRef.current.pause();
-                      audioRef.current.currentTime = 0;
-                    }
-
-                    setIsPlaying(false);
+                  onClick={(e) => {
+                    e.stopPropagation();        // 🔥 QUAN TRỌNG
                     setOpenReader(true);
                   }}
                 >
                   ⛶
                 </button>
+
+
 
               </div>
 
@@ -470,12 +489,16 @@ export default function StorybookCreatePage() {
         )}
       </div>
 
-      {openReader && (
-        <StorybookModal
-          sb={sb}
-          onClose={() => setOpenReader(false)}
-        />
-      )}
+      {openReader &&
+        createPortal(
+          <StorybookModal
+            sb={sb}
+            onClose={() => setOpenReader(false)}
+          />,
+          document.body
+        )
+      }
+
 
 
     </>
