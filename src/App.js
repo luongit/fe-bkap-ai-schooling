@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Route, Routes, Link, useLocation ,Navigate} from "react-router-dom";
+import { Route, Routes, Link, useLocation, Navigate } from "react-router-dom";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -25,6 +25,9 @@ import VoiceChatGPT5 from "./pages/voice_ai/VoiceChatGPT5";
 import AiSubmissionEditPage from "./pages/AiSubmissionEditPage";
 import AiImageLibrary from "./pages/Library";
 import LoginRequiredBox from "./pages/LoginRequiredBox";
+import InstructorLessonsPage from "./pages/teach/InstructorLessonsPage";
+import InstructorLessonDetailsPage from "./pages/teach/InstructorLessonDetailsPage";
+
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -86,7 +89,7 @@ function App() {
                 <Route path="/ai-journalism/create" element={<AiJournalismCreatePage />} />
                 <Route path="/ai-journalism/edit/:contestId" element={<AiJournalismEditPage />} />
               </Route>
-              
+
               <Route path="/" element={<Home />} />
               <Route path="/403" element={<Error403Page />} />
               <Route path="/login" element={<LoginPage />} />
@@ -110,9 +113,20 @@ function App() {
               <Route path="/assistants" element={<AssistantListPage />} />
               <Route path="/assistants/create" element={<CreateAssistantPage />} />
               <Route path="/assistants/:assistantId/chat" element={<AssistantChatPage />} />
-<Route path="/storybook/create" element={<StorybookCreatePage />} />
+              <Route path="/storybook/create" element={<StorybookCreatePage />} />
 
-
+              <Route
+                path="/teacher/lessons"
+                element={
+                  <InstructorLessonsPage />
+                }
+              />
+              <Route
+                path="/teacher/lessons/:id"
+                element={
+                  <InstructorLessonDetailsPage />
+                }
+              />
               <Route
                 path="*"
                 element={
