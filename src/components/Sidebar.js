@@ -23,6 +23,9 @@ import {
   FiCreditCard,
   FiFolderMinus,
   FiFilm,
+  FiCpu,
+  FiMonitor,
+  FiAirplay
 } from "react-icons/fi";
 import "./css/Sidebar.css";
 import "../style/chat.css";
@@ -318,6 +321,70 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             })}
           </Group>
 
+
+          {/* <Group
+            icon={FiCpu}
+            title="Bài học AI"
+            open={openGroups.aiThinker}
+            onToggle={() => toggleGroup("aiThinker")}
+          >
+            <NavLink
+              to="/ontap/"
+              onClick={() => {
+                if (typeof onToggleSidebar === "function") onToggleSidebar();
+              }}
+              className={({ isActive }) =>
+                `side-item w-full flex items-center gap-2 px-2 py-1.5 ${isActive ? "bg-gray-200 text-gray-900 font-semibold" : ""
+                }`
+              }
+            >
+              <FiMonitor className="sidebar-icon" />
+              {!isCollapsed && (
+                <span className="text-base font-normal">Ôn tập Tuần 1</span>
+              )}
+            </NavLink>
+
+            <NavLink
+              to="/slide/"
+              onClick={() => {
+                if (typeof onToggleSidebar === "function") onToggleSidebar();
+              }}
+              className={({ isActive }) =>
+                `side-item w-full flex items-center gap-2 px-2 py-1.5 ${isActive ? "bg-gray-200 text-gray-900 font-semibold" : ""
+                }`
+              }
+            >
+              <FiAirplay className="sidebar-icon" />
+              {!isCollapsed && (
+                <span className="text-base font-normal">Slide bài giảng Tuần 1</span>
+              )}
+            </NavLink>
+          </Group>
+ */}
+
+          <Group
+            icon={FiCpu}
+            title="Học liệu AI"
+            open={openGroups.aiLearning}
+            onToggle={() => toggleGroup("aiLearning")}
+          >
+            <NavLink
+              to="/teacher/courses"
+              onClick={() => {
+                if (typeof onToggleSidebar === "function") onToggleSidebar();
+              }}
+              className={({ isActive }) =>
+                `side-item w-full flex items-center gap-2 px-2 py-1.5 ${isActive ? "bg-gray-200 text-gray-900 font-semibold" : ""
+                }`
+              }
+            >
+              <FiBookOpen className="sidebar-icon" />
+              {!isCollapsed && (
+                <span className="text-base font-normal">Khóa học của tôi</span>
+              )}
+            </NavLink>
+          </Group>
+
           <Group
             icon={FiEdit3}
             title="Sáng tạo cùng AI"
@@ -343,7 +410,7 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
             </NavLink>
 
             <NavLink
-              to="/assistants"
+              to="/assistantss"
               onClick={() => {
                 sessionStorage.removeItem("assistantHistory");
                 window.dispatchEvent(new Event("newAssistant"));
@@ -359,8 +426,6 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
                 <span className="text-base font-normal">Trợ lý AI cá nhân</span>
               )}
             </NavLink>
-
-
 
             <NavLink
               to="/generate-video"

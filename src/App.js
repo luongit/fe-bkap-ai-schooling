@@ -27,7 +27,11 @@ import AiImageLibrary from "./pages/Library";
 import LoginRequiredBox from "./pages/LoginRequiredBox";
 import InstructorLessonsPage from "./pages/teach/InstructorLessonsPage";
 import InstructorLessonDetailsPage from "./pages/teach/InstructorLessonDetailsPage";
-
+import Tuan01Lop6Ontap from "./pages/lop6/Tuan01Lop6Ontap";
+import Tuan01Slide6 from "./pages/giaovien/Tuan01SlideLop6";
+import TeacherCourseListPage from "./pages/teach/TeacherCourseListPage";
+import TeacherCourseDetailPage from "./pages/teach/TeacherCourseDetailPage";
+import TeacherLessonDetailPage from "./pages/teach/TeacherLessonDetailPage";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -116,15 +120,24 @@ function App() {
               <Route path="/storybook/create" element={<StorybookCreatePage />} />
 
               <Route
-                path="/teacher/lessons"
+                element={<RoleGuard allowRoles={["SYSTEM_ADMIN", "ADMIN", "TEACHER"]} />}
+              >
+                <Route path="/teacher/courses" element={<TeacherCourseListPage />} />
+                <Route path="/teacher/courses/:courseId" element={<TeacherCourseDetailPage />} />
+                <Route path="/teacher/lessons/:lessonId" element={<TeacherLessonDetailPage />} />
+              </Route>
+
+              <Route
+                path="/ontap/"
                 element={
-                  <InstructorLessonsPage />
+                  <Tuan01Lop6Ontap />
                 }
               />
+
               <Route
-                path="/teacher/lessons/:id"
+                path="/slide/"
                 element={
-                  <InstructorLessonDetailsPage />
+                  <Tuan01Slide6 />
                 }
               />
               <Route

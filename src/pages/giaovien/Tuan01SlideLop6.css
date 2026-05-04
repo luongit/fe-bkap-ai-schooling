@@ -1,0 +1,1576 @@
+/* Scoped slide CSS converted from original HTML */
+
+  
+.tuan01-slide-wrapper * { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+  
+.tuan01-slide-wrapper {
+    --tech-navy: #0F1B3D;
+    --tech-navy-soft: #1E2D5C;
+    --tech-blue: #2563EB;
+    --tech-blue-light: #60A5FA;
+    --tech-cyan: #06B6D4;
+    --accent-orange: #F97316;
+    --accent-amber: #F59E0B;
+    --accent-emerald: #10B981;
+    --accent-rose: #EC4899;
+    --accent-violet: #8B5CF6;
+    --paper: #F8FAFC;
+    --paper-warm: #FFFBF5;
+    --ink-dark: #0F172A;
+    --ink-mid: #334155;
+    --ink-soft: #64748B;
+    --line: #E2E8F0;
+    --shadow-sm: 0 2px 8px rgba(15, 27, 61, 0.06);
+    --shadow-md: 0 8px 24px rgba(15, 27, 61, 0.12);
+    --shadow-lg: 0 16px 48px rgba(15, 27, 61, 0.18);
+    --shadow-pop: 0 12px 32px rgba(37, 99, 235, 0.25);
+  }
+
+
+.tuan01-slide-wrapper .presentation {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 720px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+  /* ==================== CONTAINER SLIDE ==================== */
+  
+
+
+.tuan01-slide-wrapper .slide-stage {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  background: white;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  overflow: hidden;
+  transform-origin: center center;
+}
+
+
+  
+.tuan01-slide-wrapper .presentation.fullscreen .slide-stage {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+
+  /* ==================== TỪNG SLIDE ==================== */
+  
+.tuan01-slide-wrapper .slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 48px 64px;
+    display: none;
+    background:
+      radial-gradient(circle at 8% 8%, rgba(96, 165, 250, 0.12) 0%, transparent 35%),
+      radial-gradient(circle at 92% 92%, rgba(249, 115, 22, 0.10) 0%, transparent 35%),
+      linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+    overflow: hidden;
+  }
+
+
+  
+.tuan01-slide-wrapper .slide.active {
+    display: flex;
+    flex-direction: column;
+    animation: slideFadeIn 0.4s ease;
+  }
+
+
+  @keyframes slideFadeIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ==================== HEADER MỖI SLIDE ==================== */
+  
+.tuan01-slide-wrapper .slide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--line);
+    flex-shrink: 0;
+  }
+
+
+  
+.tuan01-slide-wrapper .slide-tag {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+
+  
+.tuan01-slide-wrapper .slide-tag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--tech-blue), var(--tech-cyan));
+    color: white;
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    box-shadow: var(--shadow-pop);
+  }
+
+
+  
+.tuan01-slide-wrapper .slide-tag-time {
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+
+  
+.tuan01-slide-wrapper .slide-tag-time strong {
+    color: var(--accent-orange);
+  }
+
+
+  
+.tuan01-slide-wrapper .slide-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+
+
+  
+.tuan01-slide-wrapper .slide-meta .code {
+    background: var(--tech-navy);
+    color: #fff;
+    padding: 5px 11px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+
+  /* ==================== TITLE & BODY ==================== */
+  
+.tuan01-slide-wrapper .slide-title {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--ink-dark);
+    margin-bottom: 6px;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+  }
+
+
+  
+.tuan01-slide-wrapper .slide-subtitle {
+    font-size: 17px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    margin-bottom: 22px;
+  }
+
+
+  
+.tuan01-slide-wrapper .slide-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+
+  /* ==================== FOOTER ==================== */
+  
+.tuan01-slide-wrapper .slide-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    margin-top: auto;
+    border-top: 1.5px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+
+  
+.tuan01-slide-wrapper .slide-footer .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+
+  
+.tuan01-slide-wrapper .brand-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: linear-gradient(135deg, var(--tech-blue), var(--accent-orange));
+  }
+
+
+  /* ==================== SLIDE BÌA ==================== */
+  
+.tuan01-slide-wrapper .slide.cover {
+    padding: 0;
+    background:
+      radial-gradient(circle at 18% 22%, rgba(37, 99, 235, 0.45) 0%, transparent 45%),
+      radial-gradient(circle at 82% 78%, rgba(249, 115, 22, 0.35) 0%, transparent 45%),
+      linear-gradient(135deg, #0F1B3D 0%, #1E2D5C 100%);
+    color: white;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(96, 165, 250, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(96, 165, 250, 0.08) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    align-items: center;
+    padding: 64px 72px;
+    gap: 32px;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-text { color: white; }
+
+
+  
+.tuan01-slide-wrapper .cover-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(96, 165, 250, 0.18);
+    border: 1.5px solid rgba(96, 165, 250, 0.4);
+    color: #BAE6FD;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-title {
+    font-size: 70px;
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #FFFFFF 0%, #BAE6FD 60%, #FED7AA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-subtitle {
+    font-size: 19px;
+    color: rgba(255, 255, 255, 0.78);
+    margin-bottom: 32px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-info-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 540px;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-info-item {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 14px 16px;
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-info-item strong {
+    display: block;
+    color: white;
+    font-size: 16px;
+    margin-top: 6px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 700;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-visual {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-bin-card {
+    position: relative;
+    width: 320px;
+    height: 380px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+    border: 1.5px solid rgba(255, 255, 255, 0.18);
+    border-radius: 24px;
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 0 28px 0;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-bin-card::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent-emerald);
+    box-shadow: 0 0 12px var(--accent-emerald);
+    animation: pulse 2s ease infinite;
+  }
+
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+  }
+
+  
+.tuan01-slide-wrapper .cover-bin-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 1.5px;
+    margin-top: 12px;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-bin-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    margin-top: 4px;
+  }
+
+
+  
+.tuan01-slide-wrapper .cover-footer {
+    position: absolute;
+    bottom: 24px;
+    left: 72px;
+    right: 72px;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+
+  /* ==================== SLIDE LỘ TRÌNH ==================== */
+  
+.tuan01-slide-wrapper .roadmap-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 8px;
+  }
+
+
+  
+.tuan01-slide-wrapper .roadmap-item {
+    position: relative;
+    padding: 18px 16px;
+    border-radius: 14px;
+    background: white;
+    border: 2px solid var(--line);
+    transition: all 0.2s;
+  }
+
+
+  
+.tuan01-slide-wrapper .roadmap-item.current {
+    background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+    border-color: var(--tech-blue);
+    box-shadow: var(--shadow-pop);
+  }
+
+
+  
+.tuan01-slide-wrapper .roadmap-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--tech-blue);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+
+  
+.tuan01-slide-wrapper .roadmap-item.current .roadmap-time { color: var(--accent-orange); }
+
+
+  
+.tuan01-slide-wrapper .roadmap-phase {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--ink-dark);
+    margin-bottom: 8px;
+  }
+
+
+  
+.tuan01-slide-wrapper .roadmap-detail {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+  }
+
+
+  
+.tuan01-slide-wrapper .roadmap-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--tech-blue), var(--tech-cyan));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+
+  
+.tuan01-slide-wrapper .roadmap-item.current .roadmap-icon {
+    background: linear-gradient(135deg, var(--accent-orange), var(--accent-amber));
+  }
+
+
+  /* ==================== HOOK ==================== */
+  
+.tuan01-slide-wrapper .hook-container {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 24px;
+    height: 100%;
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-video-area {
+    background: linear-gradient(135deg, #0F1B3D, #1E2D5C);
+    border-radius: 18px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-video-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(96, 165, 250, 0.25), transparent 50%);
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-video-area > * { position: relative; z-index: 1; }
+
+
+  
+.tuan01-slide-wrapper .hook-play-btn {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    box-shadow: 0 8px 24px rgba(96, 165, 250, 0.4);
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-play-btn::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 22px solid var(--tech-blue);
+    border-top: 14px solid transparent;
+    border-bottom: 14px solid transparent;
+    margin-left: 6px;
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-video-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-video-meta {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-video-desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.55;
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-q-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--tech-blue);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-q-item {
+    background: white;
+    border: 2px solid var(--line);
+    border-left: 4px solid var(--accent-orange);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--ink-dark);
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+
+  
+.tuan01-slide-wrapper .hook-q-item .q-num {
+    display: inline-block;
+    color: var(--accent-orange);
+    font-weight: 800;
+    margin-right: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+
+  /* ==================== EXPLORE — APPS GRID ==================== */
+  
+.tuan01-slide-wrapper .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+
+  
+.tuan01-slide-wrapper .app-card {
+    background: white;
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 14px;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+
+  
+.tuan01-slide-wrapper .app-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--tech-blue);
+    box-shadow: var(--shadow-pop);
+  }
+
+
+  
+.tuan01-slide-wrapper .app-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    font-weight: 800;
+  }
+
+
+  
+.tuan01-slide-wrapper .app-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink-dark);
+    margin-bottom: 4px;
+  }
+
+
+  
+.tuan01-slide-wrapper .app-fn {
+    font-size: 11px;
+    color: var(--ink-soft);
+    line-height: 1.35;
+  }
+
+
+  /* ==================== EXPLORE — DEFINITION CARD ==================== */
+  
+.tuan01-slide-wrapper .def-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    height: 100%;
+  }
+
+
+  
+.tuan01-slide-wrapper .def-card {
+    background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+    border: 2px solid var(--tech-blue-light);
+    border-radius: 18px;
+    padding: 26px 28px;
+    position: relative;
+  }
+
+
+  
+.tuan01-slide-wrapper .def-card.alt {
+    background: linear-gradient(135deg, #FFF7ED, #FED7AA);
+    border-color: #FDBA74;
+  }
+
+
+  
+.tuan01-slide-wrapper .def-quote {
+    font-size: 32px;
+    color: var(--tech-blue);
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+
+  
+.tuan01-slide-wrapper .def-card.alt .def-quote { color: var(--accent-orange); }
+
+
+  
+.tuan01-slide-wrapper .def-label {
+    font-size: 12px;
+    color: var(--tech-blue);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+
+  
+.tuan01-slide-wrapper .def-card.alt .def-label { color: var(--accent-orange); }
+
+
+  
+.tuan01-slide-wrapper .def-text {
+    font-size: 16px;
+    color: var(--ink-dark);
+    line-height: 1.55;
+    font-weight: 500;
+  }
+
+
+  
+.tuan01-slide-wrapper .def-text strong {
+    color: var(--tech-navy);
+    font-weight: 800;
+  }
+
+
+  
+.tuan01-slide-wrapper .def-tag {
+    display: inline-block;
+    background: white;
+    border: 1.5px solid var(--tech-blue);
+    color: var(--tech-blue);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 14px;
+    margin-right: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+
+  
+.tuan01-slide-wrapper .def-card.alt .def-tag {
+    border-color: var(--accent-orange);
+    color: var(--accent-orange);
+  }
+
+
+  /* ==================== APPLY — SĂN AI ==================== */
+  
+.tuan01-slide-wrapper .hunt-container {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 22px;
+    height: 100%;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-instructions {
+    background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+    border: 2px solid var(--accent-emerald);
+    border-radius: 16px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-step-num {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--accent-emerald);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-step-text {
+    font-size: 14px;
+    color: var(--ink-dark);
+    line-height: 1.5;
+    font-weight: 500;
+    padding-top: 4px;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-step-text strong { color: var(--tech-navy); font-weight: 700; }
+
+
+  
+.tuan01-slide-wrapper .hunt-table {
+    background: white;
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    padding: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-table-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--tech-navy);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-table-title::before {
+    content: '📋';
+    font-size: 18px;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-row {
+    display: grid;
+    grid-template-columns: 32px 1fr 1.2fr;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--line);
+    align-items: center;
+    font-size: 12px;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-row.head {
+    color: var(--ink-soft);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-row .num {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-row.example .num {
+    background: var(--accent-emerald);
+    color: white;
+  }
+
+
+  
+.tuan01-slide-wrapper .hunt-row.example .obj { color: var(--ink-dark); font-weight: 600; }
+
+  
+.tuan01-slide-wrapper .hunt-row.example .reason { color: var(--ink-mid); }
+
+
+  
+.tuan01-slide-wrapper .hunt-row .blank {
+    height: 16px;
+    border-bottom: 1.5px solid var(--line);
+  }
+
+
+  /* ==================== APPLY — DISCUSSION ==================== */
+  
+.tuan01-slide-wrapper .discuss-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+
+  
+.tuan01-slide-wrapper .discuss-card {
+    background: white;
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+
+
+  
+.tuan01-slide-wrapper .discuss-card.true-ai {
+    border-color: var(--accent-emerald);
+    background: linear-gradient(180deg, #ECFDF5 0%, white 30%);
+  }
+
+
+  
+.tuan01-slide-wrapper .discuss-card.fake-ai {
+    border-color: var(--accent-rose);
+    background: linear-gradient(180deg, #FDF2F8 0%, white 30%);
+  }
+
+
+  
+.tuan01-slide-wrapper .discuss-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+
+  
+.tuan01-slide-wrapper .discuss-card.true-ai .discuss-card-title { color: var(--accent-emerald); }
+
+  
+.tuan01-slide-wrapper .discuss-card.fake-ai .discuss-card-title { color: var(--accent-rose); }
+
+
+  
+.tuan01-slide-wrapper .discuss-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+
+  
+.tuan01-slide-wrapper .discuss-list li {
+    font-size: 13px;
+    color: var(--ink-dark);
+    padding: 7px 0;
+    padding-left: 22px;
+    position: relative;
+    line-height: 1.45;
+  }
+
+
+  
+.tuan01-slide-wrapper .discuss-list li::before {
+    position: absolute;
+    left: 0;
+    top: 7px;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+
+  
+.tuan01-slide-wrapper .discuss-card.true-ai .discuss-list li::before { content: '✓'; color: var(--accent-emerald); }
+
+  
+.tuan01-slide-wrapper .discuss-card.fake-ai .discuss-list li::before { content: '✗'; color: var(--accent-rose); }
+
+
+  
+.tuan01-slide-wrapper .discuss-list li strong { font-weight: 700; color: var(--tech-navy); }
+
+
+  /* ==================== REFLECT ==================== */
+  
+.tuan01-slide-wrapper .reflect-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    height: 100%;
+  }
+
+
+  
+.tuan01-slide-wrapper .reflect-journal {
+    background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+    border: 2px solid var(--tech-blue-light);
+    border-radius: 16px;
+    padding: 22px 24px;
+  }
+
+
+  
+.tuan01-slide-wrapper .reflect-journal-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--tech-blue);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+
+  
+.tuan01-slide-wrapper .reflect-q {
+    background: white;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--ink-dark);
+    line-height: 1.5;
+    font-weight: 500;
+    border-left: 3px solid var(--tech-blue);
+  }
+
+
+  
+.tuan01-slide-wrapper .reflect-q-num {
+    color: var(--tech-blue);
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    margin-right: 6px;
+  }
+
+
+  
+.tuan01-slide-wrapper .homework-card {
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    border: 2px solid var(--accent-amber);
+    border-radius: 16px;
+    padding: 22px 24px;
+  }
+
+
+  
+.tuan01-slide-wrapper .homework-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #B45309;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+
+  
+.tuan01-slide-wrapper .homework-due {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #92400E;
+    margin-bottom: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+
+  
+.tuan01-slide-wrapper .homework-task {
+    background: white;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 13px;
+    color: var(--ink-dark);
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+
+
+  
+.tuan01-slide-wrapper .homework-task strong { color: #B45309; }
+
+
+  /* ==================== KẾT THÚC ==================== */
+  
+.tuan01-slide-wrapper .slide.completion {
+    padding: 0;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(37, 99, 235, 0.4) 0%, transparent 50%),
+      radial-gradient(circle at 75% 70%, rgba(249, 115, 22, 0.35) 0%, transparent 50%),
+      linear-gradient(135deg, #0F1B3D 0%, #1E2D5C 100%);
+    color: white;
+  }
+
+
+  
+.tuan01-slide-wrapper .completion-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 64px;
+    position: relative;
+    z-index: 2;
+  }
+
+
+  
+.tuan01-slide-wrapper .completion-badge {
+    background: linear-gradient(135deg, var(--accent-orange), var(--accent-amber));
+    color: white;
+    padding: 8px 22px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    margin-bottom: 22px;
+    text-transform: uppercase;
+    box-shadow: 0 12px 30px rgba(249, 115, 22, 0.4);
+  }
+
+
+  
+.tuan01-slide-wrapper .completion-title {
+    font-size: 64px;
+    font-weight: 900;
+    margin-bottom: 14px;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    background: linear-gradient(135deg, #FFFFFF, #BAE6FD);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+
+  
+.tuan01-slide-wrapper .completion-subtitle {
+    font-size: 19px;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 720px;
+    line-height: 1.5;
+    margin-bottom: 36px;
+  }
+
+
+  
+.tuan01-slide-wrapper .completion-next {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.18);
+    border-radius: 16px;
+    padding: 22px 32px;
+    backdrop-filter: blur(8px);
+    max-width: 560px;
+  }
+
+
+  
+.tuan01-slide-wrapper .completion-next-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #BAE6FD;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+
+
+  
+.tuan01-slide-wrapper .completion-next-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 6px;
+  }
+
+
+  
+.tuan01-slide-wrapper .completion-next-desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+  }
+
+
+  /* ==================== ĐIỀU HƯỚNG & ĐIỀU KHIỂN ==================== */
+  
+.tuan01-slide-wrapper .controls-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 27, 61, 0.92);
+    padding: 8px 12px;
+    border-radius: 999px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 100;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+
+  
+.tuan01-slide-wrapper .controls-bar.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+    pointer-events: none;
+  }
+
+
+  
+.tuan01-slide-wrapper .ctrl-btn {
+    width: 38px;
+    height: 38px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+  
+.tuan01-slide-wrapper .ctrl-btn:hover {
+    background: var(--tech-blue);
+    transform: scale(1.06);
+  }
+
+
+  
+.tuan01-slide-wrapper .ctrl-btn.primary {
+    background: linear-gradient(135deg, var(--tech-blue), var(--tech-cyan));
+    width: 44px;
+    height: 44px;
+  }
+
+
+  
+.tuan01-slide-wrapper .slide-counter {
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 0 14px;
+    font-family: 'JetBrains Mono', monospace;
+    min-width: 64px;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+
+  /* ==================== PROGRESS DOTS ==================== */
+  
+.tuan01-slide-wrapper .progress-dots {
+    position: fixed;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 7px;
+    z-index: 100;
+    transition: opacity 0.3s;
+  }
+
+
+  
+.tuan01-slide-wrapper .progress-dots.hidden { opacity: 0; pointer-events: none; }
+
+
+  
+.tuan01-slide-wrapper .dot {
+    width: 36px;
+    height: 5px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.18);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+
+  
+.tuan01-slide-wrapper .dot.active {
+    background: linear-gradient(90deg, var(--tech-blue), var(--tech-cyan));
+    width: 56px;
+  }
+
+
+  
+.tuan01-slide-wrapper .dot.completed { background: rgba(96, 165, 250, 0.5); }
+
+
+  /* ==================== TEACHER NOTES PANEL ==================== */
+  
+.tuan01-slide-wrapper .teacher-notes {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 400px;
+    height: 100vh;
+    background: rgba(15, 27, 61, 0.97);
+    color: white;
+    padding: 28px 26px;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s;
+    z-index: 200;
+    border-left: 2px solid var(--tech-blue);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.4);
+  }
+
+
+  
+.tuan01-slide-wrapper .teacher-notes.show { transform: translateX(0); }
+
+
+  
+.tuan01-slide-wrapper .teacher-notes h4 {
+    color: var(--tech-blue-light);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(96, 165, 250, 0.25);
+    font-size: 16px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+
+  
+.tuan01-slide-wrapper .teacher-notes-content { font-size: 13.5px; line-height: 1.6; }
+
+  
+.tuan01-slide-wrapper .teacher-notes-content p { margin-bottom: 12px; color: rgba(255,255,255,0.92); }
+
+  
+.tuan01-slide-wrapper .teacher-notes-content strong { color: var(--accent-amber); }
+
+  
+.tuan01-slide-wrapper .teacher-notes-content em { color: #BAE6FD; font-style: italic; }
+
+
+  
+.tuan01-slide-wrapper .notes-section-title {
+    color: var(--accent-orange);
+    font-weight: 800;
+    margin-top: 14px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+
+  
+.tuan01-slide-wrapper .teacher-notes-content ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 12px;
+  }
+
+  
+.tuan01-slide-wrapper .teacher-notes-content li {
+    margin-bottom: 6px;
+    padding-left: 18px;
+    position: relative;
+  }
+
+  
+.tuan01-slide-wrapper .teacher-notes-content li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--tech-blue-light);
+    font-weight: 800;
+  }
+
+
+  /* ==================== HELP OVERLAY ==================== */
+  
+.tuan01-slide-wrapper .help-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 27, 61, 0.85);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+  }
+
+
+  
+.tuan01-slide-wrapper .help-overlay.show { display: flex; }
+
+
+  
+.tuan01-slide-wrapper .help-card {
+    background: white;
+    padding: 36px 40px;
+    border-radius: 20px;
+    max-width: 540px;
+    width: 92%;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+  }
+
+
+  
+.tuan01-slide-wrapper .help-card h2 {
+    color: var(--ink-dark);
+    margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 800;
+    text-align: center;
+  }
+
+
+  
+.tuan01-slide-wrapper .help-shortcuts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 22px 0;
+  }
+
+
+  
+.tuan01-slide-wrapper .help-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: var(--paper);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--ink-dark);
+  }
+
+
+  
+.tuan01-slide-wrapper .key-cap {
+    background: var(--tech-navy);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 32px;
+    text-align: center;
+  }
+
+
+  
+.tuan01-slide-wrapper .help-close {
+    background: linear-gradient(135deg, var(--tech-blue), var(--tech-cyan));
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+    width: 100%;
+    margin-top: 8px;
+    box-shadow: var(--shadow-pop);
+  }
+
+
+  /* ==================== PRINT ==================== */
+  @media print {
+    
+.tuan01-slide-wrapper .controls-bar, .tuan01-slide-wrapper .progress-dots, .tuan01-slide-wrapper .teacher-notes, .tuan01-slide-wrapper .help-overlay {
+      display: none !important;
+    }
+
+    
+.tuan01-slide-wrapper .slide-stage {
+      width: 100% !important;
+      height: auto !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+  }
+
+  @media (max-width: 768px) {
+    
+.tuan01-slide-wrapper .teacher-notes { display: none; }
+
+  }
+
+.tuan01-slide-wrapper .teacher-notes-section { color: var(--tech-blue-light); font-weight: 800; margin-bottom: 14px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.tuan01-slide-wrapper .help-subtitle { text-align: center; color: var(--ink-soft); margin-bottom: 16px; font-size: 13px; }
+.tuan01-slide-wrapper .progress-dots .dot { border: 0; padding: 0; }
+.tuan01-slide-wrapper { display:block; }
