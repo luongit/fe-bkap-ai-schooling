@@ -28,11 +28,13 @@ import {
   List,
   ListItem,
   Divider,
+  Pagination,
   useTheme,
   alpha,
 } from "@mui/material";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
+const LESSON_PAGE_SIZE = 8;
 
 function getToken() {
   const userStr = localStorage.getItem("user");
@@ -161,6 +163,7 @@ export default function TeacherCourseDetailPage() {
   const [loading, setLoading] = useState(true);
 
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
+  const [lessonPage, setLessonPage] = useState(1);
 
   const videos = useMemo(() => {
     return parseCourseVideos(course?.videoUrl);
@@ -174,6 +177,16 @@ export default function TeacherCourseDetailPage() {
 
   const canPrevVideo = selectedVideoIndex > 0;
   const canNextVideo = selectedVideoIndex < videos.length - 1;
+
+  const totalLessonPages = Math.max(
+    1,
+    Math.ceil(lessons.length / LESSON_PAGE_SIZE)
+  );
+
+  const pagedLessons = useMemo(() => {
+    const start = (lessonPage - 1) * LESSON_PAGE_SIZE;
+    return lessons.slice(start, start + LESSON_PAGE_SIZE);
+  }, [lessons, lessonPage]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -223,6 +236,7 @@ export default function TeacherCourseDetailPage() {
       setCourse(courseData || null);
       setLessons(lessonsRes.data || []);
       setSelectedVideoIndex(0);
+      setLessonPage(1);
     } catch (error) {
       console.error("Lỗi tải chi tiết khóa học:", error);
 
@@ -235,6 +249,7 @@ export default function TeacherCourseDetailPage() {
 
       setCourse(null);
       setLessons([]);
+      setLessonPage(1);
     } finally {
       setLoading(false);
     }
@@ -749,7 +764,8 @@ export default function TeacherCourseDetailPage() {
                                 sx={{
                                   color: "white",
                                   fontSize: 34,
-                                  filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.4))",
+                                  filter:
+                                    "drop-shadow(0 2px 6px rgba(0,0,0,0.4))",
                                 }}
                               />
                             </Box>
@@ -839,68 +855,96 @@ export default function TeacherCourseDetailPage() {
       >
         <CardContent sx={{ p: 0 }}>
           <Box sx={{ p: 3, pb: 1 }}>
-            <Typography
-              variant="h6"
-              fontWeight={800}
-              sx={{ color: "#1a237e" }}
+            <Stack
+              direction={{ xs: "column", md: "row" }}
+              justifyContent="space-between"
+              alignItems={{ xs: "flex-start", md: "center" }}
+              spacing={1}
             >
-              Danh sách bài học
-            </Typography>
+              <Box>
+                <Typography
+                  variant="h6"
+                  fontWeight={800}
+                  sx={{ color: "#1a237e" }}
+                >
+                  Danh sách bài học
+                </Typography>
 
-            <Typography variant="body2" color="text.secondary">
-              Chọn bài học để xem tài liệu chi tiết
-            </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Chọn bài học để xem tài liệu chi tiết
+                </Typography>
+              </Box>
+
+              {lessons.length > 0 && (
+                <Chip
+                  label={`${lessons.length} bài học`}
+                  size="small"
+                  sx={{
+                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                    color: theme.palette.primary.dark,
+                    fontWeight: 700,
+                  }}
+                />
+              )}
+            </Stack>
           </Box>
 
           <List sx={{ p: 2 }}>
-            {lessons.length > 0 ? (
-              lessons.map((lesson, index) => (
-                <React.Fragment key={lesson.id}>
-                  <ListItem
-                    onClick={() => navigate(`/teacher/lessons/${lesson.id}`)}
-                    sx={{
-                      borderRadius: 2,
-                      cursor: "pointer",
-                      transition: "all 0.2s",
-                      "&:hover": {
-                        bgcolor: alpha(theme.palette.primary.main, 0.05),
-                      },
-                    }}
-                  >
-                    <Stack
-                      direction="row"
-                      spacing={2}
-                      alignItems="center"
-                      sx={{ width: "100%" }}
+            {pagedLessons.length > 0 ? (
+              pagedLessons.map((lesson, index) => {
+                const globalIndex =
+                  (lessonPage - 1) * LESSON_PAGE_SIZE + index;
+
+                return (
+                  <React.Fragment key={lesson.id}>
+                    <ListItem
+                      onClick={() => navigate(`/teacher/lessons/${lesson.id}`)}
+                      sx={{
+                        borderRadius: 2,
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        "&:hover": {
+                          bgcolor: alpha(theme.palette.primary.main, 0.05),
+                        },
+                      }}
                     >
-                      <Avatar
-                        sx={{
-                          bgcolor: alpha(theme.palette.primary.main, 0.12),
-                          color: theme.palette.primary.dark,
-                          fontWeight: 800,
-                        }}
+                      <Stack
+                        direction="row"
+                        spacing={2}
+                        alignItems="center"
+                        sx={{ width: "100%" }}
                       >
-                        {lesson.lessonOrder || index + 1}
-                      </Avatar>
+                        <Avatar
+                          sx={{
+                            bgcolor: alpha(theme.palette.primary.main, 0.12),
+                            color: theme.palette.primary.dark,
+                            fontWeight: 800,
+                          }}
+                        >
+                          {lesson.lessonOrder || globalIndex + 1}
+                        </Avatar>
 
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography fontWeight={700} noWrap>
-                          {lesson.name}
-                        </Typography>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography fontWeight={700} noWrap>
+                            {lesson.name}
+                          </Typography>
 
-                        <Typography variant="caption" color="text.secondary">
-                          {lesson.code} • Khối {lesson.grade} • Tháng{" "}
-                          {lesson.teachingMonth}
-                        </Typography>
-                      </Box>
+                          <Typography variant="caption" color="text.secondary">
+                            {lesson.code} • Khối {lesson.grade} • Tháng{" "}
+                            {lesson.teachingMonth}
+                          </Typography>
+                        </Box>
 
-                      <DescriptionIcon color="action" />
-                    </Stack>
-                  </ListItem>
+                        <DescriptionIcon color="action" />
+                      </Stack>
+                    </ListItem>
 
-                  {index < lessons.length - 1 && <Divider sx={{ my: 1 }} />}
-                </React.Fragment>
-              ))
+                    {index < pagedLessons.length - 1 && (
+                      <Divider sx={{ my: 1 }} />
+                    )}
+                  </React.Fragment>
+                );
+              })
             ) : (
               <Paper
                 variant="outlined"
@@ -917,6 +961,29 @@ export default function TeacherCourseDetailPage() {
               </Paper>
             )}
           </List>
+
+          {lessons.length > LESSON_PAGE_SIZE && (
+            <Stack alignItems="center" sx={{ px: 2, pb: 3 }}>
+              <Pagination
+                count={totalLessonPages}
+                page={lessonPage}
+                onChange={(_, value) => setLessonPage(value)}
+                color="primary"
+                size="medium"
+                shape="rounded"
+                showFirstButton
+                showLastButton
+              />
+
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mt: 1 }}
+              >
+                Trang {lessonPage} / {totalLessonPages} • Tổng {lessons.length} bài học
+              </Typography>
+            </Stack>
+          )}
         </CardContent>
       </Card>
     </Box>
