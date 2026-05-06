@@ -31,6 +31,36 @@ import {
 const PAGE_SIZE = 8;
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
 
+const GRADE_OPTIONS = [
+  { value: 0, label: "Mầm non" },
+  { value: 101, label: "Tiểu học" },
+  { value: 102, label: "THCS" },
+  { value: 103, label: "THPT" },
+  { value: 1, label: "Khối 1" },
+  { value: 2, label: "Khối 2" },
+  { value: 3, label: "Khối 3" },
+  { value: 4, label: "Khối 4" },
+  { value: 5, label: "Khối 5" },
+  { value: 6, label: "Khối 6" },
+  { value: 7, label: "Khối 7" },
+  { value: 8, label: "Khối 8" },
+  { value: 9, label: "Khối 9" },
+  { value: 10, label: "Khối 10" },
+  { value: 11, label: "Khối 11" },
+  { value: 12, label: "Khối 12" },
+];
+
+function getGradeLabel(grade) {
+  const numberGrade = Number(grade);
+  const found = GRADE_OPTIONS.find((item) => item.value === numberGrade);
+
+  if (found) return found.label;
+
+  return grade === null || grade === undefined || grade === ""
+    ? "Chưa phân loại"
+    : `Khối ${grade}`;
+}
+
 function getToken() {
   const userStr = localStorage.getItem("user");
 
@@ -78,7 +108,6 @@ export default function TeacherCourseListPage() {
   const [month, setMonth] = useState("");
   const [page, setPage] = useState(1);
 
-  const availableGrades = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   const availableMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
   const totalPages = Math.max(1, Math.ceil(courses.length / PAGE_SIZE));
@@ -103,7 +132,7 @@ export default function TeacherCourseListPage() {
       const response = await axios.get(`${API_URL}/teacher/courses`, {
         params: {
           keyword: keyword || null,
-          grade: grade || null,
+          grade: grade === "" ? null : grade,
           month: month || null,
         },
         headers: {
@@ -156,7 +185,6 @@ export default function TeacherCourseListPage() {
         px: { xs: 2, md: 6 },
       }}
     >
-      {/* Header */}
       <Box
         sx={{
           mb: 3,
@@ -177,11 +205,11 @@ export default function TeacherCourseListPage() {
               letterSpacing: "-0.03em",
             }}
           >
-            Khóa học của tôi
+            Học liệu của tôi
           </Typography>
 
           <Typography variant="body1" color="text.secondary">
-            Danh sách khóa học được mở theo khối lớp giáo viên phụ trách
+            Danh sách học liệu được mở theo khối/cấp học giáo viên được phân quyền
           </Typography>
         </Box>
 
@@ -209,7 +237,6 @@ export default function TeacherCourseListPage() {
         </Button>
       </Box>
 
-      {/* Filter */}
       <Card
         sx={{
           mb: 4,
@@ -227,7 +254,7 @@ export default function TeacherCourseListPage() {
             <TextField
               fullWidth
               variant="outlined"
-              placeholder="Tìm kiếm khóa học..."
+              placeholder="Tìm kiếm học liệu..."
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               InputProps={{
@@ -255,10 +282,10 @@ export default function TeacherCourseListPage() {
               }}
             >
               <FormControl fullWidth size="medium">
-                <InputLabel>Khối lớp</InputLabel>
+                <InputLabel>Khối/cấp học</InputLabel>
                 <Select
                   value={grade}
-                  label="Khối lớp"
+                  label="Khối/cấp học"
                   onChange={(e) => setGrade(e.target.value)}
                   sx={{ borderRadius: 2 }}
                 >
@@ -266,9 +293,9 @@ export default function TeacherCourseListPage() {
                     <em>Tất cả</em>
                   </MenuItem>
 
-                  {availableGrades.map((g) => (
-                    <MenuItem key={g} value={g}>
-                      Khối {g}
+                  {GRADE_OPTIONS.map((item) => (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.label}
                     </MenuItem>
                   ))}
                 </Select>
@@ -298,7 +325,6 @@ export default function TeacherCourseListPage() {
         </CardContent>
       </Card>
 
-      {/* Content */}
       {loading ? (
         <Paper
           sx={{
@@ -312,12 +338,11 @@ export default function TeacherCourseListPage() {
           <CircularProgress />
 
           <Typography sx={{ mt: 2 }} color="text.secondary">
-            Đang tải khóa học...
+            Đang tải học liệu...
           </Typography>
         </Paper>
       ) : pagedCourses.length > 0 ? (
         <>
-          {/* Course list - Udemy style */}
           <Box
             sx={{
               display: "grid",
@@ -335,7 +360,7 @@ export default function TeacherCourseListPage() {
           >
             {pagedCourses.map((course) => {
               const description =
-                course.description || "Chưa có mô tả khóa học.";
+                course.description || "Chưa có mô tả học liệu.";
 
               return (
                 <Card
@@ -362,8 +387,6 @@ export default function TeacherCourseListPage() {
                     },
                   }}
                 >
-                  {/* Thumbnail */}
-                  {/* Thumbnail */}
                   <Box
                     sx={{
                       position: "relative",
@@ -414,7 +437,6 @@ export default function TeacherCourseListPage() {
                     )}
                   </Box>
 
-                  {/* Content */}
                   <CardContent
                     sx={{
                       p: 2.2,
@@ -426,7 +448,6 @@ export default function TeacherCourseListPage() {
                       overflow: "hidden",
                     }}
                   >
-                    {/* Title */}
                     <Typography
                       title={course.name}
                       sx={{
@@ -436,13 +457,11 @@ export default function TeacherCourseListPage() {
                         lineHeight: "23px",
                         height: 46,
                         mb: 0.8,
-
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: "vertical",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
-
                         minWidth: 0,
                         maxWidth: "100%",
                         wordBreak: "break-word",
@@ -452,7 +471,6 @@ export default function TeacherCourseListPage() {
                       {course.name}
                     </Typography>
 
-                    {/* Description */}
                     <Typography
                       title={description}
                       sx={{
@@ -461,13 +479,11 @@ export default function TeacherCourseListPage() {
                         lineHeight: "20px",
                         height: 60,
                         mb: 1.4,
-
                         display: "-webkit-box",
                         WebkitLineClamp: 3,
                         WebkitBoxOrient: "vertical",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
-
                         minWidth: 0,
                         maxWidth: "100%",
                         whiteSpace: "normal",
@@ -480,7 +496,6 @@ export default function TeacherCourseListPage() {
 
                     <Box sx={{ flex: 1 }} />
 
-                    {/* Badges */}
                     <Stack
                       direction="row"
                       spacing={1}
@@ -493,7 +508,7 @@ export default function TeacherCourseListPage() {
                       }}
                     >
                       <Chip
-                        label={`Khối ${course.grade}`}
+                        label={getGradeLabel(course.grade)}
                         size="small"
                         sx={{
                           height: 26,
@@ -524,7 +539,6 @@ export default function TeacherCourseListPage() {
             })}
           </Box>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <Paper
               sx={{
@@ -552,7 +566,7 @@ export default function TeacherCourseListPage() {
                 >
                   {page}
                 </Box>{" "}
-                / {totalPages} • Tổng {courses.length} khóa học
+                / {totalPages} • Tổng {courses.length} học liệu
               </Typography>
 
               <Pagination
@@ -587,7 +601,7 @@ export default function TeacherCourseListPage() {
             />
 
             <Typography color="text.secondary">
-              Không tìm thấy khóa học phù hợp
+              Không tìm thấy học liệu phù hợp
             </Typography>
           </Stack>
         </Paper>

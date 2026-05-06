@@ -36,6 +36,36 @@ import {
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
 const LESSON_PAGE_SIZE = 8;
 
+const GRADE_OPTIONS = [
+  { value: 0, label: "Mầm non" },
+  { value: 101, label: "Tiểu học" },
+  { value: 102, label: "THCS" },
+  { value: 103, label: "THPT" },
+  { value: 1, label: "Khối 1" },
+  { value: 2, label: "Khối 2" },
+  { value: 3, label: "Khối 3" },
+  { value: 4, label: "Khối 4" },
+  { value: 5, label: "Khối 5" },
+  { value: 6, label: "Khối 6" },
+  { value: 7, label: "Khối 7" },
+  { value: 8, label: "Khối 8" },
+  { value: 9, label: "Khối 9" },
+  { value: 10, label: "Khối 10" },
+  { value: 11, label: "Khối 11" },
+  { value: 12, label: "Khối 12" },
+];
+
+function getGradeLabel(grade) {
+  const numberGrade = Number(grade);
+  const found = GRADE_OPTIONS.find((item) => item.value === numberGrade);
+
+  if (found) return found.label;
+
+  return grade === null || grade === undefined || grade === ""
+    ? "Chưa phân loại"
+    : `Khối ${grade}`;
+}
+
 function getToken() {
   const userStr = localStorage.getItem("user");
 
@@ -361,7 +391,7 @@ export default function TeacherCourseDetailPage() {
           </Button>
         </Stack>
       </Box>
-
+      {/* 
       <Card
         sx={{
           mb: 3,
@@ -409,19 +439,26 @@ export default function TeacherCourseDetailPage() {
             spacing={3}
             alignItems="flex-start"
           >
-            <Avatar
-              variant="rounded"
+            <Box
               sx={{
-                width: 72,
+                minWidth: 96,
                 height: 72,
-                bgcolor: theme.palette.primary.main,
-                fontWeight: 800,
-                fontSize: 24,
+                px: 2,
                 borderRadius: 3,
+                bgcolor: theme.palette.primary.main,
+                color: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 800,
+                fontSize: 16,
+                textAlign: "center",
+                lineHeight: 1.2,
+                flexShrink: 0,
               }}
             >
-              {course.grade}
-            </Avatar>
+              {getGradeLabel(course.grade)}
+            </Box>
 
             <Box sx={{ flex: 1 }}>
               <Typography
@@ -433,7 +470,7 @@ export default function TeacherCourseDetailPage() {
               </Typography>
 
               <Stack direction="row" spacing={1} sx={{ mb: 2 }} flexWrap="wrap">
-                <Chip label={`Khối ${course.grade}`} color="primary" />
+                <Chip label={getGradeLabel(course.grade)} color="primary" />
                 <Chip
                   label={`Tháng ${course.teachingMonth}`}
                   color="secondary"
@@ -460,6 +497,159 @@ export default function TeacherCourseDetailPage() {
                 variant="body1"
                 color="text.secondary"
                 sx={{ lineHeight: 1.7 }}
+              >
+                {course.description || "Chưa có mô tả khóa học."}
+              </Typography>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card> */}
+      <Card
+        sx={{
+          mb: 3,
+          borderRadius: 4,
+          boxShadow: "0px 4px 20px rgba(0,0,0,0.05)",
+          overflow: "hidden",
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "white",
+        }}
+      >
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            aspectRatio: "16 / 9",
+            overflow: "hidden",
+            bgcolor: "#eef4ff",
+          }}
+        >
+          {course.coverImage ? (
+            <>
+              <Box
+                component="img"
+                src={getFileUrl(course.coverImage)}
+                alt=""
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "80%",
+                  objectFit: "cover",
+                  filter: "blur(18px)",
+                  transform: "scale(1.08)",
+                  opacity: 0.45,
+                }}
+              />
+
+              <Box
+                component="img"
+                src={getFileUrl(course.coverImage)}
+                alt={course.name}
+                sx={{
+                  position: "relative",
+                  zIndex: 1,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  objectPosition: "center center",
+                  display: "block",
+                }}
+              />
+            </>
+          ) : (
+            <Stack
+              alignItems="center"
+              justifyContent="center"
+              sx={{ height: "100%" }}
+            >
+              <SchoolIcon
+                sx={{
+                  fontSize: 72,
+                  color: alpha(theme.palette.primary.main, 0.45),
+                }}
+              />
+            </Stack>
+          )}
+        </Box>
+        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={3}
+            alignItems={{ xs: "flex-start", sm: "center" }}
+          >
+            <Box
+              sx={{
+                minWidth: 104,
+                height: 64,
+                px: 2,
+                borderRadius: 3,
+                bgcolor: theme.palette.primary.main,
+                color: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 800,
+                fontSize: 16,
+                textAlign: "center",
+                lineHeight: 1.2,
+                flexShrink: 0,
+              }}
+            >
+              {getGradeLabel(course.grade)}
+            </Box>
+
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                variant="h4"
+                fontWeight={800}
+                sx={{
+                  color: "#1a237e",
+                  mb: 1,
+                  fontSize: { xs: 26, md: 34 },
+                  lineHeight: 1.2,
+                }}
+              >
+                {course.name}
+              </Typography>
+
+              <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                flexWrap="wrap"
+                sx={{ mb: 2 }}
+              >
+                <Chip label={getGradeLabel(course.grade)} color="primary" />
+                <Chip label={`Tháng ${course.teachingMonth}`} color="secondary" />
+                <Chip
+                  label={`${lessons.length} bài học`}
+                  icon={<MenuBookIcon />}
+                  variant="outlined"
+                />
+
+                {videos.length > 0 && (
+                  <Chip
+                    label={`${videos.length} video`}
+                    icon={<PlayCircleIcon />}
+                    sx={{
+                      bgcolor: alpha(theme.palette.error.main, 0.08),
+                      color: theme.palette.error.dark,
+                    }}
+                  />
+                )}
+              </Stack>
+
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{
+                  lineHeight: 1.7,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
               >
                 {course.description || "Chưa có mô tả khóa học."}
               </Typography>
@@ -930,8 +1120,8 @@ export default function TeacherCourseDetailPage() {
                           </Typography>
 
                           <Typography variant="caption" color="text.secondary">
-                            {lesson.code} • Khối {lesson.grade} • Tháng{" "}
-                            {lesson.teachingMonth}
+                            {lesson.code} • {getGradeLabel(lesson.grade)} •
+                            Tháng {lesson.teachingMonth}
                           </Typography>
                         </Box>
 
@@ -980,7 +1170,8 @@ export default function TeacherCourseDetailPage() {
                 color="text.secondary"
                 sx={{ mt: 1 }}
               >
-                Trang {lessonPage} / {totalLessonPages} • Tổng {lessons.length} bài học
+                Trang {lessonPage} / {totalLessonPages} • Tổng{" "}
+                {lessons.length} bài học
               </Typography>
             </Stack>
           )}
