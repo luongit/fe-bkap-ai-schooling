@@ -30,9 +30,11 @@ import ArchiveIcon from "@mui/icons-material/Archive";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
-import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import ArticleIcon from "@mui/icons-material/Article";
+import SlideshowIcon from "@mui/icons-material/Slideshow";
+import TableChartIcon from "@mui/icons-material/TableChart";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
 
@@ -102,6 +104,39 @@ function getFileUrl(path) {
   return `${getServerUrl()}${path}`;
 }
 
+function getOfficeViewerUrl(fileUrl) {
+  return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
+    fileUrl
+  )}`;
+}
+
+function isWordFile(fileType, fileName) {
+  return (
+    fileType === "DOC" ||
+    fileType === "DOCX" ||
+    fileName.endsWith(".doc") ||
+    fileName.endsWith(".docx")
+  );
+}
+
+function isPowerPointFile(fileType, fileName) {
+  return (
+    fileType === "PPT" ||
+    fileType === "PPTX" ||
+    fileName.endsWith(".ppt") ||
+    fileName.endsWith(".pptx")
+  );
+}
+
+function isExcelFile(fileType, fileName) {
+  return (
+    fileType === "XLS" ||
+    fileType === "XLSX" ||
+    fileName.endsWith(".xls") ||
+    fileName.endsWith(".xlsx")
+  );
+}
+
 function getPreviewUrl(file) {
   if (!file) return "";
 
@@ -118,6 +153,15 @@ function getPreviewUrl(file) {
     fileName.endsWith(".htm")
   ) {
     return getFileUrl(file.filePath);
+  }
+
+  if (
+    isWordFile(fileType, fileName) ||
+    isPowerPointFile(fileType, fileName) ||
+    isExcelFile(fileType, fileName)
+  ) {
+    const fileUrl = getFileUrl(file.filePath);
+    return getOfficeViewerUrl(fileUrl);
   }
 
   if (fileType === "ZIP" || fileType === "RAR") {
@@ -177,10 +221,22 @@ export default function TeacherLessonDetailPage() {
           }
         );
 
-        setLesson(response.data);
+        let lessonData = response.data;
 
-        if (response.data.files && response.data.files.length > 0) {
-          const firstPreviewable = response.data.files.find((file) =>
+        // BƯỚC XỬ LÝ MỚI: Lọc bỏ file ZIP/RAR gốc chưa giải nén
+        if (lessonData.files && lessonData.files.length > 0) {
+          lessonData.files = lessonData.files.filter((file) => {
+            const isArchive = file.fileType === "ZIP" || file.fileType === "RAR";
+            // Nếu là file nén (iSpring), chỉ giữ lại bản đã giải nén (isRoot = true)
+            // Nếu là các loại file khác (PDF, Word), giữ lại bình thường
+            return isArchive ? file.isRoot === true : true;
+          });
+        }
+
+        setLesson(lessonData);
+
+        if (lessonData.files && lessonData.files.length > 0) {
+          const firstPreviewable = lessonData.files.find((file) =>
             getPreviewUrl(file)
           );
 
@@ -220,7 +276,7 @@ export default function TeacherLessonDetailPage() {
     const url = getPreviewUrl(file);
 
     if (!url) {
-      alert("Định dạng này chưa hỗ trợ xem trước, vui lòng tải xuống!");
+      alert("Định dạng này chưa hỗ trợ xem trước!");
       return;
     }
 
@@ -231,17 +287,33 @@ export default function TeacherLessonDetailPage() {
     });
   };
 
-  const getFileIcon = (fileType) => {
-    if (fileType === "PDF") {
+  const getFileIcon = (fileType, fileName = "") => {
+    const type = String(fileType || "").toUpperCase();
+    const name = String(fileName || "").toLowerCase();
+
+    if (type === "PDF" || name.endsWith(".pdf")) {
       return <PictureAsPdfIcon sx={{ color: "#d32f2f" }} />;
     }
 
-    if (fileType === "HTML") {
+    if (type === "HTML" || name.endsWith(".html") || name.endsWith(".htm")) {
       return <HtmlIcon sx={{ color: "#e65100" }} />;
     }
 
-    if (fileType === "ZIP" || fileType === "RAR") {
-      return <ArchiveIcon sx={{ color: "#6a1b9a" }} />;
+    if (isWordFile(type, name)) {
+      return <ArticleIcon sx={{ color: "#1565c0" }} />;
+    }
+
+    if (isPowerPointFile(type, name)) {
+      return <SlideshowIcon sx={{ color: "#d84315" }} />;
+    }
+
+    if (isExcelFile(type, name)) {
+      return <TableChartIcon sx={{ color: "#2e7d32" }} />;
+    }
+
+    if (type === "ZIP" || type === "RAR") {
+      // Đã đổi icon cho bài giảng HTML5 thành dạng Slideshow trông đẹp mắt hơn Archive
+      return <SlideshowIcon sx={{ color: "#6a1b9a" }} />;
     }
 
     return <DescriptionIcon sx={{ color: theme.palette.primary.main }} />;
@@ -512,7 +584,6 @@ export default function TeacherLessonDetailPage() {
               {lesson.files?.map((file) => {
                 const isSelected = preview?.id === file.id;
                 const previewUrl = getPreviewUrl(file);
-                const downloadUrl = getFileUrl(file.filePath);
 
                 return (
                   <ListItem key={file.id} disablePadding sx={{ mb: 1.5 }}>
@@ -547,7 +618,7 @@ export default function TeacherLessonDetailPage() {
                             display: "flex",
                           }}
                         >
-                          {getFileIcon(file.fileType)}
+                          {getFileIcon(file.fileType, file.fileName)}
                         </Box>
 
                         <Box
@@ -565,41 +636,35 @@ export default function TeacherLessonDetailPage() {
                             color={isSelected ? "primary" : "text.primary"}
                             title={file.fileName}
                           >
-                            {file.fileName}
+                            {/* Chỉnh lại tên hiển thị cho đẹp, bỏ các đuôi .zip .rar nếu là bài giảng iSpring */}
+                            {file.fileType === "ZIP" || file.fileType === "RAR"
+                              ? file.fileName.replace(/\.(zip|rar)$/i, "")
+                              : file.fileName}
                           </Typography>
+
                           <Typography variant="caption" color="text.secondary">
-                            {file.fileType} •{" "}
+                            {file.fileType === "ZIP" || file.fileType === "RAR"
+                              ? "Bài giảng tương tác"
+                              : file.fileType}{" "}
+                            •{" "}
                             {file.fileSize
-                              ? `${(file.fileSize / 1024).toFixed(1)} KB`
+                              ? `${(file.fileSize / 1024 / 1024).toFixed(2)} MB`
                               : "File"}
                           </Typography>
                         </Box>
 
-                        <Stack direction="row">
-                          <Tooltip title="Xem trước">
-                            <span>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleViewFile(file)}
-                                color={isSelected ? "primary" : "default"}
-                                disabled={!previewUrl}
-                              >
-                                <VisibilityIcon fontSize="small" />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
-
-                          <Tooltip title="Tải xuống">
+                        <Tooltip title="Xem trước">
+                          <span>
                             <IconButton
                               size="small"
-                              href={downloadUrl}
-                              target="_blank"
-                              download
+                              onClick={() => handleViewFile(file)}
+                              color={isSelected ? "primary" : "default"}
+                              disabled={!previewUrl}
                             >
-                              <DownloadIcon fontSize="small" />
+                              <VisibilityIcon fontSize="small" />
                             </IconButton>
-                          </Tooltip>
-                        </Stack>
+                          </span>
+                        </Tooltip>
                       </Stack>
                     </Box>
                   </ListItem>
