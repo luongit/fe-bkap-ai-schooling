@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../services/apiToken";
 import { useNavigate, useParams } from "react-router-dom";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -66,33 +66,9 @@ function getGradeLabel(grade) {
     : `Khối ${grade}`;
 }
 
-function getToken() {
-  const userStr = localStorage.getItem("user");
-
-  if (userStr) {
-    try {
-      const userObj = JSON.parse(userStr);
-      return userObj.accessToken || userObj.token || "";
-    } catch {
-      return "";
-    }
-  }
-
-  const tokenStr = localStorage.getItem("token");
-
-  if (tokenStr) {
-    try {
-      const tokenObj = JSON.parse(tokenStr);
-      return tokenObj.accessToken || tokenObj.token || tokenStr;
-    } catch {
-      return tokenStr;
-    }
-  }
-
-  return localStorage.getItem("access_token") || "";
-}
-
 function getServerUrl() {
+  const API_URL =
+    process.env.REACT_APP_API_URL || "http://localhost:8080/api";
   return API_URL.replace(/\/api\/?$/, "");
 }
 
@@ -194,6 +170,8 @@ export default function TeacherCourseDetailPage() {
 
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0);
   const [lessonPage, setLessonPage] = useState(1);
+  const [totalLessons, setTotalLessons] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const videos = useMemo(() => {
     return parseCourseVideos(course?.videoUrl);
@@ -208,65 +186,43 @@ export default function TeacherCourseDetailPage() {
   const canPrevVideo = selectedVideoIndex > 0;
   const canNextVideo = selectedVideoIndex < videos.length - 1;
 
-  const totalLessonPages = Math.max(
-    1,
-    Math.ceil(lessons.length / LESSON_PAGE_SIZE)
-  );
+  const totalLessonPages = totalPages;
 
-  const pagedLessons = useMemo(() => {
-    const start = (lessonPage - 1) * LESSON_PAGE_SIZE;
-    return lessons.slice(start, start + LESSON_PAGE_SIZE);
-  }, [lessons, lessonPage]);
+  const pagedLessons = lessons;
 
   const fetchData = async () => {
     setLoading(true);
 
     try {
-      const token = getToken();
-
-      if (!token) {
-        console.error("Không tìm thấy token đăng nhập!");
-        return;
-      }
-
       let courseData = null;
-
       try {
-        const courseRes = await axios.get(
-          `${API_URL}/teacher/courses/${courseId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
+        const courseRes = await api.get(`/teacher/courses/${courseId}`);
         courseData = courseRes.data;
       } catch {
-        const listRes = await axios.get(`${API_URL}/teacher/courses`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const listRes = await api.get("/teacher/courses");
 
-        courseData = (listRes.data || []).find(
+        courseData = (listRes.data.content || []).find(
           (item) => String(item.id) === String(courseId)
         );
       }
 
-      const lessonsRes = await axios.get(
-        `${API_URL}/teacher/courses/${courseId}/lessons`,
+      const lessonsRes = await api.get(
+        `/teacher/courses/${courseId}/lessons`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
+          params: {
+            page: lessonPage - 1,
+            size: LESSON_PAGE_SIZE,
           },
         }
       );
 
+      const lessonsData = lessonsRes.data;
+
       setCourse(courseData || null);
-      setLessons(lessonsRes.data || []);
+      setLessons(lessonsData.content || []);
+      setTotalLessons(lessonsData.totalElements || 0);
+      setTotalPages(lessonsData.totalPages || 1);
       setSelectedVideoIndex(0);
-      setLessonPage(1);
     } catch (error) {
       console.error("Lỗi tải chi tiết khóa học:", error);
 
@@ -288,7 +244,7 @@ export default function TeacherCourseDetailPage() {
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line
-  }, [courseId]);
+  }, [courseId, lessonPage]);
 
   const handlePrevVideo = () => {
     if (!canPrevVideo) return;
@@ -391,119 +347,6 @@ export default function TeacherCourseDetailPage() {
           </Button>
         </Stack>
       </Box>
-      {/* 
-      <Card
-        sx={{
-          mb: 3,
-          borderRadius: 4,
-          boxShadow: "0px 4px 20px rgba(0,0,0,0.05)",
-          overflow: "hidden",
-        }}
-      >
-        <Box
-          sx={{
-            height: { xs: 180, md: 260 },
-            bgcolor: alpha(theme.palette.primary.main, 0.08),
-          }}
-        >
-          {course.coverImage ? (
-            <Box
-              component="img"
-              src={getFileUrl(course.coverImage)}
-              alt={course.name}
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <Stack
-              alignItems="center"
-              justifyContent="center"
-              sx={{ height: "100%" }}
-            >
-              <SchoolIcon
-                sx={{
-                  fontSize: 72,
-                  color: alpha(theme.palette.primary.main, 0.45),
-                }}
-              />
-            </Stack>
-          )}
-        </Box>
-
-        <CardContent sx={{ p: 3 }}>
-          <Stack
-            direction={{ xs: "column", md: "row" }}
-            spacing={3}
-            alignItems="flex-start"
-          >
-            <Box
-              sx={{
-                minWidth: 96,
-                height: 72,
-                px: 2,
-                borderRadius: 3,
-                bgcolor: theme.palette.primary.main,
-                color: "white",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 800,
-                fontSize: 16,
-                textAlign: "center",
-                lineHeight: 1.2,
-                flexShrink: 0,
-              }}
-            >
-              {getGradeLabel(course.grade)}
-            </Box>
-
-            <Box sx={{ flex: 1 }}>
-              <Typography
-                variant="h4"
-                fontWeight={800}
-                sx={{ color: "#1a237e", mb: 1 }}
-              >
-                {course.name}
-              </Typography>
-
-              <Stack direction="row" spacing={1} sx={{ mb: 2 }} flexWrap="wrap">
-                <Chip label={getGradeLabel(course.grade)} color="primary" />
-                <Chip
-                  label={`Tháng ${course.teachingMonth}`}
-                  color="secondary"
-                />
-                <Chip
-                  label={`${lessons.length} bài học`}
-                  icon={<MenuBookIcon />}
-                  variant="outlined"
-                />
-
-                {videos.length > 0 && (
-                  <Chip
-                    label={`${videos.length} video`}
-                    icon={<PlayCircleIcon />}
-                    sx={{
-                      bgcolor: alpha(theme.palette.error.main, 0.08),
-                      color: theme.palette.error.dark,
-                    }}
-                  />
-                )}
-              </Stack>
-
-              <Typography
-                variant="body1"
-                color="text.secondary"
-                sx={{ lineHeight: 1.7 }}
-              >
-                {course.description || "Chưa có mô tả khóa học."}
-              </Typography>
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card> */}
       <Card
         sx={{
           mb: 3,
@@ -623,7 +466,7 @@ export default function TeacherCourseDetailPage() {
                 <Chip label={getGradeLabel(course.grade)} color="primary" />
                 <Chip label={`Tháng ${course.teachingMonth}`} color="secondary" />
                 <Chip
-                  label={`${lessons.length} bài học`}
+                  label={`${totalLessons} bài học`}
                   icon={<MenuBookIcon />}
                   variant="outlined"
                 />
@@ -1065,9 +908,9 @@ export default function TeacherCourseDetailPage() {
                 </Typography>
               </Box>
 
-              {lessons.length > 0 && (
+              {totalLessons > 0 && (
                 <Chip
-                  label={`${lessons.length} bài học`}
+                  label={`${totalLessons} bài học`}
                   size="small"
                   sx={{
                     bgcolor: alpha(theme.palette.primary.main, 0.08),
@@ -1152,7 +995,7 @@ export default function TeacherCourseDetailPage() {
             )}
           </List>
 
-          {lessons.length > LESSON_PAGE_SIZE && (
+          {totalPages > 1 && (
             <Stack alignItems="center" sx={{ px: 2, pb: 3 }}>
               <Pagination
                 count={totalLessonPages}
@@ -1171,7 +1014,7 @@ export default function TeacherCourseDetailPage() {
                 sx={{ mt: 1 }}
               >
                 Trang {lessonPage} / {totalLessonPages} • Tổng{" "}
-                {lessons.length} bài học
+                {totalLessons} bài học
               </Typography>
             </Stack>
           )}

@@ -1,126 +1,84 @@
-/* App layout trên mobile */
+/* Mobile Overrides tập trung */
+
 @media (max-width: 920px) {
-  .app {
-    grid-template-columns: 1fr;
-  }
-  .main, .footer {
-    grid-column: 1;
-  }
-  
-  .brand {
-    font-size: 16px;
-    text-align: center;
-    margin: 0;
-  }
- 
-  /* Main scroll wrapper */
-  .main {
-    overflow: visible;       /* sticky/fixed hoạt động */
-    padding-bottom: 80px;    /* chừa chỗ cho input-area */
-  }
-
-  /* Input-area luôn sát đáy */
-  .input-area {
-    position: fixed !important;  /* dùng fixed trên mobile */
-    bottom: 0 !important;        /* sát đáy */
-    left: 0;
-    right: 0;
-    width: 100%;
-    max-width: 940px;
-    margin: 0 auto;
-    display: flex;
+  /* Layout */
+  .app-layout {
     flex-direction: column;
-    align-items: center;
-    background: var(--bg);
-    padding: 10px 0;              /* padding trên + dưới */
-    z-index: 10;                 /* luôn trên chat */
-    transform: none !important;   /* tắt hiệu ứng dịch lên xuống */
   }
 
+  .main-content {
+    padding-top: 10px;
+  }
 
-}
+  /* Header adjustments for mobile */
+  .header {
+    padding: 10px 15px !important;
+    justify-content: flex-end !important;
+  }
 
-@media (max-width: 768px) {
-  
-  .carousel {
-    gap: 8px;
+  .contest-header-btn {
+    padding: 6px 10px !important;
   }
-  .pill {
-    min-width: auto;
-    padding: 6px 10px;
-    font-size: 14px;
-  }
-  .brand {
-    font-size: 14px;
-  }
-}
 
-@media (max-width: 480px) {
-  .title {
-    font-size: 20px;
+  .contest-text {
+    display: none; /* Ẩn text trên mobile để tiết kiệm chỗ */
   }
-  .btn {
-    padding: 6px 10px;
-  }
-  .nav-btn {
-    width: 30px;
-    height: 30px;
-  }
-  .brand {
-    font-size: 12px;
-  }
-  .credit-display {
-    padding: 3px 5px;
-    font-size: 12px;
-  }
-  .credit-error {
-    font-size: 11px;
-  }
-}
-/* Responsive Breakpoints */
-@media (max-width: 1280px) {
-  .main {
-    padding: 20px 14px 120px;
-  }
-}
 
-@media (max-width: 1024px) {
-  .promo {
-    display: none;
-  }
-}
-
-
-
-@media (max-width: 768px) {
+  /* Chat Home overrides */
   .hero {
-    width: 100%;
-    padding-inline: 8px;
+    padding: 20px 10px !important;
   }
-  .carousel {
-    gap: 8px;
+
+  .chat-container {
+    padding: 0 10px !important;
   }
-  .pill {
-    min-width: auto;
-    padding: 6px 10px;
-    font-size: 14px;
+
+  .chat-message {
+    max-width: 90% !important;
   }
-  .brand {
-    font-size: 14px;
+
+  /* Vùng nhập liệu cố định ở đáy trên mobile */
+  .input-area {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #fff !important;
+    padding: 10px 10px 20px !important;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05) !important;
+    z-index: 40 !important;
+    transform: none !important;
+  }
+
+  .composer.grok-style {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .chat-scroll-wrapper {
+    padding-bottom: 100px !important; /* Chừa chỗ cho input-area cố định */
+  }
+
+  /* Tối ưu hóa font size */
+  .brand-name {
+    font-size: 1.1rem !important;
+  }
+
+  /* Fix cho các component cụ thể */
+  .credit-display {
+    font-size: 12px !important;
   }
 }
 
 @media (max-width: 480px) {
-
-  .btn {
-    padding: 6px 10px;
+  .chat-message {
+    max-width: 95% !important;
+    font-size: 14px !important;
   }
-  .nav-btn {
-    width: 30px;
-    height: 30px;
+  
+  .composer.grok-style textarea {
+    font-size: 14px !important;
   }
-  .brand {
-    font-size: 12px;
-  }
-
 }

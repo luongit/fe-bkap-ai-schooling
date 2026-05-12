@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../services/apiToken";
 // Icons
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SearchIcon from "@mui/icons-material/Search";
@@ -50,6 +50,8 @@ export default function InstructorLessonsPage() {
 
   // Pagination State
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
   const navigate = useNavigate();
 
@@ -57,31 +59,21 @@ export default function InstructorLessonsPage() {
   const loadLessons = async () => {
     setLoading(true);
     try {
-      const userStr = localStorage.getItem("user");
-      let token = "";
-      if (userStr) {
-        const userObj = JSON.parse(userStr);
-        token = userObj.accessToken;
-      }
-
-      if (!token) {
-        console.error("Không tìm thấy token đăng nhập!");
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.get(`${API_URL}/teacher/lessons`, {
+      const response = await api.get("/teachers/lessons", {
         params: {
           keyword: keyword || null,
           grade: grade || null,
           month: month || null,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
+          page: page - 1,
+          size: PAGE_SIZE,
         },
       });
 
-      setLessons(response.data || []);
+      // API trả về đối tượng Page { content: [], totalPages: ... }
+      const data = response.data;
+      setLessons(data.content || []);
+      setTotalPages(data.totalPages || 0);
+      setTotalElements(data.totalElements || 0);
     } catch (error) {
       console.error("Lỗi tải bài giảng:", error);
       if (error.response && (error.response.status === 403 || error.response.status === 401)) {
@@ -94,22 +86,15 @@ export default function InstructorLessonsPage() {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setPage(1);
-      loadLessons();
-    }, 500);
-    return () => clearTimeout(timer);
+    loadLessons();
     // eslint-disable-next-line
-  }, [keyword, grade, month]);
+  }, [keyword, grade, month, page]); // Thêm page vào dependency
 
   const availableGrades = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   const availableMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-  const totalPages = Math.ceil(lessons.length / PAGE_SIZE);
-  const pagedLessons = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return lessons.slice(start, start + PAGE_SIZE);
-  }, [lessons, page]);
+  // Logic phân trang cũ đã bỏ vì BE đã xử lý
+  const pagedLessons = lessons;
 
   const handleReload = () => {
     setKeyword("");

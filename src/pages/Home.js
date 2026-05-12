@@ -483,6 +483,13 @@ function Home() {
           remarkPlugins={[remarkMath, remarkGfm]}
           rehypePlugins={[rehypeHighlight, [rehypeKatex, { throwOnError: false, strict: false }]]}
           components={{
+            table({ children }) {
+              return (
+                <div className="table-wrapper">
+                  <table>{children}</table>
+                </div>
+              );
+            },
             code({ inline, className, children: codeChildren, ...props }) {
               const isBlock = !inline && typeof codeChildren === 'object' && String(codeChildren).includes('\n');
               const lang = className || '';
@@ -556,11 +563,7 @@ function Home() {
             </div>
           </div>
 
-          <div className="input-area" style={{
-            transform: chatHistory.length === 0 ? "translateY(-25vh)" : "translateY(0)",
-            transition: "transform 0.3s ease",
-            position: "relative",
-          }}>
+          <div className={`input-area ${chatHistory.length === 0 ? 'centered' : ''}`}>
             <div className="composer grok-style" role="group" aria-label="Hộp nhập câu hỏi">
               <textarea
                 value={input}

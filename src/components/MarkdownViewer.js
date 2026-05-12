@@ -10,6 +10,15 @@ function MarkdownViewer({ content }) {
         children={content}
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
+        components={{
+          table({ children }) {
+            return (
+              <div className="table-wrapper">
+                <table>{children}</table>
+              </div>
+            );
+          },
+        }}
       />
     </div>
   )

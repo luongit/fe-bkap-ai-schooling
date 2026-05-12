@@ -282,6 +282,15 @@ export default function WritingPage() {
           children={text}
           remarkPlugins={[remarkMath, remarkGfm]}
           rehypePlugins={[rehypeHighlight, [rehypeKatex, { throwOnError: false, strict: false }]]}
+          components={{
+            table({ children }) {
+              return (
+                <div className="table-wrapper">
+                  <table>{children}</table>
+                </div>
+              );
+            },
+          }}
         />
       );
     };

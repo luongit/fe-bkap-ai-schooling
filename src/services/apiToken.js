@@ -10,9 +10,51 @@ const api = axios.create({
   withCredentials: true, // gửi cookie refresh_token
 });
 
+/**
+ * Lấy token từ localStorage (hỗ trợ cả dạng string và object user)
+ */
+const getToken = () => {
+  const userStr = localStorage.getItem("user");
+  if (userStr) {
+    try {
+      const userObj = JSON.parse(userStr);
+      const t = userObj.accessToken || userObj.token;
+      if (t) return t;
+    } catch (e) {}
+  }
+
+  const tokenStr = localStorage.getItem("token");
+  if (tokenStr) {
+    try {
+      const tokenObj = JSON.parse(tokenStr);
+      return tokenObj.accessToken || tokenObj.token || tokenStr;
+    } catch (e) {
+      return tokenStr;
+    }
+  }
+
+  return localStorage.getItem("access_token") || "";
+};
+
+/**
+ * Cập nhật lại token mới vào localStorage
+ */
+const updateLocalToken = (newToken) => {
+  localStorage.setItem("token", newToken);
+  
+  const userStr = localStorage.getItem("user");
+  if (userStr) {
+    try {
+      const userObj = JSON.parse(userStr);
+      userObj.accessToken = newToken; // Đồng bộ vào user object
+      localStorage.setItem("user", JSON.stringify(userObj));
+    } catch (e) {}
+  }
+};
+
 // Trước mỗi request → gắn accessToken
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
 
   if (config.data instanceof FormData) {
@@ -40,11 +82,10 @@ api.interceptors.response.use(
           withCredentials: true,
         });
 
-        const newToken = res.data.accessToken;
+        const newToken = res.data.accessToken || res.data.token;
         if (newToken) {
-          localStorage.setItem("token", newToken);
+          updateLocalToken(newToken);
           original.headers.Authorization = `Bearer ${newToken}`;
-
           return api(original);
         }
 
@@ -53,7 +94,7 @@ api.interceptors.response.use(
 
         localStorage.clear();
         sessionStorage.clear();
-        window.location.href = "/auth/login";
+        window.location.href = "/login";
       }
     }
 

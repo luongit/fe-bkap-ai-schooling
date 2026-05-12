@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import api from "../../services/apiToken";
 import { useNavigate } from "react-router-dom";
 
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -61,33 +61,9 @@ function getGradeLabel(grade) {
     : `Khối ${grade}`;
 }
 
-function getToken() {
-  const userStr = localStorage.getItem("user");
-
-  if (userStr) {
-    try {
-      const userObj = JSON.parse(userStr);
-      return userObj.accessToken || userObj.token || "";
-    } catch {
-      return "";
-    }
-  }
-
-  const tokenStr = localStorage.getItem("token");
-
-  if (tokenStr) {
-    try {
-      const tokenObj = JSON.parse(tokenStr);
-      return tokenObj.accessToken || tokenObj.token || tokenStr;
-    } catch {
-      return tokenStr;
-    }
-  }
-
-  return localStorage.getItem("access_token") || "";
-}
-
 function getServerUrl() {
+  const API_URL =
+    process.env.REACT_APP_API_URL || "http://localhost:8080/api";
   return API_URL.replace(/\/api\/?$/, "");
 }
 
@@ -107,40 +83,29 @@ export default function TeacherCourseListPage() {
   const [grade, setGrade] = useState("");
   const [month, setMonth] = useState("");
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
   const availableMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-
-  const totalPages = Math.max(1, Math.ceil(courses.length / PAGE_SIZE));
-
-  const pagedCourses = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return courses.slice(start, start + PAGE_SIZE);
-  }, [courses, page]);
 
   const loadCourses = async () => {
     setLoading(true);
 
     try {
-      const token = getToken();
-
-      if (!token) {
-        console.error("Không tìm thấy token đăng nhập!");
-        setCourses([]);
-        return;
-      }
-
-      const response = await axios.get(`${API_URL}/teacher/courses`, {
+      const response = await api.get("/teacher/courses", {
         params: {
           keyword: keyword || null,
-          grade: grade === "" ? null : grade,
-          month: month || null,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
+          grade: grade || null,
+          teachingMonth: month || null,
+          page: page - 1,
+          size: PAGE_SIZE,
         },
       });
 
-      setCourses(response.data || []);
+      const data = response.data;
+      setCourses(data.content || []);
+      setTotalPages(data.totalPages || 0);
+      setTotalElements(data.totalElements || 0);
     } catch (error) {
       console.error("Lỗi tải khóa học:", error);
 
@@ -158,15 +123,11 @@ export default function TeacherCourseListPage() {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setPage(1);
-      loadCourses();
-    }, 500);
-
-    return () => clearTimeout(timer);
-
+    loadCourses();
     // eslint-disable-next-line
-  }, [keyword, grade, month]);
+  }, [keyword, grade, month, page]);
+
+  const pagedCourses = courses;
 
   const handleReload = () => {
     setKeyword("");
@@ -566,7 +527,7 @@ export default function TeacherCourseListPage() {
                 >
                   {page}
                 </Box>{" "}
-                / {totalPages} • Tổng {courses.length} học liệu
+                / {totalPages} • Tổng {totalElements} học liệu
               </Typography>
 
               <Pagination

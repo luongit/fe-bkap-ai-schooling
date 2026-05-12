@@ -44,15 +44,12 @@
   .chat-container {
     width: 100%;
     max-width: 800px;
-    /* ✅ nhỏ hơn, canh giữa */
     display: flex;
     flex-direction: column;
     gap: 12px;
     margin: 0 auto;
-    padding: 0 8px;
-    padding-bottom: 140px !important;
-    /* tăng khoảng đệm cho vùng chat */
-
+    padding: 0 16px;
+    padding-bottom: 40px !important;
   }
 
   /* Chat Inner */
@@ -230,6 +227,18 @@
 
   .chat-message td {
     background: var(--bg);
+  }
+
+  /* Responsive for tables and code */
+  .chat-message .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin: 10px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .chat-message table {
+    min-width: 400px; /* Đảm bảo bảng không quá nhỏ trên mobile */
   }
 
   /* Images in Chat */
@@ -553,6 +562,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: transform 0.3s ease;
+  }
+
+  .input-area.centered {
+    transform: translateY(-25vh);
   }
 
   .composer {

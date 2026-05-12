@@ -278,10 +278,16 @@ function Sidebar({ className, isOpen, onToggleSidebar }) {
   return (
     <aside
       ref={containerRef}
-      className={`sidebar ${className} ${isCollapsed ? "collapsed" : ""}`}
+      className={`sidebar ${isOpen ? "open" : ""} ${isCollapsed ? "collapsed" : ""}`}
     >
 
-      <Link to="/" className="side-head flex items-center gap-3 px-2 py-2">
+      <Link
+        to="/"
+        className="side-head flex items-center gap-3 px-2 py-2"
+        onClick={() => {
+          if (typeof onToggleSidebar === "function") onToggleSidebar();
+        }}
+      >
         <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-md flex-shrink-0">
           <img
             src="/logo.jpg"

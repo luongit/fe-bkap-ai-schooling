@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import api from "../../services/apiToken";
 import { useParams, useNavigate } from "react-router-dom";
 // UI Components
 import {
@@ -53,18 +53,7 @@ export default function InstructorLessonDetailsPage() {
   useEffect(() => {
     const fetchDetail = async () => {
       try {
-        // Lấy token từ key 'user' object (theo logic bài trước) hoặc key lẻ
-        const userStr = localStorage.getItem("user");
-        let token = "";
-        if (userStr) {
-            token = JSON.parse(userStr).accessToken;
-        } else {
-            token = localStorage.getItem("token") || localStorage.getItem("access_token");
-        }
-
-        const response = await axios.get(`${API_URL}/teacher/lessons/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get(`/teacher/lessons/${id}`);
 
         setLesson(response.data);
         // Tự động preview file đầu tiên nếu có

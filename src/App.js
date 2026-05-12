@@ -61,22 +61,17 @@ function App() {
 
   return (
     <>
-      {!isSidebarOpen && (
-        <button className="burger" onClick={toggleSidebar}>
-          <span className="burger-icon">
-            <span className="line top"></span>
-            <span className="line bottom"></span>
-          </span>
-        </button>
-      )}
+      <button className={`burger ${isSidebarOpen ? "open" : ""}`} onClick={toggleSidebar}>
+        <span className="burger-icon">
+          <span className="line top"></span>
+          <span className="line bottom"></span>
+        </span>
+      </button>
 
-      {isSidebarOpen && (
-        <div className="sidebar-overlay" onClick={toggleSidebar}></div>
-      )}
+      <div className={`sidebar-overlay ${isSidebarOpen ? "show" : ""}`} onClick={toggleSidebar}></div>
 
       <div className={`app-layout ${isSidebarOpen ? "sidebar-open" : ""}`}>
         <Sidebar
-          className={isSidebarOpen ? "open" : ""}
           isOpen={isSidebarOpen}
           onToggleSidebar={toggleSidebar}
         />
